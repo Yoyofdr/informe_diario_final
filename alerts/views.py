@@ -15,7 +15,7 @@ import urllib.parse
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib import messages
-from alerts.utils.db_optimizations import optimize_empresa_queries, optimize_hecho_esencial_queries, optimize_metrics_queries, QueryOptimizer
+# from alerts.utils.db_optimizations import optimize_empresa_queries, optimize_hecho_esencial_queries, optimize_metrics_queries, QueryOptimizer
 
 @login_required
 def suscripcion_ajax(request):

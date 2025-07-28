@@ -1,10 +1,101 @@
 {% extends 'alerts/base.html' %}
 {% block content %}
-<div class="container mt-5 mb-5">
+<style>
+body {
+    background: #f3f4f6;
+}
+
+.panel-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: none;
+}
+
+.info-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.table-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+}
+
+.table thead {
+    background: #f9fafb;
+}
+
+.table th {
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+h5 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.btn-primary {
+    background: #3366FF;
+    border: none;
+    border-radius: 8px;
+    padding: 0.625rem 1.25rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-primary:hover {
+    background: #2952cc;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(51, 102, 255, 0.3);
+}
+
+.btn-outline-danger {
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.form-control {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0.625rem 1rem;
+    transition: all 0.2s;
+}
+
+.form-control:focus {
+    border-color: #3366FF;
+    box-shadow: 0 0 0 3px rgba(51, 102, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+    .panel-card {
+        padding: 1.5rem;
+    }
+    h2 {
+        font-size: 1.5rem;
+    }
+}
+</style>
+<div class="container mt-4 mb-5">
     <div class="row justify-content-center">
         <div class="col-lg-8 col-md-10 col-12">
-            <div class="card p-4 shadow-sm">
-                <h2 class="mb-3">Panel de Organización</h2>
+            <div class="panel-card">
+                <h2 class="mb-4">Panel de Organización</h2>
                 {% if messages %}
                     {% for message in messages %}
                         <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -14,25 +105,28 @@
                     {% endfor %}
                 {% endif %}
                 {% if organizacion %}
-                    <div class="card mb-4" style="background-color: #f8f9fa; border: 1px solid #e9ecef;">
-                        <div class="card-body">
-                            <h5 class="card-title mb-3">Información de la Organización</h5>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <strong>Organización:</strong> 
-                                    <span class="text-primary">{{ organizacion.nombre }}</span>
-                                </div>
-                                <div class="col-md-6">
-                                    <strong>Dominio autorizado:</strong> 
+                    <div class="info-card mb-4">
+                        <h5 class="mb-3">Información de la Organización</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-2 mb-md-0">
+                                <p class="mb-0">
+                                    <i class="bi bi-building me-2 text-muted"></i>
+                                    <strong>Organización:</strong> {{ organizacion.nombre }}
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-0">
+                                    <i class="bi bi-at me-2 text-muted"></i>
+                                    <strong>Dominio:</strong> 
                                     <span class="badge bg-primary">@{{ dominio }}</span>
-                                </div>
+                                </p>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title mb-3">Agregar nuevo destinatario</h5>
+            </div>
+            
+            <div class="panel-card">
+                <h5 class="mb-3">Agregar nuevo destinatario</h5>
                             <form method="post">
                                 {% csrf_token %}
                                 <div class="row">
@@ -58,55 +152,62 @@
                                       <div class="text-danger small">{{ form.email.errors.0 }}</div>
                                     {% endif %}
                                 </div>
-                                <button type="submit" name="agregar" class="btn btn-primary">Agregar destinatario</button>
+                                <button type="submit" name="agregar" class="btn btn-primary">
+                                    <i class="bi bi-plus-circle me-2"></i>Agregar destinatario
+                                </button>
                             </form>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title mb-3">Destinatarios actuales</h5>
-                            {% if destinatarios %}
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Nombre</th>
-                                                <th>Email</th>
-                                                <th width="120">Acción</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                        {% for d in destinatarios %}
-                                            <tr>
-                                                <td>{{ d.nombre|default:"Sin nombre" }}</td>
-                                                <td><code>{{ d.email }}</code></td>
-                                                <td>
-                                                    <form method="post" class="d-inline">
-                                                        {% csrf_token %}
-                                                        <input type="hidden" name="dest_id" value="{{ d.id }}">
-                                                        <button type="submit" name="eliminar" class="btn btn-outline-danger btn-sm" onclick="return confirm('¿Estás seguro de que quieres eliminar este destinatario?')">
-                                                            <i class="fas fa-trash"></i> Eliminar
-                                                        </button>
-                                                    </form>
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            {% else %}
-                                <div class="text-center py-4">
-                                    <i class="fas fa-users text-muted" style="font-size: 3rem;"></i>
-                                    <p class="text-muted mt-2">No hay destinatarios registrados.</p>
-                                    <p class="text-muted small">Agrega el primer destinatario usando el formulario de arriba.</p>
-                                </div>
-                            {% endif %}
+            </div>
+            
+            <div class="panel-card">
+                <h5 class="mb-3">Destinatarios actuales</h5>
+                {% if destinatarios %}
+                    <div class="table-card">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Email</th>
+                                        <th width="120" class="text-center">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for d in destinatarios %}
+                                    <tr>
+                                        <td>
+                                            <i class="bi bi-person me-2 text-muted"></i>
+                                            {{ d.nombre|default:"Sin nombre" }}
+                                        </td>
+                                        <td>
+                                            <i class="bi bi-envelope me-2 text-muted"></i>
+                                            <code>{{ d.email }}</code>
+                                        </td>
+                                        <td class="text-center">
+                                            <form method="post" class="d-inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="dest_id" value="{{ d.id }}">
+                                                <button type="submit" name="eliminar" class="btn btn-outline-danger btn-sm" onclick="return confirm('¿Estás seguro de que quieres eliminar este destinatario?')">
+                                                    <i class="bi bi-trash"></i> Eliminar
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 {% else %}
                     <div class="text-center py-4">
-                        <i class="fas fa-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
+                        <i class="bi bi-people text-muted" style="font-size: 3rem;"></i>
+                        <p class="text-muted mt-2">No hay destinatarios registrados.</p>
+                        <p class="text-muted small">Agrega el primer destinatario usando el formulario de arriba.</p>
+                    </div>
+                {% endif %}
+            </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
                         <h5 class="mt-3">No tienes una organización asociada</h5>
                         <p class="text-muted">Contacta al administrador para configurar tu organización.</p>
                     </div>

@@ -212,6 +212,7 @@
 <body>
     <div class="registration-container">
         <div class="container">
+            {% if not registro_exitoso %}
             <div class="text-center mb-4">
                 <a href="/" class="back-link">
                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -220,13 +221,40 @@
                     Volver al inicio
                 </a>
             </div>
+            {% endif %}
             
             <div class="registration-card">
+                {% if registro_exitoso %}
+                <!-- Mensaje de éxito -->
+                <div class="text-center">
+                    <div style="width: 80px; height: 80px; background: #d1fae5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                        <svg width="40" height="40" fill="#10b981" viewBox="0 0 24 24">
+                            <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+                        </svg>
+                    </div>
+                    <h1 style="font-size: 2rem; color: #10b981; margin-bottom: 1rem;">¡Registro exitoso!</h1>
+                    <p style="font-size: 1.125rem; color: #374151; margin-bottom: 1.5rem;">
+                        <strong>{{ empresa.nombre }}</strong> ha sido registrada correctamente.
+                    </p>
+                    <p style="color: #6b7280; margin-bottom: 2rem;">
+                        Te hemos enviado un correo de bienvenida a tu dirección de email.<br>
+                        Recibirás tu primer informe mañana a las 9:00 AM.
+                    </p>
+                    <div class="d-flex gap-3 justify-content-center">
+                        <a href="{% url 'alerts:login' %}" class="btn btn-primary">
+                            Iniciar sesión
+                        </a>
+                        <a href="/" class="btn btn-outline-secondary">
+                            Volver al inicio
+                        </a>
+                    </div>
+                </div>
+                {% else %}
+                <!-- Formulario de registro -->
                 <div class="logo-section">
                     <h1>Crear cuenta gratuita</h1>
                     <p>Comienza a recibir el informe integrado diario en tu correo</p>
                 </div>
-                
                 
                 {% if messages %}
                     {% for message in messages %}
@@ -296,6 +324,7 @@
                     <p class="mb-2">¿Ya tienes cuenta? <a href="{% url 'alerts:login' %}" class="text-primary text-decoration-none fw-semibold">Iniciar sesión</a></p>
                     <p class="text-muted small mb-0">¿Necesitas ayuda? <a href="mailto:contacto@informediariochile.cl" class="text-primary text-decoration-none">contacto@informediariochile.cl</a></p>
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>

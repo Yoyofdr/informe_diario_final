@@ -265,6 +265,9 @@ def landing_explicativa(request):
 
 def registro_prueba(request):
     mensaje = None
+    registro_exitoso = False
+    empresa_registrada = None
+    
     if request.method == 'POST':
         form = RegistroPruebaForm(request.POST)
         if form.is_valid():
@@ -289,7 +292,7 @@ def registro_prueba(request):
                 )
                 send_mail(
                     subject='Bienvenido a Informe Diario - Resumen Integrado',
-                    message=f'Hola {nombre},\n\nTu cuenta ha sido creada exitosamente.\n\nEmail: {email}\n\nAhora recibirás diariamente un informe integrado con información de:\n• Diario Oficial: Normativas y avisos relevantes\n• CMF: Hechos esenciales del mercado financiero\n• SII: Circulares y resoluciones tributarias\n\nPuedes iniciar sesión aquí: http://localhost:8000/login/\n\n¡Bienvenido a Informe Diario!',
+                    message=f'Hola {nombre},\n\nTu cuenta ha sido creada exitosamente.\n\nEmail: {email}\n\nAhora recibirás diariamente un informe integrado con información de:\n• Diario Oficial: Normativas y avisos relevantes\n• CMF: Hechos esenciales del mercado financiero\n• SII: Circulares y resoluciones tributarias\n\nPuedes iniciar sesión aquí: https://www.informediariochile.cl/login/\n\n¡Bienvenido a Informe Diario!',
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[email],
                     fail_silently=False,
@@ -309,13 +312,19 @@ def registro_prueba(request):
                     email=email,
                     organizacion=org
                 )
-                messages.success(request, 'Registro exitoso. Ya puedes iniciar sesión y usar la plataforma gratis.')
-                return render(request, 'alerts/registro_exitoso.html', {'empresa': org})
+                registro_exitoso = True
+                empresa_registrada = org
+                form = RegistroPruebaForm()  # Limpiar el formulario
         else:
             messages.error(request, 'Por favor, corrige los errores del formulario.')
     else:
         form = RegistroPruebaForm()
-    return render(request, 'alerts/registro_prueba.html', {'form': form})
+    
+    return render(request, 'alerts/registro_prueba.html', {
+        'form': form,
+        'registro_exitoso': registro_exitoso,
+        'empresa': empresa_registrada
+    })
 
 @login_required
 def historial_informes(request):

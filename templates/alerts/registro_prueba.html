@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro - Informe Diario</title>
-    <meta name="description" content="Regístrate para recibir cada mañana un resumen claro del Diario Oficial, CMF y SII directo a tu correo." />
+    <title>Registro - Informe Diario | Resúmenes claros del Diario Oficial de Chile</title>
+    <meta name="description" content="Regístrate para recibir cada mañana un resumen claro del Diario Oficial, CMF y SII directo a tu correo. Sin tecnicismos, solo lo relevante." />
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,283 +21,355 @@
         }
         
         body {
-            background: #f8fafc;
+            background: #fff !important;
             min-height: 100vh;
             font-family: 'Inter', sans-serif;
         }
         
-        .registration-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            padding: 2rem 0;
+        /* Navigation */
+        .navbar-custom {
+            background: white;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .navbar-brand-custom {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #212121;
+            text-decoration: none;
+        }
+        
+        .navbar-brand-custom:hover {
+            color: #3366FF;
+        }
+        
+        /* Registration Hero */
+        .registration-hero {
+            padding: 5rem 0 3rem 0;
+            background: white;
         }
         
         .registration-card {
             background: white;
             border-radius: 1.5rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e5e7eb;
             padding: 3rem;
+            box-shadow: 0 8px 32px 0 rgba(37,99,235,0.07);
+            border: 1px solid #e5e7eb;
             max-width: 680px;
-            width: 100%;
             margin: 0 auto;
         }
         
-        .logo-section {
-            text-align: center;
+        .modern-badge {
+            background: #E0E8FF;
+            color: #4A67D6;
+            padding: 0.5rem 1.5rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+        
+        .registration-headline {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #212121;
+            letter-spacing: -0.025em;
+            margin-bottom: 1rem;
+        }
+        
+        .registration-subtitle {
+            font-size: 1.25rem;
+            color: #616161;
+            font-weight: 400;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        /* Form Styles */
+        .form-section {
+            background: #f9fafb;
+            border-radius: 1rem;
+            padding: 2rem;
             margin-bottom: 2rem;
         }
         
-        .logo-section h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 0.5rem;
-        }
-        
-        .logo-section p {
-            color: #64748b;
-            font-size: 1rem;
-        }
-        
         .form-label {
-            font-weight: 500;
-            color: #1e293b;
+            font-weight: 600;
+            color: #212121;
             margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
         }
         
         .form-control {
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e0e0e0;
             border-radius: 0.5rem;
-            padding: 0.75rem 1rem;
+            padding: 0.875rem 1rem;
             font-size: 1rem;
             transition: all 0.2s;
+            background: white;
         }
         
         .form-control:focus {
             border-color: #3366FF;
-            box-shadow: 0 0 0 3px rgba(51, 102, 255, 0.1);
+            box-shadow: 0 0 0 4px rgba(51, 102, 255, 0.1);
+            outline: none;
         }
         
-        .btn-primary {
+        .form-control::placeholder {
+            color: #9e9e9e;
+        }
+        
+        /* Buttons */
+        .btn-primary-custom {
             background: #3366FF;
-            border: none;
-            padding: 0.875rem 2rem;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
             font-weight: 600;
             font-size: 1.125rem;
-            border-radius: 0.75rem;
-            transition: all 0.2s;
+            border: none;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            width: 100%;
         }
         
-        .btn-primary:hover {
+        .btn-primary-custom:hover {
             background: #2952cc;
-            transform: translateY(-1px);
-            box-shadow: 0 8px 15px -3px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px -3px rgba(51,102,255,0.3);
         }
         
-        .back-link {
-            color: #64748b;
-            text-decoration: none;
-            font-size: 0.875rem;
-            display: inline-flex;
+        /* Features */
+        .features-list {
+            list-style: none;
+            padding: 0;
+            margin: 2rem 0;
+        }
+        
+        .features-list li {
+            padding: 0.75rem 0;
+            display: flex;
             align-items: center;
-            gap: 0.5rem;
+            font-size: 1rem;
+            color: #424242;
+        }
+        
+        .features-list li i {
+            color: #10b981;
+            font-size: 1.25rem;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        
+        /* Alert Styles */
+        .alert-custom {
+            border-radius: 0.75rem;
+            border: none;
+            padding: 1rem 1.5rem;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .alert-success-custom {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .alert-danger-custom {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        /* Footer */
+        .registration-footer {
+            text-align: center;
+            padding: 2rem 0;
+            border-top: 1px solid #e5e7eb;
+            margin-top: 3rem;
+        }
+        
+        .footer-links {
+            margin-top: 1rem;
+        }
+        
+        .footer-links a {
+            color: #616161;
+            text-decoration: none;
+            margin: 0 1rem;
+            font-size: 0.875rem;
             transition: color 0.2s;
         }
         
-        .back-link:hover {
+        .footer-links a:hover {
             color: #3366FF;
         }
         
-        .divider {
-            text-align: center;
-            margin: 1.5rem 0;
-            position: relative;
-        }
-        
-        .divider::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: #e2e8f0;
-        }
-        
-        .divider span {
-            background: white;
-            padding: 0 1rem;
-            position: relative;
-            color: #94a3b8;
-            font-size: 0.875rem;
-        }
-        
-        .alert {
-            border-radius: 0.75rem;
-            padding: 1rem;
-            font-size: 0.875rem;
-        }
-        
-        .alert-info {
-            background: #e0f2fe;
-            border: 1px solid #7dd3fc;
-            color: #0c4a6e;
-        }
-        
-        .info-badge {
-            background: #3366FF;
-            color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.375rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin: 0 0.125rem;
-        }
-        
-        .badge-cmf {
-            background: #dc2626;
-        }
-        
-        .badge-sii {
-            background: #16a34a;
-        }
-        
-        /* Tagify customization */
-        .tagify {
-            border: 1px solid #e2e8f0;
-            border-radius: 0.5rem;
-            min-height: 3rem;
-        }
-        
-        .tagify--focus {
-            border-color: #3366FF;
-            box-shadow: 0 0 0 3px rgba(51, 102, 255, 0.1);
-        }
-        
-        .tagify__tag {
-            background: #e0f2fe;
-            color: #0c4a6e;
-            border: 1px solid #7dd3fc;
-        }
-        
-        .tagify__tag:hover {
-            background: #bae6fd;
-        }
-        
-        .tagify__tag__removeBtn {
-            color: #0c4a6e;
-        }
-        
-        .form-text {
-            font-size: 0.875rem;
-            color: #64748b;
-            margin-top: 0.25rem;
-        }
-        
+        /* Responsive */
         @media (max-width: 768px) {
+            .registration-hero {
+                padding: 3rem 0 2rem 0;
+            }
+            
             .registration-card {
-                padding: 2rem;
+                padding: 2rem 1.5rem;
             }
             
-            .logo-section h1 {
-                font-size: 1.5rem;
+            .registration-headline {
+                font-size: 2rem;
             }
             
-            .row {
-                --bs-gutter-x: 0.75rem;
+            .registration-subtitle {
+                font-size: 1.125rem;
+            }
+            
+            .form-section {
+                padding: 1.5rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="registration-container">
+    <!-- Navigation -->
+    <nav class="navbar navbar-custom">
         <div class="container">
-            <div class="text-center mb-4">
-                <a href="/" class="back-link">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                    </svg>
-                    Volver al inicio
-                </a>
-            </div>
-            
+            <a class="navbar-brand-custom" href="/">
+                <i class="bi bi-file-text-fill me-2"></i>Informe Diario
+            </a>
+            <a href="{% url 'alerts:login' %}" class="btn btn-outline-secondary">
+                Iniciar sesión
+            </a>
+        </div>
+    </nav>
+
+    <!-- Registration Hero -->
+    <section class="registration-hero">
+        <div class="container">
             <div class="registration-card">
-                <div class="logo-section">
-                    <h1>Crear cuenta gratuita</h1>
-                    <p>Comienza a recibir el informe integrado diario en tu correo</p>
+                <div class="text-center mb-4">
+                    <span class="modern-badge">
+                        <i class="bi bi-lightning-fill me-1"></i>REGISTRO GRATUITO
+                    </span>
+                    <h1 class="registration-headline">
+                        Únete a miles de profesionales informados
+                    </h1>
+                    <p class="registration-subtitle">
+                        Recibe cada mañana un resumen claro y útil del Diario Oficial, CMF y SII. 
+                        Sin tecnicismos, solo lo que realmente importa para tu empresa.
+                    </p>
                 </div>
-                
-                
+
+                <!-- Features -->
+                <ul class="features-list">
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Resúmenes diarios del Diario Oficial, CMF y SII en un solo correo</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Información filtrada y relevante para tu industria</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Explicaciones claras sin lenguaje técnico</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Entrega automática a las 9:00 AM todos los días hábiles</span>
+                    </li>
+                </ul>
+
                 {% if messages %}
                     {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        <div class="alert {% if message.tags == 'success' %}alert-success-custom{% else %}alert-danger-custom{% endif %} alert-dismissible fade show" role="alert">
+                            <i class="bi {% if message.tags == 'success' %}bi-check-circle{% else %}bi-exclamation-circle{% endif %} me-2"></i>
                             {{ message }}
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
                         </div>
                     {% endfor %}
                 {% endif %}
-                
+
+                <!-- Registration Form -->
                 <form method="post" action="{% url 'alerts:registro_prueba' %}">
                     {% csrf_token %}
-                    <div class="row mb-3">
-                        <div class="col-md-6 mb-3 mb-md-0">
-                            <label for="id_nombre" class="form-label">Nombre</label>
-                            <input type="text" class="form-control" id="id_nombre" name="nombre" required>
+                    
+                    <div class="form-section">
+                        <h5 class="mb-3 fw-semibold">Información personal</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_nombre" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="id_nombre" name="nombre" placeholder="Juan" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="id_apellido" class="form-label">Apellido</label>
+                                <input type="text" class="form-control" id="id_apellido" name="apellido" placeholder="Pérez" required>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <label for="id_apellido" class="form-label">Apellido</label>
-                            <input type="text" class="form-control" id="id_apellido" name="apellido" required>
+                        
+                        <div class="mb-3">
+                            <label for="id_email" class="form-label">Correo electrónico</label>
+                            <input type="email" class="form-control" id="id_email" name="email" placeholder="juan@empresa.cl" required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_telefono" class="form-label">Teléfono</label>
+                                <input type="text" class="form-control" id="id_telefono" name="telefono" placeholder="+56 9 1234 5678" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="id_empresa" class="form-label">Empresa</label>
+                                <input type="text" class="form-control" id="id_empresa" name="empresa" placeholder="Nombre de tu empresa" required>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="mb-3">
-                        <label for="id_email" class="form-label">Correo electrónico</label>
-                        <input type="email" class="form-control" id="id_email" name="email" placeholder="tu@correo.com" required>
-                    </div>
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-6 mb-3 mb-md-0">
-                            <label for="id_telefono" class="form-label">Teléfono</label>
-                            <input type="text" class="form-control" id="id_telefono" name="telefono" placeholder="+56 9 1234 5678" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="id_empresa" class="form-label">Nombre de la empresa</label>
-                            <input type="text" class="form-control" id="id_empresa" name="empresa" required>
-                        </div>
-                    </div>
-                    
-                    <div class="row mb-4">
-                        <div class="col-md-6 mb-3 mb-md-0">
-                            <label for="id_password1" class="form-label">Contraseña</label>
-                            <input type="password" class="form-control" id="id_password1" name="password1" required>
-                            {% if form.password1.errors %}
-                                <div class="text-danger small mt-1">{{ form.password1.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-6">
-                            <label for="id_password2" class="form-label">Confirmar contraseña</label>
-                            <input type="password" class="form-control" id="id_password2" name="password2" required>
-                            {% if form.password2.errors %}
-                                <div class="text-danger small mt-1">{{ form.password2.errors.0 }}</div>
-                            {% endif %}
+                    <div class="form-section">
+                        <h5 class="mb-3 fw-semibold">Crear contraseña</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_password1" class="form-label">Contraseña</label>
+                                <input type="password" class="form-control" id="id_password1" name="password1" placeholder="••••••••" required>
+                                {% if form.password1.errors %}
+                                    <div class="text-danger small mt-1">{{ form.password1.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="id_password2" class="form-label">Confirmar contraseña</label>
+                                <input type="password" class="form-control" id="id_password2" name="password2" placeholder="••••••••" required>
+                                {% if form.password2.errors %}
+                                    <div class="text-danger small mt-1">{{ form.password2.errors.0 }}</div>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                     
-                    <button type="submit" class="btn btn-primary w-100">
-                        Crear cuenta gratuita
+                    <button type="submit" class="btn btn-primary-custom">
+                        <i class="bi bi-rocket-takeoff me-2"></i>Crear cuenta gratuita
                     </button>
+                    
+                    <p class="text-center mt-3 mb-0 text-muted">
+                        Al registrarte, aceptas recibir el informe diario en tu correo.
+                    </p>
                 </form>
-                
-                <div class="divider">
-                    <span>o</span>
-                </div>
-                
-                <div class="text-center">
-                    <p class="mb-2">¿Ya tienes cuenta? <a href="{% url 'alerts:login' %}" class="text-primary text-decoration-none fw-semibold">Iniciar sesión</a></p>
-                    <p class="text-muted small mb-0">¿Necesitas ayuda? <a href="mailto:contacto@informediariochile.cl" class="text-primary text-decoration-none">contacto@informediariochile.cl</a></p>
-                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <div class="registration-footer">
+        <div class="container">
+            <p class="mb-0">¿Ya tienes cuenta? <a href="{% url 'alerts:login' %}" class="text-primary fw-semibold">Iniciar sesión</a></p>
+            <div class="footer-links">
+                <a href="mailto:contacto@informediariochile.cl">
+                    <i class="bi bi-envelope me-1"></i>Contacto
+                </a>
+                <a href="/">
+                    <i class="bi bi-house me-1"></i>Volver al inicio
+                </a>
             </div>
         </div>
     </div>

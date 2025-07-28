@@ -99,10 +99,8 @@ class RegistroPruebaForm(forms.Form):
     email = forms.EmailField(label="Email")
     telefono = forms.CharField(label="Teléfono", max_length=30)
     empresa = forms.CharField(label="Nombre de la empresa", max_length=200)
-    dominio = forms.CharField(label="Dominio del correo", max_length=80)
     password1 = forms.CharField(label="Contraseña", widget=forms.PasswordInput, required=True)
     password2 = forms.CharField(label="Confirmar contraseña", widget=forms.PasswordInput, required=True)
-    destinatarios = forms.CharField(label="Correos destinatarios (separados por coma)", widget=forms.Textarea, help_text="Ejemplo: correo1@empresa.com, correo2@empresa.com")
 
     def clean(self):
         cleaned_data = super().clean()
@@ -114,17 +112,6 @@ class RegistroPruebaForm(forms.Form):
             self.add_error('password2', "Las contraseñas no coinciden.")
         return cleaned_data
 
-    def clean_destinatarios(self):
-        data = self.cleaned_data['destinatarios']
-        try:
-            tags = json.loads(data)
-            emails = [tag['value'].strip() for tag in tags if tag.get('value')]
-        except Exception:
-            # Fallback: si no es JSON, tratar como texto plano separado por comas
-            emails = [e.strip() for e in data.split(',') if e.strip()]
-        for email in emails:
-            forms.EmailField().clean(email)  # Lanza error si no es válido
-        return emails
 
 class CustomPasswordChangeForm(PasswordChangeForm):
     def __init__(self, *args, **kwargs):

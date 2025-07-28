@@ -273,8 +273,8 @@ def registro_prueba(request):
             email = form.cleaned_data['email']
             telefono = form.cleaned_data['telefono']
             empresa_nombre = form.cleaned_data['empresa']
-            dominio = form.cleaned_data['dominio'].lower().strip()
-            destinatarios = form.cleaned_data['destinatarios']
+            # Generar dominio automáticamente del email
+            dominio = email.split('@')[1] if '@' in email else 'personal.cl'
             if User.objects.filter(email=email).exists():
                 messages.error(request, 'Ya existe un usuario con ese email.')
                 return render(request, 'alerts/registro_prueba.html', {'form': form})
@@ -302,12 +302,13 @@ def registro_prueba(request):
                     dominio=dominio,
                     admin=user
                 )
-                for dest_email in destinatarios:
-                    Destinatario.objects.create(
-                        nombre=f"{nombre} {apellido}",  # Usar el nombre del admin como placeholder
-                        email=dest_email,
-                        organizacion=org
-                    )
+                # El usuario podrá agregar destinatarios después desde el panel
+                # Agregar el mismo usuario como primer destinatario
+                Destinatario.objects.create(
+                    nombre=f"{nombre} {apellido}",
+                    email=email,
+                    organizacion=org
+                )
                 messages.success(request, 'Registro exitoso. Ya puedes iniciar sesión y usar la plataforma gratis.')
                 return render(request, 'alerts/registro_exitoso.html', {'empresa': org})
         else:

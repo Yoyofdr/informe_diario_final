@@ -12,8 +12,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Tagify CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify@latest/dist/tagify.css" rel="stylesheet">
     
     <style>
         :root {
@@ -275,13 +273,7 @@
                         </div>
                     </div>
                     
-                    <div class="mb-3">
-                        <label for="id_dominio" class="form-label">Dominio del correo</label>
-                        <input type="text" class="form-control" id="id_dominio" name="dominio" placeholder="empresa.com" required>
-                        <div class="form-text">Ingresa solo el dominio sin @ (ejemplo: empresa.com)</div>
-                    </div>
-                    
-                    <div class="row mb-3">
+                    <div class="row mb-4">
                         <div class="col-md-6 mb-3 mb-md-0">
                             <label for="id_password1" class="form-label">Contraseña</label>
                             <input type="password" class="form-control" id="id_password1" name="password1" required>
@@ -296,12 +288,6 @@
                                 <div class="text-danger small mt-1">{{ form.password2.errors.0 }}</div>
                             {% endif %}
                         </div>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label for="id_destinatarios" class="form-label">Correos destinatarios</label>
-                        <input type="text" class="form-control" id="id_destinatarios" name="destinatarios" placeholder="Agrega uno o más correos..." required>
-                        <div class="form-text">Puedes agregar múltiples correos separados por comas</div>
                     </div>
                     
                     <button type="submit" class="btn btn-primary w-100">
@@ -323,22 +309,5 @@
     
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Tagify JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify@latest/dist/tagify.min.js"></script>
-    <script>
-        var input = document.getElementById('id_destinatarios');
-        var tagify = new Tagify(input, {
-            delimiters: ", ",
-            pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-            whitelist: [],
-            dropdown: {
-                enabled: 0
-            },
-            enforceWhitelist: false,
-            validate: function(email){
-                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value) ? true : "Email inválido";
-            }
-        });
-    </script>
 </body>
 </html>

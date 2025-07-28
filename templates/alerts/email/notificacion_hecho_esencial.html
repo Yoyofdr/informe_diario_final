@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumen Diario Oficial</title>
+</head>
+<body style="margin:0; padding:0; background:#f4f6fb; font-family: 'Segoe UI', Roboto, Arial, sans-serif; color:#1e293b;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6fb; min-height:100vh;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background:#fff; border-radius:18px; box-shadow:0 4px 24px rgba(37,99,235,0.07); margin:32px 0; overflow:hidden;">
+          <!-- Header -->
+          <!-- Eliminado el bloque de header completo -->
+          <!-- Badges -->
+          <tr>
+            <td style="padding:18px 32px 0 32px;">
+              <span style="display:inline-block; background:#e0e7ff; color:#2563eb; font-weight:600; border-radius:12px; padding:6px 16px; font-size:0.98em; margin-right:8px;">{{ documentos_analizados }} documentos analizados</span>
+            </td>
+          </tr>
+          <!-- Lista de hechos -->
+          <tr>
+            <td style="padding:18px 32px 0 32px;">
+              {% for hecho in hechos %}
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:18px;">
+                <tr>
+                  <td width="6" style="vertical-align:top;">
+                    <div style="width:4px; height:100%; border-radius:2px; background:
+                      {% if hecho.categoria == 'laboral' %}#2563eb
+                      {% elif hecho.categoria == 'salud' %}#22c55e
+                      {% elif hecho.categoria == 'educacion' %}#fbbf24
+                      {% else %}#a21caf{% endif %};"></div>
+                  </td>
+                  <td style="padding-left:16px; vertical-align:top;">
+                    <div style="font-size:1.13em; font-weight:700; margin-bottom:2px;">
+                      {% if hecho.categoria == 'laboral' %}💼{% elif hecho.categoria == 'salud' %}🏥{% elif hecho.categoria == 'educacion' %}📚{% else %}⚡️{% endif %}
+                      {{ hecho.titulo }}
+                    </div>
+                    <div style="color:#334155; font-size:1em;">{{ hecho.resumen }}</div>
+                  </td>
+                </tr>
+              </table>
+              {% endfor %}
+            </td>
+          </tr>
+          <!-- Tiempo de lectura y botón -->
+          <!-- Eliminado el bloque completo de tiempo de lectura y botón -->
+          <!-- Footer -->
+          <tr>
+            <td style="background:#f4f6fb; color:#64748b; font-size:0.95em; text-align:center; padding:22px 32px 18px 32px; border-radius:0 0 18px 18px;">
+              Para gestionar tus suscripciones, visita <a href="{{ url_absoluta }}" style="color:#2563eb; text-decoration:none;">tu dashboard</a>.
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html> 

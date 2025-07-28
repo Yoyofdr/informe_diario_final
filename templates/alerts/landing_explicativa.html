@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe Diario | Resúmenes del Diario Oficial, CMF y SII de Chile</title>
+    <meta name="description" content="Recibe cada mañana un resumen ejecutivo con lo más relevante del Diario Oficial, CMF y SII. Información filtrada con IA, explicada en simple y directo a tu correo." />
+    <meta name="keywords" content="Diario Oficial, CMF, SII, resumen ejecutivo, Chile, hechos esenciales, normativa tributaria, boletín, correo, informe diario, leyes, normativa, empresa, inteligencia artificial" />
+    <meta property="og:title" content="Informe Diario | Resúmenes del Diario Oficial, CMF y SII de Chile" />
+    <meta property="og:description" content="Resumen ejecutivo diario con lo más relevante del Diario Oficial, CMF y SII. Filtrado con IA para tu empresa." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://informediario.cl/" />
+    <meta property="og:image" content="https://informediario.cl/static/img/ejemplo_informe_12_julio.png" />
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Lucide Icons -->
+    <link rel="stylesheet" href="https://unpkg.com/lucide@0.263.0/dist/lucide.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    
+    <style>
+        :root {
+            --bs-body-font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background: #fff !important;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Modern Hero Section */
+        .modern-hero {
+            position: relative;
+            overflow: hidden;
+            padding: 5rem 0 3rem 0;
+        }
+        .hero-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px 0 rgba(37,99,235,0.07);
+            border: 1px solid #e5e7eb;
+        }
+        .modern-badge {
+            background: #E0E8FF;
+            color: #4A67D6;
+            padding: 0.5rem 1.5rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+        .modern-headline {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #212121;
+            letter-spacing: -0.025em;
+            margin-bottom: 1rem;
+        }
+        .modern-subtitle {
+            font-size: 1.5rem;
+            color: #424242;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+        .modern-highlight {
+            color: #3366FF;
+            font-weight: 700;
+        }
+        .modern-btn-primary {
+            background: #3366FF;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 1.125rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            transform: translateY(0);
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .modern-btn-primary:hover {
+            background: #2952cc;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px -3px rgba(0,0,0,0.1);
+        }
+        .modern-btn-secondary {
+            background: white;
+            color: #212121;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 1.125rem;
+            border: 1px solid #E0E0E0;
+            transform: translateY(0);
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .modern-btn-secondary:hover {
+            background: #f9fafb;
+            border-color: #E0E0E0;
+            color: #212121;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px -3px rgba(0,0,0,0.1);
+        }
+        
+        /* Benefits Section */
+        .benefits-section {
+            background: #fff;
+            border-top: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 5rem 0;
+        }
+        .benefit-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        .benefit-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 0.25rem;
+            background: #3366FF;
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+        .benefit-card:hover {
+            border-color: #3366FF;
+            box-shadow: 0 8px 32px 0 rgba(37,99,235,0.07);
+            transform: translateY(-4px);
+        }
+        .benefit-card:hover::before {
+            transform: scaleX(1);
+        }
+        .benefit-icon-wrapper {
+            width: 4rem;
+            height: 4rem;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+        .benefit-icon {
+            width: 2rem;
+            height: 2rem;
+        }
+        
+        /* Example Section */
+        .example-section {
+            background: white;
+            padding: 5rem 0;
+        }
+        .example-wrapper {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+        }
+        .newsletter-preview {
+            max-width: 40rem;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        .newsletter-header {
+            background: #000000;
+            padding: 3rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .newsletter-stats {
+            background: #E0E8FF;
+            border-bottom: 1px solid #E0E0E0;
+        }
+        .stat-item {
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+        .stat-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+            color: #4A67D6;
+            margin-bottom: 0.5rem;
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4A67D6;
+            line-height: 1;
+            margin-bottom: 0.25rem;
+        }
+        .stat-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #4A67D6;
+        }
+        .newsletter-content {
+            padding: 2rem;
+        }
+        .content-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #dbeafe;
+        }
+        .content-icon-wrapper {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: #E0E8FF;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+        }
+        .publication-item {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .publication-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+            line-height: 1.5;
+        }
+        .publication-summary {
+            color: #64748b;
+            font-size: 0.875rem;
+            line-height: 1.625;
+        }
+        
+        /* Modern Footer */
+        .modern-footer {
+            background: #000000;
+            color: white;
+            padding: 4rem 0 2rem 0;
+            margin-top: 5rem;
+            border-radius: 1.5rem 1.5rem 0 0;
+        }
+        
+        /* Hover scale effect for cards */
+        .hover-scale {
+            transition: all 0.3s ease;
+        }
+        .hover-scale:hover {
+            transform: translateY(-5px);
+        }
+        
+        /* Purple color for CMF checks */
+        .text-purple {
+            color: #7c3aed !important;
+        }
+        
+        @media (max-width: 768px) {
+            .modern-headline { font-size: 2rem; }
+            .modern-subtitle { font-size: 1.125rem; }
+            .hero-card { padding: 2rem; }
+            .benefit-card { padding: 1.5rem; }
+        }
+    </style>
+    <!-- Modern Hero Section -->
+    <div class="modern-hero">
+        <div class="container">
+            <div class="hero-card text-center">
+                <span class="modern-badge">✨ Resumen con IA</span>
+                <h1 class="modern-headline">Informe Diario</h1>
+                <div class="modern-subtitle">Todo lo relevante del <span class="modern-highlight">Diario Oficial, CMF y SII</span> en un solo informe</div>
+                <p class="mb-5" style="color: #4b5563; font-size: 1.125rem; max-width: 700px; margin: 0 auto;">
+                    Cada mañana recibes un resumen ejecutivo con normativas, hechos esenciales y novedades tributarias. Analizamos con IA y te explicamos en simple lo que realmente impacta a tu empresa.
+                </p>
+                <div class="d-flex flex-column flex-md-row justify-content-center align-items-center" style="gap: 1rem; position: relative; z-index: 10;">
+                    <a href="{% url 'alerts:registro_prueba' %}" class="modern-btn-primary">Comenzar gratis</a>
+                    <a href="{% url 'alerts:login' %}" class="modern-btn-secondary">Iniciar sesión</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Benefits Section -->
+    <section class="benefits-section">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold" style="font-size: 2.5rem; color: #1e293b;">¿Por qué elegir Informe Diario?</h2>
+                <p class="text-muted" style="font-size: 1.25rem; max-width: 600px; margin: 0 auto;">Diseñado para profesionales que necesitan estar informados sin perder tiempo</p>
+            </div>
+            <div class="row g-4 justify-content-center">
+                <div class="col-12 col-md-6 col-lg-3">
+                    <div class="benefit-card">
+                        <div class="benefit-icon-wrapper" style="background: #fef3c7;">
+                            <svg class="benefit-icon" style="color: #f59e0b;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <h5 class="fw-bold mb-3" style="color: #1e293b;">Ahorra tiempo</h5>
+                        <p class="text-muted mb-0">Olvídate de leer documentos extensos. Te entregamos solo lo esencial en 5 minutos de lectura.</p>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                    <div class="benefit-card">
+                        <div class="benefit-icon-wrapper" style="background: #d1fae5;">
+                            <svg class="benefit-icon" style="color: #10b981;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                        <h5 class="fw-bold mb-3" style="color: #1e293b;">3 fuentes en 1 informe</h5>
+                        <p class="text-muted mb-0">Diario Oficial, CMF y SII integrados. Un solo correo con toda la información regulatoria clave.</p>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                    <div class="benefit-card">
+                        <div class="benefit-icon-wrapper" style="background: #dbeafe;">
+                            <svg class="benefit-icon" style="color: #3b82f6;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <h5 class="fw-bold mb-3" style="color: #1e293b;">Directo a tu correo</h5>
+                        <p class="text-muted mb-0">Recibe el informe cada mañana en tu bandeja de entrada, optimizado para móvil.</p>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                    <div class="benefit-card">
+                        <div class="benefit-icon-wrapper" style="background: #ede9fe;">
+                            <svg class="benefit-icon" style="color: #8b5cf6;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                        <h5 class="fw-bold mb-3" style="color: #1e293b;">Filtrado inteligente</h5>
+                        <p class="text-muted mb-0">IA analiza cientos de documentos y selecciona solo los relevantes para empresas.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de fuentes de información -->
+    <section class="py-5 mb-5" style="background: #f9fafb;">
+        <div class="container">
+            <h2 class="text-center mb-5 h1 fw-bold">¿Qué información recibes?</h2>
+            <div class="row g-4">
+                <!-- Diario Oficial -->
+                <div class="col-lg-4">
+                    <div class="card h-100 border-0 shadow-lg rounded-4 transition-all hover-scale">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
+                                     style="width: 56px; height: 56px; background: linear-gradient(135deg, #f8f9fa, #e9ecef);">
+                                    <svg width="28" height="28" fill="none" stroke="#000" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" 
+                                              d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="mb-0 ms-3 h5 fw-bold">Diario Oficial</h3>
+                            </div>
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-3 d-flex align-items-start">
+                                    <i class="bi bi-check2-circle text-success me-2 fs-5"></i>
+                                    <span class="text-muted">Leyes y Decretos</span>
+                                </li>
+                                <li class="mb-3 d-flex align-items-start">
+                                    <i class="bi bi-check2-circle text-success me-2 fs-5"></i>
+                                    <span class="text-muted">Normativas nuevas</span>
+                                </li>
+                                <li class="mb-3 d-flex align-items-start">
+                                    <i class="bi bi-check2-circle text-success me-2 fs-5"></i>
+                                    <span class="text-muted">Licitaciones públicas</span>
+                                </li>
+                                <li class="mb-3 d-flex align-items-start">
+                                    <i class="bi bi-check2-circle text-success me-2 fs-5"></i>
+                                    <span class="text-muted">Avisos legales relevantes</span>
+                                </li>
+                                <li class="d-flex align-items-start">
+                                    <i class="bi bi-check2-circle text-success me-2 fs-5"></i>
+                                    <span class="text-muted">Modificaciones regulatorias</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- SII -->
+                <div class="col-lg-4">
+                    <div class="card h-100 border-0 shadow-lg rounded-4 transition-all hover-scale">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
+                                     style="width: 56px; height: 56px; background: linear-gradient(135deg, #e0f2ff, #bae6fd);">
+                                    <svg width="28" height="28" fill="none" stroke="#3b82f6" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" 
+                                              d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="mb-0 ms-3 h5 fw-bold">SII</h3>
+                            </div>
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-3 d-flex align-items-start"><i class="bi bi-check2-circle text-primary me-2 fs-5"></i><span class="text-muted">Circulares tributarias</span></li>
+                                <li class="mb-3 d-flex align-items-start"><i class="bi bi-check2-circle text-primary me-2 fs-5"></i><span class="text-muted">Resoluciones nuevas</span></li>
+                                <li class="mb-3 d-flex align-items-start"><i class="bi bi-check2-circle text-primary me-2 fs-5"></i><span class="text-muted">Jurisprudencia tributaria</span></li>
+                                <li class="mb-3 d-flex align-items-start"><i class="bi bi-check2-circle text-primary me-2 fs-5"></i><span class="text-muted">Oficios interpretativos</span></li>
+                                <li class="d-flex align-items-start"><i class="bi bi-check2-circle text-primary me-2 fs-5"></i><span class="text-muted">Cambios normativos</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- CMF -->
+                <div class="col-lg-4">
+                    <div class="card h-100 border-0 shadow-lg rounded-4 transition-all hover-scale">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
+                                     style="width: 56px; height: 56px; background: linear-gradient(135deg, #ede9fe, #ddd6fe);">
+                                    <svg width="28" height="28" fill="none" stroke="#7c3aed" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" 
+                                              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="mb-0 ms-3 h5 fw-bold">CMF</h3>
+                            </div>
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-3 d-flex align-items-start">
+                                    <i class="bi bi-check2-circle text-purple me-2 fs-5"></i>
+                                    <span class="text-muted">Hechos esenciales de grandes empresas</span>
+                                </li>
+                                <li class="mb-3 d-flex align-items-start">
+                                    <i class="bi bi-check2-circle text-purple me-2 fs-5"></i>
+                                    <span class="text-muted">Fusiones y adquisiciones</span>
+                                </li>
+                                <li class="mb-3 d-flex align-items-start">
+                                    <i class="bi bi-check2-circle text-purple me-2 fs-5"></i>
+                                    <span class="text-muted">Cambios de directorio</span>
+                                </li>
+                                <li class="mb-3 d-flex align-items-start">
+                                    <i class="bi bi-check2-circle text-purple me-2 fs-5"></i>
+                                    <span class="text-muted">Emisiones de valores</span>
+                                </li>
+                                <li class="d-flex align-items-start">
+                                    <i class="bi bi-check2-circle text-purple me-2 fs-5"></i>
+                                    <span class="text-muted">Operaciones relevantes</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Example Section -->
+    <section id="ejemplo" class="example-section">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold" style="font-size: 2.5rem; color: #1e293b;">Así se ve tu informe diario</h2>
+                <p class="text-muted" style="font-size: 1.25rem;">Las 3 fuentes oficiales en un formato claro y organizado</p>
+            </div>
+            <div class="example-wrapper">
+                <!-- Informe Completo del 12 de julio de 2025 -->
+                <div style="max-width: 672px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+                    
+                    <!-- Wrapper -->
+                    <div style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden;">
+                        
+                        <!-- Header -->
+                        <div style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); padding: 48px 32px; text-align: center;">
+                            <h1 style="margin: 0 0 8px 0; font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: -0.025em;">
+                                Informe Diario
+                            </h1>
+                            <p style="margin: 0; color: #cbd5e1; font-size: 14px; font-weight: 500;">
+                                Diario Oficial • CMF • SII
+                            </p>
+                            <p style="margin: 8px 0 0 0; color: #94a3b8; font-size: 13px;">
+                                26 de julio de 2025
+                            </p>
+                        </div>
+                        
+                        
+                        <!-- Content -->
+                        <div style="padding: 32px;">
+                            
+                            <!-- NORMAS GENERALES -->
+                            <div style="margin-bottom: 40px;">
+                                <div class="d-flex align-items-center justify-content-between mb-3 pb-3" style="border-bottom: 1px solid #eff6ff;">
+                                    <div>
+                                        <h2 style="margin: 0 0 2px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
+                                            Normas Generales
+                                        </h2>
+                                        <p style="margin: 0; font-size: 14px; color: #6b7280;">
+                                            Normativas de aplicación general
+                                        </p>
+                                    </div>
+                                    <span style="font-size: 14px; color: #374151; font-weight: 500;">
+                                        1 elemento
+                                    </span>
+                                </div>
+                                
+                                <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 16px;">
+                                    <div style="padding: 24px; border-top: 3px solid #000000; border-radius: 12px 12px 0 0;">
+                                        <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
+                                            Decreto número 662, de 2024.- Aprueba Reglamento de la ley sobre la economía circular en la adquisición de bienes y servicios de los Organismos del Estado, aprobada por el artículo segundo de la ley Nº 21.634
+                                        </h3>
+                                        <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
+                                            El Decreto número 662, emitido por el Ministerio de Hacienda el 3 de junio de 2024, aprueba el reglamento de la ley sobre economía circular en la adquisición de bienes y servicios por organismos del Estado, regulando la transferencia y disposición de bienes muebles en desuso. Este reglamento busca fomentar la reutilización de recursos públicos y el cuidado del medio ambiente, estableciendo plazos y condiciones para la implementación de un sistema de economía circular en la administración pública.
+                                        </p>
+                                        <a href="https://www.diariooficial.interior.gob.cl/publicaciones/2025/07/12/44197/01/2670892.pdf" class="btn btn-sm btn-primary" style="background: #000000; border: none; padding: 8px 16px; font-size: 14px;">
+                                            <svg style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                            </svg>
+                                            Ver documento oficial
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- AVISOS DESTACADOS -->
+                            <div style="margin-bottom: 40px;">
+                                <div class="d-flex align-items-center justify-content-between mb-3 pb-3" style="border-bottom: 1px solid #eff6ff;">
+                                    <div>
+                                        <h2 style="margin: 0 0 2px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
+                                            Avisos Destacados
+                                        </h2>
+                                        <p style="margin: 0; font-size: 14px; color: #6b7280;">
+                                            Avisos de interés público y licitaciones
+                                        </p>
+                                    </div>
+                                    <span style="font-size: 14px; color: #374151; font-weight: 500;">
+                                        1 elemento
+                                    </span>
+                                </div>
+                                
+                                <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 16px;">
+                                    <div style="padding: 24px; border-top: 3px solid #000000; border-radius: 12px 12px 0 0;">
+                                        <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
+                                            Llamado a Licitación Pública para la Concesión del Uso de las Vías
+                                            <span style="display: inline-block; padding: 4px 8px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 4px; margin-left: 8px; background-color: #f3f4f6; color: #374151;">Licitación</span>
+                                        </h3>
+                                        <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
+                                            El Ministerio de Transportes y Telecomunicaciones convoca a una licitación pública para la concesión del uso de las vías de los servicios urbanos de transporte público mediante buses, con bases disponibles por 10 días hábiles desde su publicación. Las ofertas deberán presentarse en un acto público, cuya fecha se comunicará con al menos 20 días de anticipación, y el costo de las bases es de $300.000.
+                                        </p>
+                                        <a href="http://www.diariooficial.interior.gob.cl/publicaciones/2025/07/12/44197/04/2672097.pdf" class="btn btn-sm btn-primary" style="background: #000000; border: none; padding: 8px 16px; font-size: 14px;">
+                                            <svg style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                            </svg>
+                                            Ver documento oficial
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- NOVEDADES SII -->
+                            <div style="margin-bottom: 40px;">
+                                <div class="d-flex align-items-center justify-content-between mb-3 pb-3" style="border-bottom: 1px solid #dbeafe;">
+                                    <div>
+                                        <h2 style="margin: 0 0 2px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
+                                            Novedades Tributarias SII
+                                        </h2>
+                                        <p style="margin: 0; font-size: 14px; color: #3b82f6;">
+                                            Actualizaciones y circulares recientes
+                                        </p>
+                                    </div>
+                                    <span style="font-size: 14px; color: #3b82f6; font-weight: 500;">
+                                        2 elementos
+                                    </span>
+                                </div>
+                                
+                                <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 16px;">
+                                    <div style="padding: 24px; border-top: 3px solid #3b82f6; border-radius: 12px 12px 0 0;">
+                                        <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
+                                            Circular N° 45: Nuevas disposiciones para facturación electrónica
+                                        </h3>
+                                        <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
+                                            Se establecen nuevos requisitos para la emisión de facturas electrónicas, incluyendo campos obligatorios adicionales para operaciones con retención de IVA. Vigencia a partir del 1 de septiembre de 2025.
+                                        </p>
+                                        <a href="#" class="btn btn-sm" style="background: #3b82f6; color: white; border: none; padding: 8px 16px; font-size: 14px; text-decoration: none; display: inline-block; border-radius: 4px;">
+                                            Ver circular completa
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- HECHOS ESENCIALES CMF -->
+                            <div style="margin-bottom: 40px;">
+                                <div class="d-flex align-items-center justify-content-between mb-3 pb-3" style="border-bottom: 1px solid #f3e8ff;">
+                                    <div>
+                                        <h2 style="margin: 0 0 2px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
+                                            Hechos Esenciales CMF
+                                        </h2>
+                                        <p style="margin: 0; font-size: 14px; color: #7c3aed;">
+                                            Los más relevantes del mercado financiero
+                                        </p>
+                                    </div>
+                                    <span style="font-size: 14px; color: #7c3aed; font-weight: 500;">
+                                        5 elementos
+                                    </span>
+                                </div>
+                                
+                                <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 16px;">
+                                    <div style="padding: 24px; border-top: 3px solid #7c3aed; border-radius: 12px 12px 0 0;">
+                                        <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
+                                            TECNOVAL S.A.: Comunicación sobre cambio de control
+                                        </h3>
+                                        <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
+                                            Se informa que Grupo Inversiones Atlas adquirió el 51% de las acciones, configurando un cambio de controlador. La operación valoriza la compañía en US$450 millones y permitirá acelerar el plan de expansión regional.
+                                        </p>
+                                        <a href="#" class="btn btn-sm" style="background: #7c3aed; color: white; border: none; padding: 8px 16px; font-size: 14px; text-decoration: none; display: inline-block; border-radius: 4px;">
+                                            Ver detalle en CMF
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 16px;">
+                                    <div style="padding: 24px; border-top: 3px solid #7c3aed; border-radius: 12px 12px 0 0;">
+                                        <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
+                                            MINERA DEL PACÍFICO: Suspensión temporal de operaciones
+                                        </h3>
+                                        <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
+                                            Por mantención programada de planta procesadora, se suspenderán operaciones del 5 al 12 de agosto. Se estima impacto de US$8 millones en resultados del trimestre. La producción anual se mantiene dentro del guidance comunicado.
+                                        </p>
+                                        <a href="#" class="btn btn-sm" style="background: #7c3aed; color: white; border: none; padding: 8px 16px; font-size: 14px; text-decoration: none; display: inline-block; border-radius: 4px;">
+                                            Ver detalle en CMF
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        
+                        <!-- Footer -->
+                        <div style="background-color: #f8fafc; padding: 24px 32px; text-align: center; border-top: 1px solid #e2e8f0;">
+                            <p style="margin: 0; font-size: 13px; color: #64748b; line-height: 1.5;">
+                                Información obtenida de fuentes oficiales: diariooficial.interior.gob.cl • cmfchile.cl • sii.cl
+                            </p>
+                        </div>
+                        
+                    </div>
+                    <!-- End Wrapper -->
+                    
+                </div>
+                
+            </div>
+        </div>
+    </section>
+
+    <!-- Modern Footer -->
+    <footer class="modern-footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <h4 class="fw-bold mb-3">Informe Diario</h4>
+                    <p class="mb-0" style="color: #e5e7eb;">Resúmenes integrados del Diario Oficial, CMF y SII. Todo lo relevante en un solo correo.</p>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="fw-semibold mb-3" style="color: #f3f4f6;">Enlaces</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2"><a href="/" class="text-decoration-none" style="color: #e5e7eb; transition: color 0.2s;" onmouseover="this.style.color='#60a5fa'" onmouseout="this.style.color='#e5e7eb'">Inicio</a></li>
+                        <li class="mb-2"><a href="{% url 'alerts:registro_prueba' %}" class="text-decoration-none" style="color: #e5e7eb; transition: color 0.2s;" onmouseover="this.style.color='#60a5fa'" onmouseout="this.style.color='#e5e7eb'">Registro</a></li>
+                        <li class="mb-2"><a href="{% url 'alerts:login' %}" class="text-decoration-none" style="color: #e5e7eb; transition: color 0.2s;" onmouseover="this.style.color='#60a5fa'" onmouseout="this.style.color='#e5e7eb'">Iniciar sesión</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="fw-semibold mb-3" style="color: #f3f4f6;">Contacto</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li style="color: #e5e7eb;">contacto@informediariochile.cl</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4" style="border-color: rgba(255,255,255,0.1);">
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

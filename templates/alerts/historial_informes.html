@@ -1,0 +1,44 @@
+{% extends 'alerts/base.html' %}
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-md-12 col-12">
+            <div class="card p-4 shadow-sm">
+                <h2 class="mb-4">Historial de Informes Enviados</h2>
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Empresa</th>
+                                <th>Destinatarios</th>
+                                <th>Resumen</th>
+                                <th>Enlace HTML</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for informe in informes %}
+                            <tr>
+                                <td>{{ informe.fecha_envio|date:'d-m-Y H:i' }}</td>
+                                <td>{{ informe.empresa.nombre }}</td>
+                                <td style="word-break:break-all;">{{ informe.destinatarios }}</td>
+                                <td style="max-width:320px; white-space:pre-line;">{{ informe.resumen|truncatechars:180 }}</td>
+                                <td>
+                                    {% if informe.enlace_html %}
+                                        <a href="{{ informe.enlace_html }}" target="_blank" class="btn btn-sm btn-outline-primary">Ver HTML</a>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="5" class="text-center text-muted py-4">No hay informes enviados aún.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

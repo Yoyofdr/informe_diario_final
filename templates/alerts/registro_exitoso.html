@@ -1,0 +1,24 @@
+{% extends 'alerts/base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body text-center p-5">
+                    <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+                    <h2 class="mt-3 mb-3">¡Registro exitoso!</h2>
+                    <p class="mb-2">La empresa <strong>{{ empresa.nombre }}</strong> ha sido registrada correctamente.</p>
+                    <p class="text-muted mb-4">Ya puedes comenzar a recibir tu informe diario integrado con información de:</p>
+                    <div class="d-flex justify-content-center gap-3 mb-4">
+                        <span class="badge bg-primary">Diario Oficial</span>
+                        <span class="badge bg-danger">CMF</span>
+                        <span class="badge bg-success">SII</span>
+                    </div>
+                    <p class="mb-4">Ahora puedes iniciar sesión como administrador para gestionar tus destinatarios.</p>
+                    <a href="/login/" class="btn btn-primary btn-lg">Iniciar sesión</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

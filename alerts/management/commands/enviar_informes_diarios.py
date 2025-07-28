@@ -15,7 +15,7 @@ class Command(BaseCommand):
         try:
             # Importar el módulo del generador de informes
             import importlib.util
-            script_path = os.path.join(BASE_DIR, 'generar_informe_oficial_integrado_mejorado.py')
+            script_path = os.path.join(BASE_DIR, 'scripts', 'generators', 'generar_informe_oficial_integrado_mejorado.py')
             spec = importlib.util.spec_from_file_location("generar_informe", script_path)
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)

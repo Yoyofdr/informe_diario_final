@@ -25,13 +25,14 @@ except ImportError:
     pass
 
 # Configurar Django
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(BASE_DIR))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'market_sniper.settings')
 django.setup()
 
 # Importar scrapers
 from alerts.scraper_diario_oficial import obtener_sumario_diario_oficial
-from scraper_cmf_mejorado import ScraperCMFMejorado
+from scripts.scrapers.scraper_cmf_mejorado import ScraperCMFMejorado
 from alerts.cmf_criterios_profesionales import filtrar_hechos_profesional, get_icono_categoria
 from alerts.scraper_sii import obtener_circulares_sii, obtener_resoluciones_exentas_sii, obtener_jurisprudencia_administrativa_sii
 from alerts.cmf_resumenes_ai import generar_resumen_cmf
@@ -134,7 +135,8 @@ def obtener_hechos_cmf_dia(fecha):
     
     # Leer hechos del JSON actualizado
     try:
-        with open('hechos_cmf_selenium_reales.json', 'r', encoding='utf-8') as f:
+        json_path = BASE_DIR / 'data' / 'hechos_cmf_selenium_reales.json'
+        with open(json_path, 'r', encoding='utf-8') as f:
             datos = json.load(f)
             todos_hechos = datos.get('hechos', [])
         

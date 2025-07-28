@@ -295,7 +295,7 @@ def obtener_numero_edicion(fecha, driver=None):
     # Primero intentar con caché local
     try:
         import json
-        cache_file = os.path.join(os.path.dirname(__file__), '..', 'edition_cache.json')
+        cache_file = os.path.join(os.path.dirname(__file__), '..', 'data', 'edition_cache.json')
         if os.path.exists(cache_file):
             with open(cache_file, 'r') as f:
                 cache = json.load(f)
@@ -366,7 +366,7 @@ def obtener_numero_edicion(fecha, driver=None):
                 
                 # Actualizar el caché
                 try:
-                    cache_file = os.path.join(os.path.dirname(__file__), '..', 'edition_cache.json')
+                    cache_file = os.path.join(os.path.dirname(__file__), '..', 'data', 'edition_cache.json')
                     cache = {}
                     if os.path.exists(cache_file):
                         with open(cache_file, 'r') as f:
@@ -427,7 +427,7 @@ def estimar_edicion_por_dias_habiles(fecha):
     """
     try:
         # Cargar el caché
-        cache_file = os.path.join(os.path.dirname(__file__), '..', 'edition_cache.json')
+        cache_file = os.path.join(os.path.dirname(__file__), '..', 'data', 'edition_cache.json')
         cache = {}
         if os.path.exists(cache_file):
             with open(cache_file, 'r') as f:

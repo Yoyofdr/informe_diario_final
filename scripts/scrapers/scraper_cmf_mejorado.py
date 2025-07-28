@@ -12,6 +12,7 @@ import time
 import logging
 from typing import Dict, List, Optional
 import re
+from pathlib import Path
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -107,7 +108,8 @@ class ScraperCMFMejorado:
         
         # Cargar JSON existente
         try:
-            with open('hechos_cmf_selenium_reales.json', 'r', encoding='utf-8') as f:
+            json_path = Path(__file__).parent.parent.parent / 'data' / 'hechos_cmf_selenium_reales.json'
+            with open(json_path, 'r', encoding='utf-8') as f:
                 datos = json.load(f)
         except:
             datos = {"hechos": []}
@@ -149,7 +151,8 @@ class ScraperCMFMejorado:
                 hechos_agregados += 1
         
         # Guardar JSON actualizado
-        with open('hechos_cmf_selenium_reales.json', 'w', encoding='utf-8') as f:
+        json_path = Path(__file__).parent.parent.parent / 'data' / 'hechos_cmf_selenium_reales.json'
+        with open(json_path, 'w', encoding='utf-8') as f:
             json.dump(datos, f, ensure_ascii=False, indent=2)
         
         logger.info(f"✅ Actualización completada:")

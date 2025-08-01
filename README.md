@@ -150,4 +150,4 @@ Proyecto privado - Todos los derechos reservados
 
 ## 📞 Contacto
 
-Para consultas: contacto@informediariochile.cl
+Para consultas: contacto@informediariochile.cl# Cache bust: Fri Aug  1 15:56:45 -04 2025

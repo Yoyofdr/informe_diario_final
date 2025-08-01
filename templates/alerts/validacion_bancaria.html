@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Validación Bancaria - Informe Diario{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Conecta tu Cuenta Bancaria</h4>
+                </div>
+                <div class="card-body">
+                    <p class="lead">Para continuar con el proceso, necesitamos verificar tu cuenta bancaria.</p>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>¿Por qué necesitamos esto?</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Verificar tu identidad de forma segura</li>
+                            <li>Preparar tu cuenta para futuros pagos automáticos</li>
+                            <li>Cumplir con las regulaciones financieras chilenas</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="text-center my-4">
+                        <button id="conectar-btn" class="btn btn-primary btn-lg">
+                            <i class="fas fa-university"></i> Conectar mi Cuenta Bancaria
+                        </button>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-shield-alt"></i>
+                        <strong>Tu información está segura</strong>
+                        <p class="mb-0">Usamos Fintoc, un servicio certificado por la CMF, para conectar tu cuenta de forma segura. Nunca almacenamos tus credenciales bancarias.</p>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{% url 'alerts:dashboard' %}" class="text-muted">
+                            Hacerlo más tarde
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fintoc Widget Script -->
+<script src="https://js.fintoc.com/v1/"></script>
+
+<script>
+document.getElementById('conectar-btn').addEventListener('click', function() {
+    const widget = Fintoc.create({
+        publicKey: '{{ public_key }}',
+        widgetToken: '{{ link_token }}',
+        product: 'movements',
+        onSuccess: function() {
+            // Mostrar mensaje de éxito
+            Swal.fire({
+                icon: 'success',
+                title: '¡Cuenta conectada!',
+                text: 'Tu cuenta bancaria ha sido conectada exitosamente.',
+                confirmButtonText: 'Continuar'
+            }).then((result) => {
+                // Redirigir al dashboard
+                window.location.href = '{% url "alerts:dashboard" %}';
+            });
+        },
+        onExit: function() {
+            console.log('Usuario cerró el widget');
+        }
+    });
+    
+    widget.open();
+});
+
+// Verificar estado periódicamente
+setInterval(function() {
+    fetch('{% url "alerts:estado_validacion_bancaria" %}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'connected') {
+                window.location.href = '{% url "alerts:dashboard" %}';
+            }
+        });
+}, 5000);
+</script>
+{% endblock %}

@@ -15,7 +15,9 @@ import urllib.parse
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib import messages
-# from alerts.utils.db_optimizations import optimize_empresa_queries, optimize_hecho_esencial_queries, optimize_metrics_queries, QueryOptimizer
+from alerts.utils.db_optimizations import optimize_empresa_queries, optimize_hecho_esencial_queries, optimize_metrics_queries, QueryOptimizer
+from .enviar_informe_bienvenida import enviar_informe_bienvenida
+from django.db import transaction
 
 @login_required
 def suscripcion_ajax(request):
@@ -61,36 +63,20 @@ def register(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            
-            # Crear organización automáticamente para el nuevo usuario
-            # Extraer dominio del email
-            email_domain = user.email.split('@')[1] if '@' in user.email else 'personal.cl'
-            
-            # Crear nombre de organización basado en el nombre del usuario o email
-            if user.first_name and user.last_name:
-                org_name = f"{user.first_name} {user.last_name}"
-            elif user.first_name:
-                org_name = user.first_name
-            else:
-                org_name = user.email.split('@')[0]
-            
-            # Crear la organización
-            organizacion = Organizacion.objects.create(
-                nombre=org_name,
-                dominio=email_domain,
-                admin=user,
-                plan='gratis',
-                suscripcion_activa=True  # Activar automáticamente para usuarios nuevos
-            )
-            
-            # Agregar al usuario como destinatario de su propia organización
-            Destinatario.objects.create(
-                nombre=user.get_full_name() or user.username,
-                email=user.email,
-                organizacion=organizacion
-            )
-            
             auth_login(request, user)
+            
+            # Enviar informe de bienvenida
+            try:
+                nombre_completo = f"{user.first_name} {user.last_name}".strip()
+                if not nombre_completo:
+                    nombre_completo = user.username
+                
+                enviar_informe_bienvenida(user.email, nombre_completo)
+                messages.success(request, 'Te hemos enviado el informe del Diario Oficial de hoy por email.')
+            except Exception as e:
+                print(f"Error enviando informe de bienvenida: {e}")
+                # No mostrar error al usuario para no afectar la experiencia de registro
+            
             return redirect('alerts:dashboard')
     else:
         form = CustomUserCreationForm()
@@ -143,7 +129,15 @@ def landing(request):
             if org:
                 destinatario.organizacion = org
                 destinatario.save()
-                mensaje = f"Registro exitoso. Te hemos agregado a la lista de destinatarios."
+                
+                # Enviar informe de bienvenida
+                try:
+                    enviar_informe_bienvenida(destinatario.email, destinatario.nombre)
+                    mensaje = f"Registro exitoso. Te hemos agregado a la lista de destinatarios y enviado el informe de hoy por email."
+                except Exception as e:
+                    print(f"Error enviando informe de bienvenida: {e}")
+                    mensaje = f"Registro exitoso. Te hemos agregado a la lista de destinatarios."
+                
                 messages.success(request, mensaje)
                 form = DestinatarioForm()  # Limpiar el form
             else:
@@ -181,7 +175,15 @@ def panel_organizacion(request):
                 destinatario.nombre = f"{nombre} {apellido}".strip()
                 destinatario.organizacion = organizacion
                 destinatario.save()
-                messages.success(request, f"Destinatario {form.cleaned_data['email']} agregado.")
+                
+                # Enviar informe de bienvenida al nuevo destinatario
+                try:
+                    enviar_informe_bienvenida(destinatario.email, destinatario.nombre)
+                    messages.success(request, f"Destinatario {form.cleaned_data['email']} agregado y se le envió el informe de hoy.")
+                except Exception as e:
+                    print(f"Error enviando informe de bienvenida: {e}")
+                    messages.success(request, f"Destinatario {form.cleaned_data['email']} agregado.")
+                
                 form = DestinatarioForm(organizacion=organizacion)
             # else:
             #     messages.error(request, 'Por favor, corrige los errores del formulario.')
@@ -201,23 +203,65 @@ def registro_empresa_admin(request):
     if request.method == 'POST':
         form = RegistroEmpresaAdminForm(request.POST)
         if form.is_valid():
-            # Siempre guardar el email como username para compatibilidad, pero el login será solo por email
-            user = User.objects.create_user(
-                username=form.cleaned_data['email'],
-                email=form.cleaned_data['email'],
-                password=form.cleaned_data['password1'],
-                first_name=form.cleaned_data['nombre'],
-                last_name=form.cleaned_data['apellido']
-            )
-            # Generar dominio basado en el email del administrador
-            email_dominio = form.cleaned_data['email'].split('@')[1]
-            org = Organizacion.objects.create(
-                nombre=form.cleaned_data['nombre_empresa'],
-                dominio=email_dominio,
-                admin=user
-            )
-            messages.success(request, 'Registro exitoso. Ahora puedes iniciar sesión.')
-            return render(request, 'alerts/registro_exitoso.html', {'empresa': org})
+            email = form.cleaned_data['email']
+            email_dominio = email.split('@')[1]
+            
+            # Verificar duplicados ANTES de crear
+            if User.objects.filter(email=email).exists():
+                messages.error(request, 'Ya existe un usuario con ese email.')
+                return render(request, 'alerts/registro_empresa_admin.html', {'form': form})
+            
+            if Organizacion.objects.filter(dominio=email_dominio).exists():
+                messages.error(request, 'Ya existe una organización con ese dominio.')
+                return render(request, 'alerts/registro_empresa_admin.html', {'form': form})
+            
+            try:
+                with transaction.atomic():
+                    # Crear usuario
+                    user = User.objects.create_user(
+                        username=email,
+                        email=email,
+                        password=form.cleaned_data['password1'],
+                        first_name=form.cleaned_data['nombre'],
+                        last_name=form.cleaned_data['apellido']
+                    )
+                    
+                    # Crear organización
+                    org = Organizacion.objects.create(
+                        nombre=form.cleaned_data['nombre_empresa'],
+                        dominio=email_dominio,
+                        admin=user
+                    )
+                    
+                    # IMPORTANTE: Agregar como destinatario
+                    Destinatario.objects.create(
+                        nombre=f"{user.first_name} {user.last_name}",
+                        email=email,
+                        organizacion=org
+                    )
+                    
+                    # Enviar informe de bienvenida dentro de la transacción
+                    try:
+                        nombre_completo = f"{user.first_name} {user.last_name}".strip()
+                        enviar_informe_bienvenida(user.email, nombre_completo)
+                    except Exception as e:
+                        print(f"Error enviando informe de bienvenida: {e}")
+                
+                # Email de confirmación (fuera de la transacción)
+                send_mail(
+                    subject='Bienvenido a Informe Diario',
+                    message=f'Hola {user.first_name},\n\nTu cuenta ha sido creada exitosamente.',
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[email],
+                    fail_silently=True
+                )
+                
+                messages.success(request, 'Registro exitoso. Te hemos enviado el informe del Diario Oficial de hoy.')
+                return render(request, 'alerts/registro_exitoso.html', {'empresa': org})
+                
+            except Exception as e:
+                messages.error(request, f'Error durante el registro: {str(e)}')
+                return render(request, 'alerts/registro_empresa_admin.html', {'form': form})
         else:
             messages.error(request, 'Por favor, corrige los errores del formulario.')
     else:
@@ -265,9 +309,6 @@ def landing_explicativa(request):
 
 def registro_prueba(request):
     mensaje = None
-    registro_exitoso = False
-    empresa_registrada = None
-    
     if request.method == 'POST':
         form = RegistroPruebaForm(request.POST)
         if form.is_valid():
@@ -276,55 +317,86 @@ def registro_prueba(request):
             email = form.cleaned_data['email']
             telefono = form.cleaned_data['telefono']
             empresa_nombre = form.cleaned_data['empresa']
-            # Generar dominio automáticamente del email
-            dominio = email.split('@')[1] if '@' in email else 'personal.cl'
+            dominio = form.cleaned_data['dominio'].lower().strip()
+            destinatarios = form.cleaned_data['destinatarios']
+            
+            # Verificar email duplicado
             if User.objects.filter(email=email).exists():
                 messages.error(request, 'Ya existe un usuario con ese email.')
                 return render(request, 'alerts/registro_prueba.html', {'form': form})
-            else:
-                password = form.cleaned_data['password1']
-                user = User.objects.create_user(
-                    username=email,
-                    email=email,
-                    password=password,
-                    first_name=nombre,
-                    last_name=apellido
-                )
-                send_mail(
-                    subject='Bienvenido a Informe Diario - Resumen Integrado',
-                    message=f'Hola {nombre},\n\nTu cuenta ha sido creada exitosamente.\n\nEmail: {email}\n\nAhora recibirás diariamente un informe integrado con información de:\n• Diario Oficial: Normativas y avisos relevantes\n• CMF: Hechos esenciales del mercado financiero\n• SII: Circulares y resoluciones tributarias\n\nPuedes iniciar sesión aquí: https://www.informediariochile.cl/login/\n\n¡Bienvenido a Informe Diario!',
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[email],
-                    fail_silently=False,
-                )
+            
+            # Verificar dominio duplicado ANTES de crear el usuario
             if Organizacion.objects.filter(dominio=dominio).exists():
                 messages.error(request, 'Ya existe una organización con ese dominio.')
-            else:
-                org = Organizacion.objects.create(
-                    nombre=empresa_nombre,
-                    dominio=dominio,
-                    admin=user
-                )
-                # El usuario podrá agregar destinatarios después desde el panel
-                # Agregar el mismo usuario como primer destinatario
-                Destinatario.objects.create(
-                    nombre=f"{nombre} {apellido}",
-                    email=email,
-                    organizacion=org
-                )
-                registro_exitoso = True
-                empresa_registrada = org
-                form = RegistroPruebaForm()  # Limpiar el formulario
+                return render(request, 'alerts/registro_prueba.html', {'form': form})
+            
+            # Si todo está OK, proceder con el registro
+            try:
+                with transaction.atomic():
+                    password = form.cleaned_data['password1']
+                    user = User.objects.create_user(
+                        username=email,
+                        email=email,
+                        password=password,
+                        first_name=nombre,
+                        last_name=apellido
+                    )
+                    org = Organizacion.objects.create(
+                        nombre=empresa_nombre,
+                        dominio=dominio,
+                        admin=user
+                    )
+                    
+                    # IMPORTANTE: Agregar al admin como destinatario principal
+                    admin_destinatario = Destinatario.objects.create(
+                        nombre=f"{nombre} {apellido}",
+                        email=email,
+                        organizacion=org
+                    )
+                    
+                    # Enviar informe de bienvenida al admin
+                    try:
+                        nombre_completo = f"{nombre} {apellido}".strip()
+                        enviar_informe_bienvenida(email, nombre_completo)
+                    except Exception as e:
+                        print(f"Error enviando informe de bienvenida al admin: {e}")
+                    
+                    # Crear destinatarios y enviarles informes de bienvenida
+                    for dest_email in destinatarios:
+                        dest = Destinatario.objects.create(
+                            nombre=f"{nombre} {apellido}",  # Usar el nombre del admin como placeholder
+                            email=dest_email,
+                            organizacion=org
+                        )
+                        # Enviar informe de bienvenida a cada destinatario
+                        try:
+                            enviar_informe_bienvenida(dest_email, dest.nombre)
+                        except Exception as e:
+                            print(f"Error enviando informe de bienvenida a {dest_email}: {e}")
+                    
+                    # Enviar email de confirmación DESPUÉS de que todo esté creado
+                    send_mail(
+                        subject='Bienvenido a Informe Diario',
+                        message=f'Hola {nombre},\n\nTu cuenta ha sido creada exitosamente.\n\nEmail: {email}\n\nYa puedes iniciar sesión en la plataforma.\n\n¡Bienvenido!',
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[email],
+                        fail_silently=False,
+                    )
+                    
+                    messages.success(request, 'Registro exitoso. Te hemos enviado el informe del Diario Oficial de hoy a ti y a todos los destinatarios registrados. Ya puedes iniciar sesión y usar la plataforma gratis.')
+                    return render(request, 'alerts/registro_exitoso.html', {'empresa': org})
+                
+            except Exception as e:
+                # Si algo falla, eliminar el usuario creado
+                if 'user' in locals():
+                    user.delete()
+                messages.error(request, f'Error durante el registro: {str(e)}')
+                return render(request, 'alerts/registro_prueba.html', {'form': form})
         else:
             messages.error(request, 'Por favor, corrige los errores del formulario.')
     else:
         form = RegistroPruebaForm()
-    
-    return render(request, 'alerts/registro_prueba.html', {
-        'form': form,
-        'registro_exitoso': registro_exitoso,
-        'empresa': empresa_registrada
-    })
+    return render(request, 'alerts/registro_prueba.html', {'form': form})
 
 @login_required
 def historial_informes(request):

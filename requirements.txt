@@ -33,6 +33,12 @@ python-dotenv
 # API de WhatsApp
 twilio
 
+# Integración bancaria
+fintoc
+
+# API de IA
+openai
+
 # Added from the code block
 django-crispy-forms==2.1
 crispy-bootstrap5==2024.2

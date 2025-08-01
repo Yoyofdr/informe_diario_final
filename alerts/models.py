@@ -134,6 +134,21 @@ class Organizacion(models.Model):
     fecha_pago = models.DateTimeField(null=True, blank=True)
     suscripcion_activa = models.BooleanField(default=False)
     admin = models.ForeignKey(User, on_delete=models.CASCADE, related_name='organizaciones')
+    
+    # Campos para futura integración bancaria - NO USAR AÚN
+    # Estos campos están preparados para cuando se active la funcionalidad de cuentas bancarias
+    bank_account_status = models.CharField(
+        max_length=50,
+        choices=[
+            ('pending', 'Pendiente'),
+            ('connected', 'Conectada'),
+            ('failed', 'Falló'),
+            ('disconnected', 'Desconectada')
+        ],
+        default='pending',
+        help_text='CAMPO RESERVADO - No usar hasta activar funcionalidad bancaria'
+    )
+    
     PLAN_CHOICES = [
         ('gratis', 'Gratis'),
         ('premium', 'Premium'),

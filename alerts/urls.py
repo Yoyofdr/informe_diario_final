@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+# from . import views_fintoc  # DESACTIVADO TEMPORALMENTE - Activar cuando se habiliten cuentas bancarias
 from django.contrib.auth import views as auth_views
 from .forms import CustomPasswordChangeForm
 
@@ -25,4 +26,11 @@ urlpatterns = [
     path('password_change/', auth_views.PasswordChangeView.as_view(template_name='alerts/password_change_form.html', form_class=CustomPasswordChangeForm), name='password_change'),
     path('password_change/done/', auth_views.PasswordChangeDoneView.as_view(template_name='alerts/password_change_done.html'), name='password_change_done'),
     path('admin-panel/', views.admin_panel, name='admin_panel'),
+    
+    # Fintoc integration URLs - DESACTIVADAS TEMPORALMENTE
+    # Descomentar estas líneas cuando se active la funcionalidad de cuentas bancarias
+    # path('validacion-bancaria/', views_fintoc.iniciar_validacion_bancaria, name='validacion_bancaria'),
+    # path('validacion-bancaria/estado/', views_fintoc.estado_validacion_bancaria, name='estado_validacion_bancaria'),
+    # path('validacion-bancaria/desconectar/', views_fintoc.desconectar_cuenta_bancaria, name='desconectar_cuenta_bancaria'),
+    # path('webhooks/fintoc/', views_fintoc.webhook_fintoc, name='webhook_fintoc'),
 ] 

@@ -287,7 +287,7 @@
             {% endfor %}
         {% endif %}
         
-        <form method="POST" action="{% url 'alerts:registro_prueba' %}">
+        <form method="POST" action="{% url 'alerts:registro_prueba' %}" id="registroForm">
             {% csrf_token %}
             <div class="row mb-2-custom">
                 <div class="col-6">
@@ -355,6 +355,35 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
+        // Prevent multiple submissions
+        let isSubmitting = false;
+        
+        // Handle form submission
+        document.getElementById('registroForm').addEventListener('submit', function(e) {
+            if (isSubmitting) {
+                e.preventDefault();
+                return;
+            }
+            
+            // Validate passwords match
+            const pass1 = document.getElementById('password1').value;
+            const pass2 = document.getElementById('password2').value;
+            
+            if (pass1 !== pass2) {
+                alert('Las contraseñas no coinciden');
+                e.preventDefault();
+                return;
+            }
+            
+            // Mark as submitting
+            isSubmitting = true;
+            
+            // Change button text
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creando cuenta...';
+            submitBtn.disabled = true;
+        });
+        
         // Check if there's a success message
         document.addEventListener('DOMContentLoaded', function() {
             {% if messages %}
@@ -369,6 +398,9 @@
                         alertElements.forEach(function(alert) {
                             alert.style.display = 'none';
                         });
+                        
+                        // Clear form
+                        document.getElementById('registroForm').reset();
                     {% endif %}
                 {% endfor %}
             {% endif %}

@@ -317,8 +317,9 @@ def registro_prueba(request):
             email = form.cleaned_data['email']
             telefono = form.cleaned_data['telefono']
             empresa_nombre = form.cleaned_data['empresa']
-            dominio = form.cleaned_data['dominio'].lower().strip()
-            destinatarios = form.cleaned_data['destinatarios']
+            # Extraer dominio del email
+            dominio = email.split('@')[1].lower().strip()
+            # No hay destinatarios adicionales en este formulario - solo el admin
             
             # Verificar email duplicado
             if User.objects.filter(email=email).exists():
@@ -361,18 +362,7 @@ def registro_prueba(request):
                     except Exception as e:
                         print(f"Error enviando informe de bienvenida al admin: {e}")
                     
-                    # Crear destinatarios y enviarles informes de bienvenida
-                    for dest_email in destinatarios:
-                        dest = Destinatario.objects.create(
-                            nombre=f"{nombre} {apellido}",  # Usar el nombre del admin como placeholder
-                            email=dest_email,
-                            organizacion=org
-                        )
-                        # Enviar informe de bienvenida a cada destinatario
-                        try:
-                            enviar_informe_bienvenida(dest_email, dest.nombre)
-                        except Exception as e:
-                            print(f"Error enviando informe de bienvenida a {dest_email}: {e}")
+                    # No hay destinatarios adicionales en este formulario simplificado
                     
                     # Enviar email de confirmación DESPUÉS de que todo esté creado
                     send_mail(
@@ -383,7 +373,7 @@ def registro_prueba(request):
                         fail_silently=False,
                     )
                     
-                    messages.success(request, 'Registro exitoso. Te hemos enviado el informe del Diario Oficial de hoy a ti y a todos los destinatarios registrados. Ya puedes iniciar sesión y usar la plataforma gratis.')
+                    messages.success(request, 'Registro exitoso. Te hemos enviado el informe del Diario Oficial de hoy por email. Ya puedes iniciar sesión y usar la plataforma gratis.')
                     return render(request, 'alerts/registro_exitoso.html', {'empresa': org})
                 
             except Exception as e:

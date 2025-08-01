@@ -284,11 +284,11 @@ def login_email(request):
         except User.DoesNotExist:
             print(f"[LOGIN] No existe usuario con email: {email}")
             messages.error(request, "No existe un usuario con ese email.")
-            return render(request, 'registration/login_chennai.html')
+            return render(request, 'registration/login_fixed.html')
         except MultipleObjectsReturned:
             print(f"[LOGIN] ERROR: Hay múltiples usuarios con el email: {email}")
             messages.error(request, "Error: Hay más de un usuario registrado con este email. Por favor contacta a soporte.")
-            return render(request, 'registration/login_chennai.html')
+            return render(request, 'registration/login_fixed.html')
         user_auth = authenticate(request, username=user.username, password=password)
         print(f"[LOGIN] Resultado authenticate: {user_auth}")
         if user_auth is not None and user_auth.is_active:
@@ -298,8 +298,8 @@ def login_email(request):
         else:
             print(f"[LOGIN] Falló la autenticación para usuario: {user.username} (email: {user.email})")
             messages.error(request, "Email o contraseña incorrectos.")
-            return render(request, 'registration/login_chennai.html')
-    return render(request, 'registration/login_chennai.html')
+            return render(request, 'registration/login_fixed.html')
+    return render(request, 'registration/login_fixed.html')
 
 def landing_explicativa(request):
     """

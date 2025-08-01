@@ -260,7 +260,6 @@
                     <p class="mb-2"><strong>Estado:</strong> {{ estado }}</p>
                     {% if organizacion %}
                     <p class="mb-2"><strong>Organización:</strong> {{ organizacion.nombre }}</p>
-                    {% endif %}
                     
                     <div class="d-flex flex-wrap gap-2 mb-3 mt-3">
                         <a href="{% url 'alerts:panel_organizacion' %}" class="btn btn-primary btn-custom">
@@ -295,15 +294,13 @@
                             Escríbenos a <a href="mailto:contacto@informediario.cl">contacto@informediario.cl</a>
                         </p>
                     </div>
-                </div>
-                
                 {% else %}
                     <div class="card p-4">
                         <h5>Bienvenido</h5>
                         <p>Para empezar a recibir informes diarios, contacta con soporte.</p>
                     </div>
                 {% endif %}
-            </div>
+                </div>
         </div>
     </div>
 

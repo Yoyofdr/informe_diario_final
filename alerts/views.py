@@ -374,7 +374,8 @@ def registro_prueba(request):
                     )
                     
                     messages.success(request, 'Registro exitoso. Te hemos enviado el informe del Diario Oficial de hoy por email. Ya puedes iniciar sesión y usar la plataforma gratis.')
-                    return render(request, 'alerts/registro_exitoso.html', {'empresa': org})
+                    # Redirigir al formulario para mostrar el popup de éxito
+                    return redirect('alerts:registro_prueba')
                 
             except Exception as e:
                 # Si algo falla, eliminar el usuario creado

@@ -7,7 +7,7 @@ from .forms import CustomPasswordChangeForm
 app_name = 'alerts'
 
 urlpatterns = [
-    path('', views.landing_explicativa, name='landing_explicativa'),
+    path('', views.registro_prueba, name='landing_explicativa'),
     path('registro-prueba/', views.registro_prueba, name='registro_prueba'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('login/', views.login_email, name='login'),

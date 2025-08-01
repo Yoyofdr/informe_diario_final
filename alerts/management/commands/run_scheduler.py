@@ -30,14 +30,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write(self.style.SUCCESS('Iniciando el programador...'))
 
-        # Programar el envío del informe diario a las 8:00 AM
-        schedule.every().day.at("08:00").do(job, task_name="Envío Informe Diario Oficial", command_name='informe_diario_oficial')
+        # Programar el envío del informe diario a las 9:00 AM
+        schedule.every().day.at("09:00").do(job, task_name="Envío Informe Diario Oficial", command_name='informe_diario_oficial')
 
         # Puedes mantener otras tareas si lo deseas
         # schedule.every(30).minutes.do(job, task_name="Scraping de Hechos Esenciales", command_name='scrape_hechos')
         # schedule.every(30).minutes.do(job, task_name="Envío de Notificaciones", command_name='send_notifications')
 
-        self.stdout.write(self.style.SUCCESS('Tarea programada para ejecutarse todos los días a las 8:00 AM.'))
+        self.stdout.write(self.style.SUCCESS('Tarea programada para ejecutarse todos los días a las 9:00 AM.'))
         self.stdout.write(self.style.SUCCESS('Presiona CTRL+C para detener el programador.'))
 
         while True:

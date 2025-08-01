@@ -47,9 +47,9 @@ class Command(BaseCommand):
                 total_documentos = len(publicaciones)
             tiempo_lectura = max(1, total_documentos // 4)
             url_informe_completo = "https://informediario.cl/informe-completo"  # Puedes personalizar esto
-            if not publicaciones and (total_documentos == 0 or total_documentos is None):
-                print("[INFO] Scraping falló o no hay contenido. No se enviará correo al cliente.")
-                return
+            # Siempre enviar el informe, incluso si no hay publicaciones
+            if not publicaciones:
+                print("[INFO] No se encontraron publicaciones relevantes para hoy.")
             html = generar_informe_html(publicaciones, fecha, valores_monedas, documentos_analizados=total_documentos, tiempo_lectura=tiempo_lectura, url_informe_completo=url_informe_completo)
             text = f"Informe Diario Oficial {fecha or ''}: ver versión HTML."
 

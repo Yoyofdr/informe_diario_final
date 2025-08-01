@@ -29,10 +29,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-=y5=dph9@+r+3=&h4dns^
 # La variable de entorno 'DEBUG' será '1' o 'True' en desarrollo, y no existirá en producción.
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'informediario.cl', '134.122.16.228']
-# Añadimos el dominio de producción a la lista si no está ya
-if 'informediario.cl' not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS.append('informediario.cl')
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'informediario.cl', 'informediariochile.cl', 'www.informediariochile.cl', '134.122.16.228', 'informediariochile-fe11f11884cd.herokuapp.com']
 
 
 # Application definition

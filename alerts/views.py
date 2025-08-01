@@ -326,11 +326,6 @@ def registro_prueba(request):
                 messages.error(request, 'Ya existe un usuario con ese email.')
                 return render(request, 'alerts/registro_prueba_chennai.html', {'form': form})
             
-            # Verificar dominio duplicado ANTES de crear el usuario
-            if Organizacion.objects.filter(dominio=dominio).exists():
-                messages.error(request, 'Ya existe una organización con ese dominio.')
-                return render(request, 'alerts/registro_prueba_chennai.html', {'form': form})
-            
             # Si todo está OK, proceder con el registro
             try:
                 with transaction.atomic():
@@ -342,11 +337,18 @@ def registro_prueba(request):
                         first_name=nombre,
                         last_name=apellido
                     )
-                    org = Organizacion.objects.create(
-                        nombre=empresa_nombre,
-                        dominio=dominio,
-                        admin=user
-                    )
+                    
+                    # Buscar si ya existe una organización para este dominio
+                    org = Organizacion.objects.filter(dominio=dominio).first()
+                    if not org:
+                        # Crear nueva organización si no existe
+                        org = Organizacion.objects.create(
+                            nombre=empresa_nombre,
+                            dominio=dominio,
+                            admin=user
+                        )
+                    # Si ya existe, simplemente usar la organización existente
+                    # El usuario se agregará como destinatario más abajo
                     
                     # IMPORTANTE: Agregar al admin como destinatario principal
                     admin_destinatario = Destinatario.objects.create(

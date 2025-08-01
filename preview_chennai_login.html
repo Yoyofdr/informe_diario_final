@@ -1,0 +1,45 @@
+{% extends "alerts/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Iniciar Sesión - Informe Diario{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card p-4 shadow-sm">
+                <h2 class="text-center mb-4">Bienvenido de Vuelta</h2>
+                <p class="text-center text-muted mb-4">Ingresa tu email y contraseña para acceder a tu dashboard.</p>
+                {% if mensaje %}
+                    <div class="alert alert-danger">{{ mensaje }}</div>
+                {% endif %}
+                <form method="post" action="{% url 'alerts:login' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="id_email" class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control" id="id_email" value="{{ form.data.email|default_if_none:'' }}" required>
+                        {% if form.email.errors %}
+                            <div class="text-danger">{{ form.email.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_password" class="form-label">Contraseña</label>
+                        <input type="password" name="password" class="form-control" id="id_password" required>
+                        {% if form.password.errors %}
+                            <div class="text-danger">{{ form.password.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">Iniciar Sesión</button>
+                    </div>
+                </form>
+                <div class="text-center mt-3">
+                    <a href="{% url 'alerts:password_reset' %}">¿Olvidaste tu contraseña?</a>
+                </div>
+                <hr class="my-4">
+                <p class="text-center">¿No tienes una cuenta? <a href="{% url 'alerts:registro_empresa_admin' %}">Regístrate</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

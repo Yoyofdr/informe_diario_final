@@ -1,10 +1,262 @@
-{% extends 'alerts/base.html' %}
-{% block content %}
-<div class="container mt-5 mb-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8 col-md-10 col-12">
-            <div class="card p-4 shadow-sm">
-                <h2 class="mb-3">Panel de Organización</h2>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Destinatarios - Informe Diario</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bs-body-font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f3f4f6;
+            min-height: 100vh;
+        }
+        
+        .navbar {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: #4c1d95;
+            text-decoration: none;
+        }
+        
+        .navbar-brand:hover {
+            color: #5b21b6;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: none;
+            margin-bottom: 1.5rem;
+        }
+        
+        .info-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .info-card h5 {
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .domain-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+        
+        h5 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 1rem;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .form-control {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: all 0.2s;
+            background-color: #f9fafb;
+        }
+        
+        .form-control:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            outline: none;
+            background-color: #fff;
+        }
+        
+        .btn-primary {
+            background: #6366f1;
+            border: none;
+            padding: 0.625rem 1.25rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary:hover {
+            background: #4f46e5;
+            transform: translateY(-1px);
+        }
+        
+        .btn-back {
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .btn-back:hover {
+            color: #4b5563;
+        }
+        
+        .btn-logout {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        
+        .btn-logout:hover {
+            background: #dc2626;
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        .table {
+            font-size: 0.9375rem;
+        }
+        
+        .table th {
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+            padding: 0.75rem;
+        }
+        
+        .table td {
+            padding: 1rem 0.75rem;
+            vertical-align: middle;
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: #f9fafb;
+        }
+        
+        .btn-delete {
+            background: transparent;
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-delete:hover {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            color: #9ca3af;
+            margin-bottom: 1rem;
+        }
+        
+        .empty-state p {
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+        
+        .alert {
+            border-radius: 8px;
+            border: none;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .alert-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .text-muted {
+            color: #6b7280 !important;
+        }
+        
+        code {
+            background: #f3f4f6;
+            padding: 0.125rem 0.375rem;
+            border-radius: 4px;
+            color: #4c1d95;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'alerts:landing_explicativa' %}">Informe Diario</a>
+            <div class="ms-auto">
+                <a href="/accounts/logout/" class="btn-logout" onclick="return confirm('¿Estás seguro de que quieres cerrar sesión?')">
+                    <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4 mb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10 col-12">
+                <a href="/dashboard/" class="btn-back">
+                    <i class="bi bi-arrow-left"></i> Volver al dashboard
+                </a>
+                
+                <h2>Gestionar Destinatarios</h2>
+                <p class="text-muted mb-4">Administra quiénes reciben el informe diario en tu organización</p>
+                
                 {% if messages %}
                     {% for message in messages %}
                         <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -13,106 +265,113 @@
                         </div>
                     {% endfor %}
                 {% endif %}
+                
                 {% if organizacion %}
-                    <div class="card mb-4" style="background-color: #f8f9fa; border: 1px solid #e9ecef;">
-                        <div class="card-body">
-                            <h5 class="card-title mb-3">Información de la Organización</h5>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <strong>Organización:</strong> 
-                                    <span class="text-primary">{{ organizacion.nombre }}</span>
-                                </div>
-                                <div class="col-md-6">
-                                    <strong>Dominio autorizado:</strong> 
-                                    <span class="badge bg-primary">@{{ dominio }}</span>
-                                </div>
+                    <!-- Info Card -->
+                    <div class="info-card">
+                        <h5>Información de la Organización</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Organización:</strong> {{ organizacion.nombre }}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Dominio autorizado:</strong> 
+                                <span class="domain-badge">@{{ dominio }}</span>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title mb-3">Agregar nuevo destinatario</h5>
-                            <form method="post">
-                                {% csrf_token %}
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="{{ form.nombre.id_for_label }}" class="form-label">{{ form.nombre.label }}</label>
-                                        {{ form.nombre }}
-                                        {% if form.nombre.errors %}
-                                          <div class="text-danger small">{{ form.nombre.errors.0 }}</div>
-                                        {% endif %}
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="{{ form.apellido.id_for_label }}" class="form-label">{{ form.apellido.label }}</label>
-                                        {{ form.apellido }}
-                                        {% if form.apellido.errors %}
-                                          <div class="text-danger small">{{ form.apellido.errors.0 }}</div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }} <small class="text-muted">(debe ser @{{ dominio }})</small></label>
-                                    {{ form.email }}
-                                    {% if form.email.errors %}
-                                      <div class="text-danger small">{{ form.email.errors.0 }}</div>
+                    <!-- Add Recipient Form -->
+                    <div class="card p-4">
+                        <h5>Agregar nuevo destinatario</h5>
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.nombre.id_for_label }}" class="form-label">{{ form.nombre.label }}</label>
+                                    {{ form.nombre }}
+                                    {% if form.nombre.errors %}
+                                        <div class="text-danger small mt-1">{{ form.nombre.errors.0 }}</div>
                                     {% endif %}
                                 </div>
-                                <button type="submit" name="agregar" class="btn btn-primary">Agregar destinatario</button>
-                            </form>
-                        </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.apellido.id_for_label }}" class="form-label">{{ form.apellido.label }}</label>
+                                    {{ form.apellido }}
+                                    {% if form.apellido.errors %}
+                                        <div class="text-danger small mt-1">{{ form.apellido.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.email.id_for_label }}" class="form-label">
+                                    {{ form.email.label }} 
+                                    <small class="text-muted">(debe ser @{{ dominio }})</small>
+                                </label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <button type="submit" name="agregar" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-2"></i>Agregar destinatario
+                            </button>
+                        </form>
                     </div>
                     
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title mb-3">Destinatarios actuales</h5>
-                            {% if destinatarios %}
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Nombre</th>
-                                                <th>Email</th>
-                                                <th width="120">Acción</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                        {% for d in destinatarios %}
-                                            <tr>
-                                                <td>{{ d.nombre|default:"Sin nombre" }}</td>
-                                                <td><code>{{ d.email }}</code></td>
-                                                <td>
-                                                    <form method="post" class="d-inline">
-                                                        {% csrf_token %}
-                                                        <input type="hidden" name="dest_id" value="{{ d.id }}">
-                                                        <button type="submit" name="eliminar" class="btn btn-outline-danger btn-sm" onclick="return confirm('¿Estás seguro de que quieres eliminar este destinatario?')">
-                                                            <i class="fas fa-trash"></i> Eliminar
-                                                        </button>
-                                                    </form>
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            {% else %}
-                                <div class="text-center py-4">
-                                    <i class="fas fa-users text-muted" style="font-size: 3rem;"></i>
-                                    <p class="text-muted mt-2">No hay destinatarios registrados.</p>
-                                    <p class="text-muted small">Agrega el primer destinatario usando el formulario de arriba.</p>
-                                </div>
-                            {% endif %}
-                        </div>
+                    <!-- Recipients List -->
+                    <div class="card p-4">
+                        <h5>Destinatarios actuales</h5>
+                        {% if destinatarios %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Nombre</th>
+                                            <th>Email</th>
+                                            <th width="100">Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for d in destinatarios %}
+                                        <tr>
+                                            <td>{{ d.nombre|default:"Sin nombre" }}</td>
+                                            <td><code>{{ d.email }}</code></td>
+                                            <td>
+                                                <form method="post" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="dest_id" value="{{ d.id }}">
+                                                    <button type="submit" name="eliminar" class="btn btn-delete" 
+                                                            onclick="return confirm('¿Estás seguro de que quieres eliminar este destinatario?')">
+                                                        <i class="bi bi-trash"></i> Eliminar
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-people"></i>
+                                <p>No hay destinatarios registrados.</p>
+                                <p class="small">Agrega el primer destinatario usando el formulario de arriba.</p>
+                            </div>
+                        {% endif %}
                     </div>
                 {% else %}
-                    <div class="text-center py-4">
-                        <i class="fas fa-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
-                        <h5 class="mt-3">No tienes una organización asociada</h5>
-                        <p class="text-muted">Contacta al administrador para configurar tu organización.</p>
+                    <div class="card p-5">
+                        <div class="text-center">
+                            <i class="bi bi-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
+                            <h5 class="mt-3">No tienes una organización asociada</h5>
+                            <p class="text-muted">Contacta al administrador para configurar tu organización.</p>
+                        </div>
                     </div>
                 {% endif %}
             </div>
         </div>
     </div>
-</div>
-{% endblock %} 
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

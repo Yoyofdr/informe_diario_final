@@ -1,44 +1,276 @@
-{% extends 'alerts/base.html' %}
-{% block content %}
-<div class="container mt-5 mb-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-10 col-md-12 col-12">
-            <div class="card p-4 shadow-sm">
-                <h2 class="mb-4">Historial de Informes Enviados</h2>
-                <div class="table-responsive">
-                    <table class="table table-striped table-bordered align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Empresa</th>
-                                <th>Destinatarios</th>
-                                <th>Resumen</th>
-                                <th>Enlace HTML</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for informe in informes %}
-                            <tr>
-                                <td>{{ informe.fecha_envio|date:'d-m-Y H:i' }}</td>
-                                <td>{{ informe.empresa.nombre }}</td>
-                                <td style="word-break:break-all;">{{ informe.destinatarios }}</td>
-                                <td style="max-width:320px; white-space:pre-line;">{{ informe.resumen|truncatechars:180 }}</td>
-                                <td>
-                                    {% if informe.enlace_html %}
-                                        <a href="{{ informe.enlace_html }}" target="_blank" class="btn btn-sm btn-outline-primary">Ver HTML</a>
-                                    {% else %}
-                                        <span class="text-muted">-</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr><td colspan="5" class="text-center text-muted py-4">No hay informes enviados aún.</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Informes - Informe Diario</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bs-body-font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f3f4f6;
+            min-height: 100vh;
+        }
+        
+        .navbar {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: #4c1d95;
+            text-decoration: none;
+        }
+        
+        .navbar-brand:hover {
+            color: #5b21b6;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: none;
+            padding: 2rem;
+        }
+        
+        h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+        
+        .btn-back {
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .btn-back:hover {
+            color: #4b5563;
+        }
+        
+        .btn-logout {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        
+        .btn-logout:hover {
+            background: #dc2626;
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        .table {
+            font-size: 0.9375rem;
+            margin-top: 1.5rem;
+        }
+        
+        .table th {
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+            padding: 0.75rem;
+            background: #f9fafb;
+        }
+        
+        .table td {
+            padding: 1rem 0.75rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: #f9fafb;
+        }
+        
+        .date-badge {
+            background: #e0e7ff;
+            color: #4338ca;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        
+        .company-name {
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        .email-list {
+            color: #6b7280;
+            font-size: 0.875rem;
+            max-width: 250px;
+            word-break: break-word;
+        }
+        
+        .summary-text {
+            color: #4b5563;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            max-width: 350px;
+        }
+        
+        .btn-view {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 0.375rem 0.875rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+        
+        .btn-view:hover {
+            background: #4f46e5;
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 1rem;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            color: #9ca3af;
+            margin-bottom: 1rem;
+        }
+        
+        .empty-state p {
+            color: #6b7280;
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .text-muted {
+            color: #9ca3af !important;
+        }
+        
+        @media (max-width: 768px) {
+            .table {
+                font-size: 0.875rem;
+            }
+            
+            .summary-text, .email-list {
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'alerts:landing_explicativa' %}">Informe Diario</a>
+            <div class="ms-auto">
+                <a href="/accounts/logout/" class="btn-logout" onclick="return confirm('¿Estás seguro de que quieres cerrar sesión?')">
+                    <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4 mb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-md-12 col-12">
+                <a href="/dashboard/" class="btn-back">
+                    <i class="bi bi-arrow-left"></i> Volver al dashboard
+                </a>
+                
+                <div class="card">
+                    <h2>Historial de Informes</h2>
+                    <p class="text-muted mb-4">Consulta todos los informes enviados a tu organización</p>
+                    
+                    {% if informes %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Empresa</th>
+                                        <th>Destinatarios</th>
+                                        <th>Resumen</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for informe in informes %}
+                                    <tr>
+                                        <td>
+                                            <span class="date-badge">
+                                                <i class="bi bi-calendar3 me-1"></i>
+                                                {{ informe.fecha_envio|date:'d/m/Y' }}
+                                            </span>
+                                            <small class="d-block text-muted mt-1">{{ informe.fecha_envio|date:'H:i' }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="company-name">{{ informe.empresa.nombre }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="email-list">{{ informe.destinatarios }}</div>
+                                        </td>
+                                        <td>
+                                            <div class="summary-text">{{ informe.resumen|truncatechars:120 }}</div>
+                                        </td>
+                                        <td>
+                                            {% if informe.enlace_html %}
+                                                <a href="{{ informe.enlace_html }}" target="_blank" class="btn-view">
+                                                    <i class="bi bi-eye"></i> Ver informe
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted">No disponible</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="bi bi-file-text"></i>
+                            <p>No hay informes enviados aún</p>
+                            <p class="small text-muted">Los informes aparecerán aquí una vez que se envíen</p>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
-</div>
-{% endblock %} 
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

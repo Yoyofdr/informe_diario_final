@@ -357,26 +357,39 @@ def registro_prueba(request):
                         organizacion=org
                     )
                     
-                    # Enviar informe de bienvenida al admin
-                    try:
-                        nombre_completo = f"{nombre} {apellido}".strip()
-                        enviar_informe_bienvenida(email, nombre_completo)
-                    except Exception as e:
-                        print(f"Error enviando informe de bienvenida al admin: {e}")
-                    
-                    # No hay destinatarios adicionales en este formulario simplificado
-                    
-                    # Enviar email de confirmación DESPUÉS de que todo esté creado
-                    send_mail(
-                        subject='Bienvenido a Informe Diario',
-                        message=f'Hola {nombre},\n\nTu cuenta ha sido creada exitosamente.\n\nEmail: {email}\n\nYa puedes iniciar sesión en la plataforma.\n\n¡Bienvenido!',
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[email],
-                        fail_silently=False,
-                    )
-                    
                     # En lugar de redirect, mostrar página de éxito directamente
-                    return render(request, 'alerts/registro_exitoso_partial.html')
+                    response = render(request, 'alerts/registro_exitoso_partial.html')
+                    
+                    # Enviar emails en background (no bloquear la respuesta)
+                    # Nota: En producción se debería usar Celery o similar
+                    import threading
+                    
+                    def enviar_emails_background():
+                        try:
+                            # Enviar informe de bienvenida
+                            nombre_completo = f"{nombre} {apellido}".strip()
+                            enviar_informe_bienvenida(email, nombre_completo)
+                        except Exception as e:
+                            print(f"Error enviando informe de bienvenida: {e}")
+                        
+                        try:
+                            # Enviar email de confirmación
+                            send_mail(
+                                subject='Bienvenido a Informe Diario',
+                                message=f'Hola {nombre},\n\nTu cuenta ha sido creada exitosamente.\n\nEmail: {email}\n\nYa puedes iniciar sesión en la plataforma.\n\n¡Bienvenido!',
+                                from_email=settings.DEFAULT_FROM_EMAIL,
+                                recipient_list=[email],
+                                fail_silently=True,
+                            )
+                        except Exception as e:
+                            print(f"Error enviando email de confirmación: {e}")
+                    
+                    # Ejecutar en thread separado
+                    thread = threading.Thread(target=enviar_emails_background)
+                    thread.daemon = True
+                    thread.start()
+                    
+                    return response
                 
             except Exception as e:
                 # Si algo falla, eliminar el usuario creado

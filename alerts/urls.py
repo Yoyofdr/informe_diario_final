@@ -9,7 +9,7 @@ app_name = 'alerts'
 
 urlpatterns = [
     path('', views.landing_explicativa, name='landing_explicativa'),
-    path('registro-prueba/', views.registro_prueba, name='registro_prueba'),
+    path('registro/', views.registro_prueba, name='registro_prueba'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('login/', views.login_email, name='login'),
     # path('register/', views.register, name='register'),  # Desactivado - usar registro_prueba

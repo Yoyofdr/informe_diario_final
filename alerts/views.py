@@ -424,5 +424,5 @@ def logout_view(request):
     """Vista personalizada de logout que acepta GET requests"""
     print(f"[LOGOUT] Usuario {request.user} cerrando sesión")
     auth_logout(request)
-    print("[LOGOUT] Sesión cerrada, redirigiendo a landing")
-    return redirect('/') 
+    print("[LOGOUT] Sesión cerrada, mostrando página de confirmación")
+    return render(request, 'alerts/logout_success.html') 

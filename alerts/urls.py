@@ -27,7 +27,7 @@ urlpatterns = [
     path('password_change/', auth_views.PasswordChangeView.as_view(template_name='alerts/password_change_form_chennai.html', form_class=CustomPasswordChangeForm), name='password_change'),
     # path('password_change/done/', auth_views.PasswordChangeDoneView.as_view(template_name='alerts/password_change_done.html'), name='password_change_done'),
     # path('admin-panel/', views.admin_panel, name='admin_panel'),  # Desactivado - template no existe
-    path('logout/', auth_views.LogoutView.as_view(next_page='/'), name='logout'),
+    path('logout/', views.logout_view, name='logout'),
     
     # Fintoc integration URLs - DESACTIVADAS TEMPORALMENTE
     # Descomentar estas líneas cuando se active la funcionalidad de cuentas bancarias

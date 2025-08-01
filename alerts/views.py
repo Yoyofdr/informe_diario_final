@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login as auth_login
+from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .forms import CustomUserCreationForm, DestinatarioForm, RegistroEmpresaAdminForm, EmailAuthenticationForm, RegistroPruebaForm
 from .models import Empresa, PerfilUsuario, SuscripcionLanding, Organizacion, Destinatario, InformeEnviado
@@ -418,4 +418,9 @@ def admin_panel(request):
         'empresas': empresas,
         'usuarios': usuarios,
         'destinatarios': destinatarios
-    }) 
+    })
+
+def logout_view(request):
+    """Vista personalizada de logout que acepta GET requests"""
+    auth_logout(request)
+    return redirect('alerts:landing_explicativa') 

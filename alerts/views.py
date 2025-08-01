@@ -101,7 +101,7 @@ def dashboard(request):
         estado = "Acceso gratuito activo"
     else:
         estado = "Sin organización asociada"
-    return render(request, 'alerts/dashboard.html', {
+    return render(request, 'alerts/dashboard_chennai.html', {
         'user': user,
         'organizacion': organizacion,
         'destinatarios': destinatarios,
@@ -160,7 +160,7 @@ def panel_organizacion(request):
         organizacion = Organizacion.objects.select_related('admin').get(admin=request.user)
     except Organizacion.DoesNotExist:
         messages.error(request, 'No tienes una organización asociada.')
-        return render(request, 'panel_organizacion.html')
+        return render(request, 'panel_organizacion_chennai.html')
     # Eliminar validación de pago/suscripción
     dominio = organizacion.dominio.lower().strip()
     form = DestinatarioForm(organizacion=organizacion)
@@ -192,7 +192,7 @@ def panel_organizacion(request):
             Destinatario.objects.filter(id=dest_id, organizacion=organizacion).delete()
             messages.success(request, "Destinatario eliminado.")
     destinatarios = Destinatario.objects.select_related('organizacion').filter(organizacion=organizacion)
-    return render(request, 'panel_organizacion.html', {
+    return render(request, 'panel_organizacion_chennai.html', {
         'organizacion': organizacion,
         'destinatarios': destinatarios,
         'dominio': dominio,
@@ -284,11 +284,11 @@ def login_email(request):
         except User.DoesNotExist:
             print(f"[LOGIN] No existe usuario con email: {email}")
             messages.error(request, "No existe un usuario con ese email.")
-            return render(request, 'registration/login.html')
+            return render(request, 'registration/login_chennai.html')
         except MultipleObjectsReturned:
             print(f"[LOGIN] ERROR: Hay múltiples usuarios con el email: {email}")
             messages.error(request, "Error: Hay más de un usuario registrado con este email. Por favor contacta a soporte.")
-            return render(request, 'registration/login.html')
+            return render(request, 'registration/login_chennai.html')
         user_auth = authenticate(request, username=user.username, password=password)
         print(f"[LOGIN] Resultado authenticate: {user_auth}")
         if user_auth is not None and user_auth.is_active:
@@ -298,14 +298,14 @@ def login_email(request):
         else:
             print(f"[LOGIN] Falló la autenticación para usuario: {user.username} (email: {user.email})")
             messages.error(request, "Email o contraseña incorrectos.")
-            return render(request, 'registration/login.html')
-    return render(request, 'registration/login.html')
+            return render(request, 'registration/login_chennai.html')
+    return render(request, 'registration/login_chennai.html')
 
 def landing_explicativa(request):
     """
     Landing explicativa del producto, con botón para probar gratis.
     """
-    return render(request, 'alerts/landing_explicativa.html')
+    return render(request, 'alerts/landing_explicativa_chennai.html')
 
 def registro_prueba(request):
     mensaje = None
@@ -323,12 +323,12 @@ def registro_prueba(request):
             # Verificar email duplicado
             if User.objects.filter(email=email).exists():
                 messages.error(request, 'Ya existe un usuario con ese email.')
-                return render(request, 'alerts/registro_prueba.html', {'form': form})
+                return render(request, 'alerts/registro_prueba_chennai.html', {'form': form})
             
             # Verificar dominio duplicado ANTES de crear el usuario
             if Organizacion.objects.filter(dominio=dominio).exists():
                 messages.error(request, 'Ya existe una organización con ese dominio.')
-                return render(request, 'alerts/registro_prueba.html', {'form': form})
+                return render(request, 'alerts/registro_prueba_chennai.html', {'form': form})
             
             # Si todo está OK, proceder con el registro
             try:
@@ -391,12 +391,12 @@ def registro_prueba(request):
                 if 'user' in locals():
                     user.delete()
                 messages.error(request, f'Error durante el registro: {str(e)}')
-                return render(request, 'alerts/registro_prueba.html', {'form': form})
+                return render(request, 'alerts/registro_prueba_chennai.html', {'form': form})
         else:
             messages.error(request, 'Por favor, corrige los errores del formulario.')
     else:
         form = RegistroPruebaForm()
-    return render(request, 'alerts/registro_prueba.html', {'form': form})
+    return render(request, 'alerts/registro_prueba_chennai.html', {'form': form})
 
 @login_required
 def historial_informes(request):
@@ -413,7 +413,7 @@ def historial_informes(request):
                 informes = []
         except Organizacion.DoesNotExist:
             informes = []
-    return render(request, 'alerts/historial_informes.html', {'informes': informes})
+    return render(request, 'alerts/historial_informes_chennai.html', {'informes': informes})
 
 @user_passes_test(lambda u: u.is_superuser)
 def admin_panel(request):

@@ -240,7 +240,7 @@
         <div class="container">
             <a class="navbar-brand" href="{% url 'alerts:landing_explicativa' %}"></a>
             <div class="ms-auto">
-                <a href="/accounts/logout/" class="btn-logout" onclick="return confirm('¿Estás seguro de que quieres cerrar sesión?')">
+                <a href="{% url 'alerts:logout' %}" class="btn-logout" onclick="return confirm('¿Estás seguro de que quieres cerrar sesión?')">
                     <i class="bi bi-box-arrow-right"></i> Cerrar sesión
                 </a>
             </div>

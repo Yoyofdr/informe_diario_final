@@ -11,6 +11,13 @@ logging.basicConfig(filename='scheduler.log', level=logging.INFO, format='%(asct
 def job(task_name, command_name):
     """Ejecuta un comando de Django y registra la hora."""
     current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    # Verificar si es domingo (6 = domingo)
+    if datetime.datetime.now().weekday() == 6:
+        print(f"[{current_time}] SALTANDO tarea '{task_name}' - Es domingo")
+        logging.info(f"SALTANDO tarea '{task_name}' - Es domingo")
+        return
+    
     print(f"[{current_time}] Iniciando tarea: '{task_name}'...")
     logging.info(f"Iniciando tarea: '{task_name}'...")
     try:
@@ -31,7 +38,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('Iniciando el programador...'))
 
         # Programar el envío del informe diario a las 9:00 AM
-        schedule.every().day.at("09:00").do(job, task_name="Envío Informe Diario Oficial", command_name='informe_diario_oficial')
+        schedule.every().day.at("09:00").do(job, task_name="Envío Informe Diario Oficial", command_name='enviar_informes_diarios')
 
         # Puedes mantener otras tareas si lo deseas
         # schedule.every(30).minutes.do(job, task_name="Scraping de Hechos Esenciales", command_name='scrape_hechos')

@@ -22,8 +22,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-</head>
-<body>
     
     <style>
         :root {
@@ -294,6 +292,8 @@
             .benefit-card { padding: 1.5rem; }
         }
     </style>
+</head>
+<body>
     <!-- Modern Hero Section -->
     <div class="modern-hero">
         <div class="container">
@@ -496,7 +496,7 @@
                         <!-- Header -->
                         <div style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); padding: 48px 32px; text-align: center;">
                             <h1 style="margin: 0 0 8px 0; font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: -0.025em;">
-                                Informe Diario
+                                Informe Diario Integrado
                             </h1>
                             <p style="margin: 0; color: #cbd5e1; font-size: 14px; font-weight: 500;">
                                 Diario Oficial • CMF • SII
@@ -684,7 +684,7 @@
                 <div class="col-md-3">
                     <h6 class="fw-semibold mb-3" style="color: #f3f4f6;">Enlaces</h6>
                     <ul class="list-unstyled mb-0">
-                        <li class="mb-2"><a href="/" class="text-decoration-none" style="color: #e5e7eb; transition: color 0.2s;" onmouseover="this.style.color='#60a5fa'" onmouseout="this.style.color='#e5e7eb'">Inicio</a></li>
+                        <li class="mb-2"><a href="{% url 'alerts:landing_explicativa' %}" class="text-decoration-none" style="color: #e5e7eb; transition: color 0.2s;" onmouseover="this.style.color='#60a5fa'" onmouseout="this.style.color='#e5e7eb'">Inicio</a></li>
                         <li class="mb-2"><a href="{% url 'alerts:registro_prueba' %}" class="text-decoration-none" style="color: #e5e7eb; transition: color 0.2s;" onmouseover="this.style.color='#60a5fa'" onmouseout="this.style.color='#e5e7eb'">Registro</a></li>
                         <li class="mb-2"><a href="{% url 'alerts:login' %}" class="text-decoration-none" style="color: #e5e7eb; transition: color 0.2s;" onmouseover="this.style.color='#60a5fa'" onmouseout="this.style.color='#e5e7eb'">Iniciar sesión</a></li>
                     </ul>
@@ -692,11 +692,14 @@
                 <div class="col-md-3">
                     <h6 class="fw-semibold mb-3" style="color: #f3f4f6;">Contacto</h6>
                     <ul class="list-unstyled mb-0">
-                        <li style="color: #e5e7eb;">contacto@informediariochile.cl</li>
+                        <li style="color: #e5e7eb;">contacto@informediario.cl</li>
                     </ul>
                 </div>
             </div>
             <hr class="my-4" style="border-color: rgba(255,255,255,0.1);">
+            <div class="text-center">
+                <p class="mb-0" style="color: #9ca3af; font-size: 0.875rem;">© 2025 Informe Diario. Todos los derechos reservados.</p>
+            </div>
         </div>
     </footer>
 

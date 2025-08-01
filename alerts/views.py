@@ -422,5 +422,7 @@ def admin_panel(request):
 
 def logout_view(request):
     """Vista personalizada de logout que acepta GET requests"""
+    print(f"[LOGOUT] Usuario {request.user} cerrando sesión")
     auth_logout(request)
-    return redirect('alerts:landing_explicativa') 
+    print("[LOGOUT] Sesión cerrada, redirigiendo a landing")
+    return redirect('/') 

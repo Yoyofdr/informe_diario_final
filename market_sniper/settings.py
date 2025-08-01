@@ -160,6 +160,7 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000
 
 # URL a la que redirigir después de un login exitoso.
 LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
 # --- Email Backend Configuration ---
 # Define si se envían correos reales ('smtp') o se guardan en archivos ('filebased').

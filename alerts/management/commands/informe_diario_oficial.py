@@ -87,8 +87,7 @@ class Command(BaseCommand):
             if not empresa_default:
                 # Crear empresa por defecto si no existe ninguna
                 empresa_default = Empresa.objects.create(
-                    nombre="Informe Diario",
-                    descripcion="Empresa por defecto para registro de informes"
+                    nombre="Informe Diario"
                 )
             
             InformeEnviado.objects.create(

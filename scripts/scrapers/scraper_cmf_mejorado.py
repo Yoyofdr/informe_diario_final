@@ -27,6 +27,12 @@ class ScraperCMFMejorado:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         })
     
+    def obtener_hechos_fecha(self, fecha: str) -> List[Dict]:
+        """
+        Alias de obtener_hechos_dia para compatibilidad
+        """
+        return self.obtener_hechos_dia(fecha)
+    
     def obtener_hechos_dia(self, fecha: str) -> List[Dict]:
         """
         Obtiene los hechos esenciales de un día específico

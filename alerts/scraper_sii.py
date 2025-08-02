@@ -185,11 +185,20 @@ def obtener_circulares_sii(year=None):
     if year is None:
         year = datetime.now().year
     
-    url = f"{BASE_URL_SII}/normativa_legislacion/circulares/{year}/indcir{year}.htm"
+    # Intentar múltiples URLs posibles del SII
+    urls_posibles = [
+        f"{BASE_URL_SII}/normativa_legislacion/circulares/circulares_{year}.html",
+        f"{BASE_URL_SII}/normativa_legislacion/circulares/circulares.html",
+        f"{BASE_URL_SII}/normativa_legislacion/circulares/{year}/indcir{year}.htm",
+        f"{BASE_URL_SII}/normativa_legislacion/index_normativa_legislacion.html"
+    ]
     
-    try:
-        response = requests.get(url, timeout=30)
-        response.raise_for_status()
+    for url in urls_posibles:
+        try:
+            response = requests.get(url, timeout=30)
+            if response.status_code == 404:
+                continue  # Probar siguiente URL
+            response.raise_for_status()
         
         soup = BeautifulSoup(response.text, 'html.parser')
         circulares = []
@@ -269,18 +278,24 @@ def obtener_circulares_sii(year=None):
                     
                     circulares.append(circular)
         
-        # Ordenar por número (más reciente primero)
-        try:
-            circulares.sort(key=lambda x: int(x['numero']) if x['numero'].isdigit() else 0, reverse=True)
-        except:
-            pass
-        
-        print(f"[SII] Se encontraron {len(circulares)} circulares para {year}")
-        return circulares
-        
-    except Exception as e:
-        print(f"[SII] Error obteniendo circulares: {str(e)}")
-        return []
+            # Ordenar por número (más reciente primero)
+            try:
+                circulares.sort(key=lambda x: int(x['numero']) if x['numero'].isdigit() else 0, reverse=True)
+            except:
+                pass
+            
+            print(f"[SII] Se encontraron {len(circulares)} circulares para {year}")
+            return circulares
+            
+        except Exception as e:
+            if url == urls_posibles[-1]:  # Si es la última URL
+                print(f"[SII] Error obteniendo circulares: {str(e)}")
+                return []
+            continue  # Probar siguiente URL
+    
+    # Si ninguna URL funcionó
+    print(f"[SII] No se pudo acceder a ninguna URL de circulares")
+    return []
 
 @rate_limited
 @retry(max_retries=3, backoff_factor=2)
@@ -297,11 +312,20 @@ def obtener_resoluciones_exentas_sii(year=None):
     if year is None:
         year = datetime.now().year
     
-    url = f"{BASE_URL_SII}/normativa_legislacion/resoluciones/{year}/res_ind{year}.htm"
+    # Intentar múltiples URLs posibles del SII
+    urls_posibles = [
+        f"{BASE_URL_SII}/normativa_legislacion/resoluciones/resoluciones_{year}.html",
+        f"{BASE_URL_SII}/normativa_legislacion/resoluciones/resoluciones.html",
+        f"{BASE_URL_SII}/normativa_legislacion/resoluciones/{year}/res_ind{year}.htm",
+        f"{BASE_URL_SII}/normativa_legislacion/index_normativa_legislacion.html"
+    ]
     
-    try:
-        response = requests.get(url, timeout=30)
-        response.raise_for_status()
+    for url in urls_posibles:
+        try:
+            response = requests.get(url, timeout=30)
+            if response.status_code == 404:
+                continue  # Probar siguiente URL
+            response.raise_for_status()
         
         soup = BeautifulSoup(response.text, 'html.parser')
         resoluciones = []
@@ -381,18 +405,24 @@ def obtener_resoluciones_exentas_sii(year=None):
                     
                     resoluciones.append(resolucion)
         
-        # Ordenar por número (más reciente primero)
-        try:
-            resoluciones.sort(key=lambda x: int(x['numero']) if x['numero'].isdigit() else 0, reverse=True)
-        except:
-            pass
-        
-        print(f"[SII] Se encontraron {len(resoluciones)} resoluciones exentas para {year}")
-        return resoluciones
-        
-    except Exception as e:
-        print(f"[SII] Error obteniendo resoluciones exentas: {str(e)}")
-        return []
+            # Ordenar por número (más reciente primero)
+            try:
+                resoluciones.sort(key=lambda x: int(x['numero']) if x['numero'].isdigit() else 0, reverse=True)
+            except:
+                pass
+            
+            print(f"[SII] Se encontraron {len(resoluciones)} resoluciones exentas para {year}")
+            return resoluciones
+            
+        except Exception as e:
+            if url == urls_posibles[-1]:  # Si es la última URL
+                print(f"[SII] Error obteniendo resoluciones exentas: {str(e)}")
+                return []
+            continue  # Probar siguiente URL
+    
+    # Si ninguna URL funcionó
+    print(f"[SII] No se pudo acceder a ninguna URL de resoluciones")
+    return []
 
 def obtener_jurisprudencia_administrativa_sii(year=None):
     """

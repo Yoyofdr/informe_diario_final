@@ -666,26 +666,32 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
 
 def enviar_informe_email(html, fecha):
     """
-    Envía el informe por email
+    Envía el informe por email a TODOS los destinatarios
     """
+    # Importar modelo de destinatarios
+    from alerts.models import Destinatario
+    
     # Configuración desde variables de entorno
-    de_email = os.getenv('EMAIL_FROM', 'contacto@informediariochile.cl')
-    
-    # Verificar si es un informe de bienvenida
-    es_bienvenida = os.getenv('INFORME_ES_BIENVENIDA', 'false') == 'true'
-    
-    if es_bienvenida:
-        # Usar destinatario temporal para bienvenida
-        para_email = os.getenv('INFORME_DESTINATARIO_TEMP', 'rfernandezdelrio@uc.cl')
-        nombre_destinatario = os.getenv('INFORME_NOMBRE_TEMP', '')
-    else:
-        # Usar destinatario por defecto
-        para_email = os.getenv('DEFAULT_TO_EMAIL', 'rfernandezdelrio@uc.cl')
-        nombre_destinatario = ''
-    
+    de_email = 'contacto@informediariochile.cl'  # Siempre usar este email
     password = os.getenv('HOSTINGER_EMAIL_PASSWORD', '')
     smtp_server = os.getenv('SMTP_SERVER', 'smtp.hostinger.com')
     smtp_port = int(os.getenv('SMTP_PORT', '587'))
+    
+    # Verificar si es un informe de bienvenida (solo para casos especiales)
+    es_bienvenida = os.getenv('INFORME_ES_BIENVENIDA', 'false') == 'true'
+    
+    if es_bienvenida:
+        # Caso especial: envío de bienvenida a un solo destinatario
+        para_email = os.getenv('INFORME_DESTINATARIO_TEMP', 'rfernandezdelrio@uc.cl')
+        destinatarios = [para_email]
+        logger.info("Modo bienvenida: enviando a un solo destinatario")
+    else:
+        # Caso normal: obtener TODOS los destinatarios de la base de datos
+        destinatarios = list(Destinatario.objects.values_list('email', flat=True))
+        if not destinatarios:
+            logger.warning("No hay destinatarios registrados en la base de datos")
+            return
+        logger.info(f"Enviando a {len(destinatarios)} destinatarios registrados")
     
     # Verificar que tenemos la contraseña
     if not password:
@@ -695,37 +701,54 @@ def enviar_informe_email(html, fecha):
     
     # Formatear fecha para el asunto
     fecha_obj = datetime.strptime(fecha, "%d-%m-%Y")
-    fecha_formato = fecha_obj.strftime("%d de %B, %Y").replace("July", "Julio")
+    fecha_formato = fecha_obj.strftime("%d de %B, %Y").replace("July", "Julio").replace("August", "Agosto")
     
-    # Crear mensaje
-    msg = MIMEMultipart('alternative')
-    msg['From'] = de_email
-    msg['To'] = para_email
+    logger.info(f"📧 Preparando envío a {len(destinatarios)} destinatarios...")
     
-    # Ajustar asunto según si es bienvenida o no
-    if es_bienvenida:
-        msg['Subject'] = f"Bienvenido a Informe Diario - Ejemplo del {fecha_formato}"
-    else:
-        msg['Subject'] = f"Informe Diario • {fecha_formato}"
-    
-    # Agregar contenido HTML
-    html_part = MIMEText(html, 'html', 'utf-8')
-    msg.attach(html_part)
-    
+    # Conectar al servidor SMTP una sola vez
     try:
-        # Enviar
         server = smtplib.SMTP(smtp_server, smtp_port)
         server.starttls()
         server.login(de_email, password)
-        server.send_message(msg)
+        
+        enviados = 0
+        errores = 0
+        
+        # Enviar a cada destinatario
+        for email_destinatario in destinatarios:
+            # Crear mensaje individual para cada destinatario
+            msg = MIMEMultipart('alternative')
+            msg['From'] = de_email
+            msg['To'] = email_destinatario
+            
+            # Ajustar asunto según si es bienvenida o no
+            if es_bienvenida:
+                msg['Subject'] = f"Bienvenido a Informe Diario - Ejemplo del {fecha_formato}"
+            else:
+                msg['Subject'] = f"Informe Diario • {fecha_formato}"
+            
+            # Agregar contenido HTML
+            html_part = MIMEText(html, 'html', 'utf-8')
+            msg.attach(html_part)
+            
+            try:
+                # Enviar mensaje individual
+                server.send_message(msg)
+                enviados += 1
+                logger.info(f"✅ Enviado a: {email_destinatario}")
+            except Exception as e:
+                errores += 1
+                logger.error(f"❌ Error enviando a {email_destinatario}: {str(e)}")
+        
         server.quit()
         
-        logger.info("✅ Informe enviado exitosamente!")
-        logger.info(f"   De: {de_email}")
-        logger.info(f"   Para: {para_email}")
+        logger.info(f"\n📊 RESUMEN DE ENVÍO:")
+        logger.info(f"   ✅ Enviados exitosamente: {enviados}")
+        logger.info(f"   ❌ Errores: {errores}")
+        logger.info(f"   📧 Total destinatarios: {len(destinatarios)}")
         
     except Exception as e:
-        logger.error(f"Error al enviar email: {str(e)}")
+        logger.error(f"Error crítico al conectar con servidor SMTP: {str(e)}")
 
 if __name__ == "__main__":
     import sys

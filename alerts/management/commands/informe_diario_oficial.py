@@ -17,7 +17,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         fecha = options.get('fecha')
         force = options.get('force', False)
-        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@carvuk.com')
+        from_email = 'rodrigo@carvuk.com'  # Siempre usar este email según CLAUDE.md
         destinatarios = Destinatario.objects.values_list('email', flat=True)
         if not destinatarios:
             self.stdout.write(self.style.WARNING('No hay destinatarios registrados.'))
@@ -54,27 +54,48 @@ class Command(BaseCommand):
             text = f"Informe Diario Oficial {fecha or ''}: ver versión HTML."
 
         subject = f"Informe Diario Oficial - {fecha or datetime.now().strftime('%d-%m-%Y')}"
-        # Agrupar destinatarios por organización
-        orgs = {}
+        
+        # ENVIAR A TODOS LOS DESTINATARIOS SIN IMPORTAR SI TIENEN EMPRESA
+        destinatarios_enviados = []
+        destinatarios_por_org = {}
+        
+        # Obtener todos los destinatarios
         for dest in Destinatario.objects.select_related('organizacion').all():
-            org = dest.organizacion
-            if org not in orgs:
-                orgs[org] = []
-            orgs[org].append(dest.email)
-        for org, emails in orgs.items():
-            # Buscar empresa asociada por nombre (si existe)
-            empresa = Empresa.objects.filter(nombre__iexact=org.nombre).first()
-            if not empresa:
-                continue  # Si no hay empresa asociada, omitir
-            for email in emails:
+            email = dest.email
+            org_nombre = dest.organizacion.nombre if dest.organizacion else "Sin organización"
+            
+            # Enviar email
+            try:
                 msg = EmailMultiAlternatives(subject, text, from_email, [email])
                 msg.attach_alternative(html, "text/html")
                 msg.send()
-                self.stdout.write(self.style.SUCCESS(f"Correo enviado a {email} (from: {from_email})"))
-            # Guardar registro en InformeEnviado (un registro por organización/empresa)
+                self.stdout.write(self.style.SUCCESS(f"✅ Correo enviado a {email} ({org_nombre})"))
+                destinatarios_enviados.append(email)
+                
+                # Agrupar por organización para el registro
+                if org_nombre not in destinatarios_por_org:
+                    destinatarios_por_org[org_nombre] = []
+                destinatarios_por_org[org_nombre].append(email)
+                
+            except Exception as e:
+                self.stdout.write(self.style.ERROR(f"❌ Error enviando a {email}: {str(e)}"))
+        
+        # Guardar registro general de envío (sin depender de Empresa)
+        if destinatarios_enviados:
+            # Buscar si existe alguna empresa para mantener compatibilidad
+            empresa_default = Empresa.objects.first()
+            if not empresa_default:
+                # Crear empresa por defecto si no existe ninguna
+                empresa_default = Empresa.objects.create(
+                    nombre="Informe Diario",
+                    descripcion="Empresa por defecto para registro de informes"
+                )
+            
             InformeEnviado.objects.create(
-                empresa=empresa,
-                destinatarios=", ".join(emails),
-                enlace_html="",  # Si guardas el HTML en disco, pon la ruta aquí
-                resumen=text
-            ) 
+                empresa=empresa_default,
+                destinatarios=", ".join(destinatarios_enviados),
+                enlace_html="",
+                resumen=f"{text} - Enviado a {len(destinatarios_enviados)} destinatarios"
+            )
+        
+        self.stdout.write(self.style.SUCCESS(f"\n📧 Total de correos enviados: {len(destinatarios_enviados)}")) 

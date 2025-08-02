@@ -17,7 +17,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         fecha = options.get('fecha')
         force = options.get('force', False)
-        from_email = 'rodrigo@carvuk.com'  # Siempre usar este email según CLAUDE.md
+        from_email = 'contacto@informediariochile.cl'  # Usar email configurado en el servidor SMTP
         destinatarios = Destinatario.objects.values_list('email', flat=True)
         if not destinatarios:
             self.stdout.write(self.style.WARNING('No hay destinatarios registrados.'))

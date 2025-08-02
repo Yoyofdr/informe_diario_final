@@ -199,84 +199,84 @@ def obtener_circulares_sii(year=None):
             if response.status_code == 404:
                 continue  # Probar siguiente URL
             response.raise_for_status()
-        
-        soup = BeautifulSoup(response.text, 'html.parser')
-        circulares = []
-        
-        # Buscar estructura de circulares en el HTML
-        # La estructura es: ##### [Circular N° XX del DD de Mes del YYYY](archivo.pdf)
-        #                  Descripción de la circular
-        #                  _Fuente: Subdirección._
-        
-        # Buscar todas las secciones h5 que contienen circulares
-        for h5 in soup.find_all(['h5', 'h4', 'h3']):
-            if 'circular' in h5.get_text().lower():
-                link = h5.find('a', href=True)
-                if link and 'circu' in link['href'] and link['href'].endswith('.pdf'):
-                    href = link['href']
-                    
-                    # Extraer información del título del enlace
-                    titulo_enlace = link.get_text(strip=True)
-                    
-                    # Extraer número de circular
-                    match_numero = re.search(r'Circular\s*N[°º]?\s*(\d+)', titulo_enlace, re.IGNORECASE)
-                    numero = match_numero.group(1) if match_numero else "N/A"
-                    
-                    # Extraer fecha
-                    match_fecha = re.search(r'(\d{1,2})\s+de\s+(\w+)\s+del?\s+(\d{4})', titulo_enlace, re.IGNORECASE)
-                    fecha = None
-                    if match_fecha:
-                        dia, mes, anio = match_fecha.groups()
-                        fecha = f"{dia} de {mes} de {anio}"
-                    
-                    # Buscar la descripción en el siguiente elemento
-                    descripcion = ""
-                    siguiente = h5.find_next_sibling()
-                    if siguiente and siguiente.name == 'p':
-                        desc_text = siguiente.get_text(strip=True)
-                        # Filtrar la fuente si está incluida
-                        if 'Fuente:' not in desc_text:
-                            descripcion = desc_text
+            
+            soup = BeautifulSoup(response.text, 'html.parser')
+            circulares = []
+            
+            # Buscar estructura de circulares en el HTML
+            # La estructura es: ##### [Circular N° XX del DD de Mes del YYYY](archivo.pdf)
+            #                  Descripción de la circular
+            #                  _Fuente: Subdirección._
+            
+            # Buscar todas las secciones h5 que contienen circulares
+            for h5 in soup.find_all(['h5', 'h4', 'h3']):
+                if 'circular' in h5.get_text().lower():
+                    link = h5.find('a', href=True)
+                    if link and 'circu' in link['href'] and link['href'].endswith('.pdf'):
+                        href = link['href']
+                        
+                        # Extraer información del título del enlace
+                        titulo_enlace = link.get_text(strip=True)
+                        
+                        # Extraer número de circular
+                        match_numero = re.search(r'Circular\s*N[°º]?\s*(\d+)', titulo_enlace, re.IGNORECASE)
+                        numero = match_numero.group(1) if match_numero else "N/A"
+                        
+                        # Extraer fecha
+                        match_fecha = re.search(r'(\d{1,2})\s+de\s+(\w+)\s+del?\s+(\d{4})', titulo_enlace, re.IGNORECASE)
+                        fecha = None
+                        if match_fecha:
+                            dia, mes, anio = match_fecha.groups()
+                            fecha = f"{dia} de {mes} de {anio}"
+                        
+                        # Buscar la descripción en el siguiente elemento
+                        descripcion = ""
+                        siguiente = h5.find_next_sibling()
+                        if siguiente and siguiente.name == 'p':
+                            desc_text = siguiente.get_text(strip=True)
+                            # Filtrar la fuente si está incluida
+                            if 'Fuente:' not in desc_text:
+                                descripcion = desc_text
+                            else:
+                                descripcion = desc_text.split('Fuente:')[0].strip()
+                        
+                        # Si no hay descripción en el siguiente párrafo, buscar en el contenido completo
+                        if not descripcion:
+                            parent = h5.parent
+                            if parent:
+                                texto_completo = parent.get_text()
+                                # Buscar patrón: después del enlace hasta "Fuente:"
+                                patron = rf'{re.escape(titulo_enlace)}.*?\n(.+?)\n.*?Fuente:'
+                                match_desc = re.search(patron, texto_completo, re.DOTALL)
+                                if match_desc:
+                                    descripcion = match_desc.group(1).strip()
+                        
+                        # URL completa del PDF
+                        if href.startswith('http'):
+                            url_pdf = href
                         else:
-                            descripcion = desc_text.split('Fuente:')[0].strip()
-                    
-                    # Si no hay descripción en el siguiente párrafo, buscar en el contenido completo
-                    if not descripcion:
-                        parent = h5.parent
-                        if parent:
-                            texto_completo = parent.get_text()
-                            # Buscar patrón: después del enlace hasta "Fuente:"
-                            patron = rf'{re.escape(titulo_enlace)}.*?\n(.+?)\n.*?Fuente:'
-                            match_desc = re.search(patron, texto_completo, re.DOTALL)
-                            if match_desc:
-                                descripcion = match_desc.group(1).strip()
-                    
-                    # URL completa del PDF
-                    if href.startswith('http'):
-                        url_pdf = href
-                    else:
-                        url_pdf = f"{BASE_URL_SII}/normativa_legislacion/circulares/{year}/{href}"
-                    
-                    # Extraer fuente si está disponible
-                    fuente = "Subdirección de Fiscalización"  # Default
-                    siguiente_fuente = h5.find_next('em')
-                    if siguiente_fuente and 'fuente:' in siguiente_fuente.get_text().lower():
-                        fuente_text = siguiente_fuente.get_text(strip=True)
-                        fuente = fuente_text.replace('Fuente:', '').strip()
-                    
-                    # Mejorar la descripción para que sea más clara
-                    descripcion_mejorada = mejorar_descripcion_tributaria(descripcion, 'circular')
-                    
-                    circular = {
-                        'tipo': 'Circular',
-                        'numero': numero,
-                        'fecha': fecha,
-                        'titulo': descripcion_mejorada or f"Circular N° {numero}",
-                        'url_pdf': url_pdf,
-                        'fuente': fuente
-                    }
-                    
-                    circulares.append(circular)
+                            url_pdf = f"{BASE_URL_SII}/normativa_legislacion/circulares/{year}/{href}"
+                        
+                        # Extraer fuente si está disponible
+                        fuente = "Subdirección de Fiscalización"  # Default
+                        siguiente_fuente = h5.find_next('em')
+                        if siguiente_fuente and 'fuente:' in siguiente_fuente.get_text().lower():
+                            fuente_text = siguiente_fuente.get_text(strip=True)
+                            fuente = fuente_text.replace('Fuente:', '').strip()
+                        
+                        # Mejorar la descripción para que sea más clara
+                        descripcion_mejorada = mejorar_descripcion_tributaria(descripcion, 'circular')
+                        
+                        circular = {
+                            'tipo': 'Circular',
+                            'numero': numero,
+                            'fecha': fecha,
+                            'titulo': descripcion_mejorada or f"Circular N° {numero}",
+                            'url_pdf': url_pdf,
+                            'fuente': fuente
+                        }
+                        
+                        circulares.append(circular)
         
             # Ordenar por número (más reciente primero)
             try:
@@ -326,85 +326,85 @@ def obtener_resoluciones_exentas_sii(year=None):
             if response.status_code == 404:
                 continue  # Probar siguiente URL
             response.raise_for_status()
-        
-        soup = BeautifulSoup(response.text, 'html.parser')
-        resoluciones = []
-        
-        # Buscar estructura de resoluciones en el HTML
-        # La estructura es similar a las circulares:
-        # ##### [Resolución Exenta SII N° XX del DD de Mes del YYYY](archivo.pdf)
-        #       Descripción de la resolución
-        #       _Fuente: Subdirección._
-        
-        for h5 in soup.find_all(['h5', 'h4', 'h3']):
-            if 'resolución exenta sii' in h5.get_text().lower():
-                link = h5.find('a', href=True)
-                if link and 'reso' in link['href'] and link['href'].endswith('.pdf'):
-                    href = link['href']
-                    
-                    # Extraer información del título del enlace
-                    titulo_enlace = link.get_text(strip=True)
-                    
-                    # Extraer número de resolución
-                    match_numero = re.search(r'Resolución\s*Exenta\s*SII\s*N[°º]?\s*(\d+)', titulo_enlace, re.IGNORECASE)
-                    numero = match_numero.group(1) if match_numero else "N/A"
-                    
-                    # Extraer fecha
-                    match_fecha = re.search(r'(\d{1,2})\s+de\s+(\w+)\s+del?\s+(\d{4})', titulo_enlace, re.IGNORECASE)
-                    fecha = None
-                    if match_fecha:
-                        dia, mes, anio = match_fecha.groups()
-                        fecha = f"{dia} de {mes} de {anio}"
-                    
-                    # Buscar la descripción en el siguiente elemento
-                    descripcion = ""
-                    siguiente = h5.find_next_sibling()
-                    if siguiente and siguiente.name == 'p':
-                        desc_text = siguiente.get_text(strip=True)
-                        # Filtrar la fuente si está incluida
-                        if 'Fuente:' not in desc_text:
-                            descripcion = desc_text
+            
+            soup = BeautifulSoup(response.text, 'html.parser')
+            resoluciones = []
+            
+            # Buscar estructura de resoluciones en el HTML
+            # La estructura es similar a las circulares:
+            # ##### [Resolución Exenta SII N° XX del DD de Mes del YYYY](archivo.pdf)
+            #       Descripción de la resolución
+            #       _Fuente: Subdirección._
+            
+            for h5 in soup.find_all(['h5', 'h4', 'h3']):
+                if 'resolución exenta sii' in h5.get_text().lower():
+                    link = h5.find('a', href=True)
+                    if link and 'reso' in link['href'] and link['href'].endswith('.pdf'):
+                        href = link['href']
+                        
+                        # Extraer información del título del enlace
+                        titulo_enlace = link.get_text(strip=True)
+                        
+                        # Extraer número de resolución
+                        match_numero = re.search(r'Resolución\s*Exenta\s*SII\s*N[°º]?\s*(\d+)', titulo_enlace, re.IGNORECASE)
+                        numero = match_numero.group(1) if match_numero else "N/A"
+                        
+                        # Extraer fecha
+                        match_fecha = re.search(r'(\d{1,2})\s+de\s+(\w+)\s+del?\s+(\d{4})', titulo_enlace, re.IGNORECASE)
+                        fecha = None
+                        if match_fecha:
+                            dia, mes, anio = match_fecha.groups()
+                            fecha = f"{dia} de {mes} de {anio}"
+                        
+                        # Buscar la descripción en el siguiente elemento
+                        descripcion = ""
+                        siguiente = h5.find_next_sibling()
+                        if siguiente and siguiente.name == 'p':
+                            desc_text = siguiente.get_text(strip=True)
+                            # Filtrar la fuente si está incluida
+                            if 'Fuente:' not in desc_text:
+                                descripcion = desc_text
+                            else:
+                                descripcion = desc_text.split('Fuente:')[0].strip()
+                        
+                        # Si no hay descripción en el siguiente párrafo, buscar en el contenido completo
+                        if not descripcion:
+                            parent = h5.parent
+                            if parent:
+                                texto_completo = parent.get_text()
+                                # Buscar patrón: después del enlace hasta "Fuente:"
+                                patron = rf'{re.escape(titulo_enlace)}.*?\n(.+?)\n.*?Fuente:'
+                                match_desc = re.search(patron, texto_completo, re.DOTALL)
+                                if match_desc:
+                                    descripcion = match_desc.group(1).strip()
+                        
+                        # URL completa del PDF
+                        if href.startswith('http'):
+                            url_pdf = href
                         else:
-                            descripcion = desc_text.split('Fuente:')[0].strip()
-                    
-                    # Si no hay descripción en el siguiente párrafo, buscar en el contenido completo
-                    if not descripcion:
-                        parent = h5.parent
-                        if parent:
-                            texto_completo = parent.get_text()
-                            # Buscar patrón: después del enlace hasta "Fuente:"
-                            patron = rf'{re.escape(titulo_enlace)}.*?\n(.+?)\n.*?Fuente:'
-                            match_desc = re.search(patron, texto_completo, re.DOTALL)
-                            if match_desc:
-                                descripcion = match_desc.group(1).strip()
-                    
-                    # URL completa del PDF
-                    if href.startswith('http'):
-                        url_pdf = href
-                    else:
-                        url_pdf = f"{BASE_URL_SII}/normativa_legislacion/resoluciones/{year}/{href}"
-                    
-                    # Extraer fuente si está disponible
-                    fuente = "Subdirección Jurídica"  # Default
-                    siguiente_fuente = h5.find_next('em')
-                    if siguiente_fuente and 'fuente:' in siguiente_fuente.get_text().lower():
-                        fuente_text = siguiente_fuente.get_text(strip=True)
-                        fuente = fuente_text.replace('Fuente:', '').strip()
-                    
-                    # Mejorar la descripción para que sea más clara
-                    descripcion_mejorada = mejorar_descripcion_tributaria(descripcion, 'resolucion')
-                    
-                    resolucion = {
-                        'tipo': 'Resolución Exenta',
-                        'numero': numero,
-                        'fecha': fecha,
-                        'titulo': descripcion_mejorada or f"Resolución Exenta SII N° {numero}",
-                        'url_pdf': url_pdf,
-                        'fuente': fuente
-                    }
-                    
-                    resoluciones.append(resolucion)
-        
+                            url_pdf = f"{BASE_URL_SII}/normativa_legislacion/resoluciones/{year}/{href}"
+                        
+                        # Extraer fuente si está disponible
+                        fuente = "Subdirección Jurídica"  # Default
+                        siguiente_fuente = h5.find_next('em')
+                        if siguiente_fuente and 'fuente:' in siguiente_fuente.get_text().lower():
+                            fuente_text = siguiente_fuente.get_text(strip=True)
+                            fuente = fuente_text.replace('Fuente:', '').strip()
+                        
+                        # Mejorar la descripción para que sea más clara
+                        descripcion_mejorada = mejorar_descripcion_tributaria(descripcion, 'resolucion')
+                        
+                        resolucion = {
+                            'tipo': 'Resolución Exenta',
+                            'numero': numero,
+                            'fecha': fecha,
+                            'titulo': descripcion_mejorada or f"Resolución Exenta SII N° {numero}",
+                            'url_pdf': url_pdf,
+                            'fuente': fuente
+                        }
+                        
+                        resoluciones.append(resolucion)
+            
             # Ordenar por número (más reciente primero)
             try:
                 resoluciones.sort(key=lambda x: int(x['numero']) if x['numero'].isdigit() else 0, reverse=True)

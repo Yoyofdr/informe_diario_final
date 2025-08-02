@@ -330,6 +330,7 @@ def registro_prueba(request):
             try:
                 with transaction.atomic():
                     password = form.cleaned_data['password1']
+                    print(f"[REGISTRO] Creando usuario: {email}")
                     user = User.objects.create_user(
                         username=email,
                         email=email,
@@ -337,6 +338,7 @@ def registro_prueba(request):
                         first_name=nombre,
                         last_name=apellido
                     )
+                    print(f"[REGISTRO] Usuario creado con ID: {user.id}")
                     
                     # Buscar si ya existe una organización para este dominio
                     org = Organizacion.objects.filter(dominio=dominio).first()
@@ -351,45 +353,59 @@ def registro_prueba(request):
                     # El usuario se agregará como destinatario más abajo
                     
                     # IMPORTANTE: Agregar al admin como destinatario principal
+                    print(f"[REGISTRO] Creando destinatario para org: {org.id}")
                     admin_destinatario = Destinatario.objects.create(
                         nombre=f"{nombre} {apellido}",
                         email=email,
                         organizacion=org
                     )
+                    print(f"[REGISTRO] Destinatario creado con ID: {admin_destinatario.id}")
                     
-                    # En lugar de redirect, mostrar página de éxito directamente
-                    response = render(request, 'alerts/registro_exitoso_partial.html')
+                    # Verificar que se guardó correctamente antes de continuar
+                    user_check = User.objects.filter(id=user.id).exists()
+                    dest_check = Destinatario.objects.filter(id=admin_destinatario.id).exists()
                     
-                    # Enviar emails en background (no bloquear la respuesta)
-                    # Nota: En producción se debería usar Celery o similar
-                    import threading
+                    if not user_check or not dest_check:
+                        raise Exception("Error: Los datos no se guardaron correctamente")
                     
-                    def enviar_emails_background():
-                        try:
-                            # Enviar informe de bienvenida
-                            nombre_completo = f"{nombre} {apellido}".strip()
-                            enviar_informe_bienvenida(email, nombre_completo)
-                        except Exception as e:
-                            print(f"Error enviando informe de bienvenida: {e}")
-                        
-                        try:
-                            # Enviar email de confirmación
-                            send_mail(
-                                subject='Bienvenido a Informe Diario',
-                                message=f'Hola {nombre},\n\nTu cuenta ha sido creada exitosamente.\n\nEmail: {email}\n\nYa puedes iniciar sesión en la plataforma.\n\n¡Bienvenido!',
-                                from_email=settings.DEFAULT_FROM_EMAIL,
-                                recipient_list=[email],
-                                fail_silently=True,
-                            )
-                        except Exception as e:
-                            print(f"Error enviando email de confirmación: {e}")
+                    print(f"[REGISTRO] Verificación OK - Usuario: {user_check}, Destinatario: {dest_check}")
                     
-                    # Ejecutar en thread separado
-                    thread = threading.Thread(target=enviar_emails_background)
-                    thread.daemon = True
-                    thread.start()
+                # Fuera de la transacción - los datos ya deberían estar guardados
+                print(f"[REGISTRO] Transacción completada exitosamente")
+                
+                # En lugar de redirect, mostrar página de éxito directamente
+                response = render(request, 'alerts/registro_exitoso_partial.html')
+                
+                # Enviar emails en background (no bloquear la respuesta)
+                # Nota: En producción se debería usar Celery o similar
+                import threading
+                
+                def enviar_emails_background():
+                    try:
+                        # Enviar informe de bienvenida
+                        nombre_completo = f"{nombre} {apellido}".strip()
+                        enviar_informe_bienvenida(email, nombre_completo)
+                    except Exception as e:
+                        print(f"Error enviando informe de bienvenida: {e}")
                     
-                    return response
+                    try:
+                        # Enviar email de confirmación
+                        send_mail(
+                            subject='Bienvenido a Informe Diario',
+                            message=f'Hola {nombre},\n\nTu cuenta ha sido creada exitosamente.\n\nEmail: {email}\n\nYa puedes iniciar sesión en la plataforma.\n\n¡Bienvenido!',
+                            from_email=settings.DEFAULT_FROM_EMAIL,
+                            recipient_list=[email],
+                            fail_silently=True,
+                        )
+                    except Exception as e:
+                        print(f"Error enviando email de confirmación: {e}")
+                
+                # Ejecutar en thread separado
+                thread = threading.Thread(target=enviar_emails_background)
+                thread.daemon = True
+                thread.start()
+                
+                return response
                 
             except Exception as e:
                 # Si algo falla, eliminar el usuario creado

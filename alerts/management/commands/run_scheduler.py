@@ -40,14 +40,14 @@ class Command(BaseCommand):
         # Programar el envío del informe diario a las 9:00 AM hora de Chile
         # Heroku usa UTC, Chile es UTC-3 en verano y UTC-4 en invierno
         # Para las 9:00 AM Chile, programamos a las 12:00 UTC (verano) o 13:00 UTC (invierno)
-        # Usamos 12:00 UTC que es 9:00 AM en horario de verano de Chile
-        schedule.every().day.at("12:00").do(job, task_name="Envío Informe Diario Oficial", command_name='enviar_informes_diarios')
+        # Usamos 13:00 UTC que es 9:00 AM en horario de invierno de Chile
+        schedule.every().day.at("13:00").do(job, task_name="Envío Informe Diario Oficial", command_name='enviar_informes_diarios')
 
         # Puedes mantener otras tareas si lo deseas
         # schedule.every(30).minutes.do(job, task_name="Scraping de Hechos Esenciales", command_name='scrape_hechos')
         # schedule.every(30).minutes.do(job, task_name="Envío de Notificaciones", command_name='send_notifications')
 
-        self.stdout.write(self.style.SUCCESS('Tarea programada para ejecutarse todos los días a las 12:00 UTC (9:00 AM Chile).'))
+        self.stdout.write(self.style.SUCCESS('Tarea programada para ejecutarse todos los días a las 13:00 UTC (9:00 AM Chile - horario invierno).'))
         self.stdout.write(self.style.SUCCESS('Presiona CTRL+C para detener el programador.'))
 
         while True:

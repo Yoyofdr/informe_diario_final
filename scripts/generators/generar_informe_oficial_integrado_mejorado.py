@@ -40,6 +40,33 @@ from alerts.cmf_resumenes_ai import generar_resumen_cmf
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+def formatear_fecha_espanol(fecha_obj, con_coma=True, mes_mayuscula=False):
+    """
+    Formatea una fecha en español con el mes en minúscula por defecto
+    Ej: 04 de agosto, 2025 (con_coma=True)
+    Ej: 04 de agosto de 2025 (con_coma=False)
+    """
+    meses = {
+        'January': 'enero', 'February': 'febrero', 'March': 'marzo',
+        'April': 'abril', 'May': 'mayo', 'June': 'junio',
+        'July': 'julio', 'August': 'agosto', 'September': 'septiembre',
+        'October': 'octubre', 'November': 'noviembre', 'December': 'diciembre'
+    }
+    
+    # Obtener la fecha en inglés
+    if con_coma:
+        fecha_str = fecha_obj.strftime("%d de %B, %Y")
+    else:
+        fecha_str = fecha_obj.strftime("%d de %B de %Y")
+    
+    # Reemplazar el mes en inglés por el español
+    for mes_ingles, mes_espanol in meses.items():
+        if mes_mayuscula:
+            mes_espanol = mes_espanol.capitalize()
+        fecha_str = fecha_str.replace(mes_ingles, mes_espanol)
+    
+    return fecha_str
+
 def obtener_publicaciones_sii_dia(fecha):
     """
     Obtiene las publicaciones del SII del día anterior
@@ -63,7 +90,7 @@ def obtener_publicaciones_sii_dia(fecha):
             if isinstance(resultado_sii, dict):
                 # Solo procesar si realmente son del día anterior
                 # Verificar si las publicaciones son del día que buscamos
-                fecha_buscada_str = fecha_anterior.strftime("%d de %B de %Y").replace("January", "Enero").replace("February", "Febrero").replace("March", "Marzo").replace("April", "Abril").replace("May", "Mayo").replace("June", "Junio").replace("July", "Julio").replace("August", "Agosto").replace("September", "Septiembre").replace("October", "Octubre").replace("November", "Noviembre").replace("December", "Diciembre")
+                fecha_buscada_str = formatear_fecha_espanol(fecha_anterior, con_coma=False, mes_mayuscula=True)
                 
                 # Procesar circulares - solo si son del día anterior
                 for circular in resultado_sii.get('circulares', []):
@@ -216,7 +243,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
     """
     # Formatear fecha
     fecha_obj = datetime.strptime(fecha, "%d-%m-%Y")
-    fecha_formato = fecha_obj.strftime("%d de %B, %Y").replace("July", "Julio")
+    fecha_formato = formatear_fecha_espanol(fecha_obj)
     
     # Obtener publicaciones del Diario Oficial
     publicaciones = resultado_diario.get('publicaciones', [])
@@ -701,7 +728,7 @@ def enviar_informe_email(html, fecha):
     
     # Formatear fecha para el asunto
     fecha_obj = datetime.strptime(fecha, "%d-%m-%Y")
-    fecha_formato = fecha_obj.strftime("%d de %B, %Y").replace("July", "Julio").replace("August", "Agosto")
+    fecha_formato = formatear_fecha_espanol(fecha_obj)
     
     logger.info(f"📧 Preparando envío a {len(destinatarios)} destinatarios...")
     

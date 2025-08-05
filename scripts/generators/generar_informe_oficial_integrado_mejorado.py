@@ -264,6 +264,22 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Informe Diario • {fecha}</title>
+    <style>
+        @media screen and (max-width: 600px) {{
+            /* Ajustes para móviles */
+            .wrapper {{ width: 100% !important; }}
+            .content-padding {{ padding: 16px !important; }}
+            .header-padding {{ padding: 32px 16px !important; }}
+            .section-padding {{ padding: 16px !important; }}
+            h1 {{ font-size: 24px !important; }}
+            h2 {{ font-size: 16px !important; }}
+            h3 {{ font-size: 14px !important; }}
+            p, a, li {{ font-size: 14px !important; }}
+            .small-text {{ font-size: 12px !important; }}
+            .button {{ padding: 12px 16px !important; }}
+            .mobile-block {{ display: block !important; width: 100% !important; margin-bottom: 8px !important; }}
+        }}
+    </style>
 </head>
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc; color: #1e293b; line-height: 1.6;">
     
@@ -272,11 +288,11 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
             <td align="center" style="padding: 20px 0;">
                 
                 <!-- Wrapper -->
-                <table width="672" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden;">
+                <table class="wrapper" width="672" cellpadding="0" cellspacing="0" style="max-width: 672px; width: 100%; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden;">
                     
                     <!-- Header -->
                     <tr>
-                        <td style="background-color: #0f172a; padding: 48px 32px; text-align: center;">
+                        <td class="header-padding" style="background-color: #0f172a; padding: 48px 32px; text-align: center;">
                             <h1 style="margin: 0 0 8px 0; font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: -0.025em;">
                                 Informe Diario
                             </h1>
@@ -288,7 +304,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                     
                     <!-- Content -->
                     <tr>
-                        <td style="padding: 32px;">"""
+                        <td class="content-padding" style="padding: 32px;">"""
     
     # Agregar mensaje de bienvenida si aplica
     es_bienvenida = os.getenv('INFORME_ES_BIENVENIDA', 'false') == 'true'
@@ -346,7 +362,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                     <td style="padding-bottom: 16px;">
                                         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;">
                                             <tr>
-                                                <td style="padding: 24px; border-top: 3px solid #6b7280; border-radius: 12px 12px 0 0;">
+                                                <td class="section-padding" style="padding: 24px; border-top: 3px solid #6b7280; border-radius: 12px 12px 0 0;">
                                                     <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
                                                         {pub.get('titulo', '')}
                                                     </h3>
@@ -356,7 +372,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     <table cellpadding="0" cellspacing="0">
                                                         <tr>
                                                             <td style="background-color: #6b7280; border-radius: 6px;">
-                                                                <a href="{pub.get('url_pdf', '#')}" style="display: inline-block; padding: 10px 20px; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 500;">
+                                                                <a href="{pub.get('url_pdf', '#')}" class="button" style="display: inline-block; padding: 10px 20px; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 500;">
                                                                     Ver documento oficial
                                                                 </a>
                                                             </td>
@@ -399,7 +415,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                     <td style="padding-bottom: 16px;">
                                         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;">
                                             <tr>
-                                                <td style="padding: 24px; border-top: 3px solid #94a3b8; border-radius: 12px 12px 0 0;">
+                                                <td class="section-padding" style="padding: 24px; border-top: 3px solid #94a3b8; border-radius: 12px 12px 0 0;">
                                                     <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
                                                         {pub.get('titulo', '')}
                                                     </h3>
@@ -409,7 +425,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     <table cellpadding="0" cellspacing="0">
                                                         <tr>
                                                             <td style="background-color: #94a3b8; border-radius: 6px;">
-                                                                <a href="{pub.get('url_pdf', '#')}" style="display: inline-block; padding: 10px 20px; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 500;">
+                                                                <a href="{pub.get('url_pdf', '#')}" class="button" style="display: inline-block; padding: 10px 20px; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 500;">
                                                                     Ver documento oficial
                                                                 </a>
                                                             </td>
@@ -452,7 +468,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                     <td style="padding-bottom: 16px;">
                                         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;">
                                             <tr>
-                                                <td style="padding: 24px; border-top: 3px solid #64748b; border-radius: 12px 12px 0 0;">
+                                                <td class="section-padding" style="padding: 24px; border-top: 3px solid #64748b; border-radius: 12px 12px 0 0;">
                                                     <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
                                                         {pub.get('titulo', '')}
                                                     </h3>
@@ -462,7 +478,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     <table cellpadding="0" cellspacing="0">
                                                         <tr>
                                                             <td style="background-color: #64748b; border-radius: 6px;">
-                                                                <a href="{pub.get('url_pdf', '#')}" style="display: inline-block; padding: 10px 20px; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 500;">
+                                                                <a href="{pub.get('url_pdf', '#')}" class="button" style="display: inline-block; padding: 10px 20px; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 500;">
                                                                     Ver documento oficial
                                                                 </a>
                                                             </td>
@@ -506,7 +522,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                     <td style="padding-bottom: 16px;">
                                         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
                                             <tr>
-                                                <td style="padding: 24px; text-align: center;">
+                                                <td class="section-padding" style="padding: 24px; text-align: center;">
                                                     <p style="margin: 0; font-size: 14px; color: #64748b; font-style: italic;">
                                                         No se encontraron circulares, resoluciones ni jurisprudencia nueva
                                                     </p>
@@ -537,7 +553,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                     <td style="padding-bottom: 16px;">
                                         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;">
                                             <tr>
-                                                <td style="padding: 24px; border-top: 3px solid #2563eb; border-radius: 12px 12px 0 0;">
+                                                <td class="section-padding" style="padding: 24px; border-top: 3px solid #2563eb; border-radius: 12px 12px 0 0;">
                                                     <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
                                                         {titulo_completo}
                                                     </h3>
@@ -550,7 +566,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     <table cellpadding="0" cellspacing="0">
                                                         <tr>
                                                             <td style="background-color: #2563eb; border-radius: 6px;">
-                                                                <a href="{url_documento}" style="display: inline-block; padding: 10px 20px; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 500;">
+                                                                <a href="{url_documento}" class="button" style="display: inline-block; padding: 10px 20px; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 500;">
                                                                     Ver documento SII
                                                                 </a>
                                                             </td>
@@ -598,7 +614,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                     <td style="padding-bottom: 16px;">
                                         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;">
                                             <tr>
-                                                <td style="padding: 24px; border-top: 3px solid #7c3aed; border-radius: 12px 12px 0 0;">
+                                                <td class="section-padding" style="padding: 24px; border-top: 3px solid #7c3aed; border-radius: 12px 12px 0 0;">
                                                     <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
                                                         {hecho.get('entidad', '')}
                                                     </h3>
@@ -611,7 +627,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     <table cellpadding="0" cellspacing="0">
                                                         <tr>
                                                             <td style="background-color: #7c3aed; border-radius: 6px;">
-                                                                <a href="{url_hecho}" style="display: inline-block; padding: 10px 20px; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 500;">
+                                                                <a href="{url_hecho}" class="button" style="display: inline-block; padding: 10px 20px; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 500;">
                                                                     Ver hecho esencial
                                                                 </a>
                                                             </td>
@@ -651,12 +667,12 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                     <td>
                                         <table width="100%" cellpadding="0" cellspacing="0">
                                             <tr>
-                                                <td width="50%" style="padding: 16px; background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; text-align: center;">
+                                                <td class="mobile-block" width="50%" style="padding: 16px; background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; text-align: center;">
                                                     <div style="font-size: 14px; color: #0369a1; margin-bottom: 4px;">Dólar Observado</div>
                                                     <div style="font-size: 24px; font-weight: 700; color: #0c4a6e;">${valores_monedas.get('dolar', 'N/A')}</div>
                                                 </td>
-                                                <td width="8"></td>
-                                                <td width="50%" style="padding: 16px; background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; text-align: center;">
+                                                <td class="mobile-block" width="8"></td>
+                                                <td class="mobile-block" width="50%" style="padding: 16px; background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; text-align: center;">
                                                     <div style="font-size: 14px; color: #0369a1; margin-bottom: 4px;">Euro</div>
                                                     <div style="font-size: 24px; font-weight: 700; color: #0c4a6e;">€{valores_monedas.get('euro', 'N/A')}</div>
                                                 </td>
@@ -673,8 +689,8 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
 
                     <!-- Footer -->
                     <tr>
-                        <td style="background-color: #f8fafc; padding: 24px 32px; text-align: center; border-top: 1px solid #e2e8f0;">
-                            <p style="margin: 0; font-size: 13px; color: #64748b; line-height: 1.5;">
+                        <td class="content-padding" style="background-color: #f8fafc; padding: 24px 32px; text-align: center; border-top: 1px solid #e2e8f0;">
+                            <p class="small-text" style="margin: 0; font-size: 13px; color: #64748b; line-height: 1.5;">
                                 Información obtenida directamente de fuentes oficiales
                             </p>
                         </td>

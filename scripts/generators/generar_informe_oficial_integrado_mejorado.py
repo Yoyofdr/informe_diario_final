@@ -296,7 +296,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                             <h1 style="margin: 0 0 8px 0; font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: -0.025em;">
                                 Informe Diario
                             </h1>
-                            <p style="margin: 0; color: #e2e8f0; font-size: 14px; font-weight: 500;">
+                            <p style="margin: 0; color: #ffffff; font-size: 14px; font-weight: 500;">
                                 {fecha_formato}
                             </p>
                         </td>

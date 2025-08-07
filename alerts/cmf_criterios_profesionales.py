@@ -169,8 +169,10 @@ CATEGORIAS_HECHOS = {
             "venta de control", "controlador", "adquisicion de control",
             
             # M&A
-            "fusion", "adquisicion", "compra de empresa", "venta de filial", 
-            "merger", "spin off", "division", "escision", "venta de activos estrategicos",
+            "fusion", "fusión", "adquisicion", "adquisición", "compra de empresa", "venta de filial", 
+            "merger", "spin off", "division", "división", "escision", "escisión", 
+            "venta de activos estrategicos", "venta de activos estratégicos",
+            "constitución de sociedades", "constitucion de sociedades",
             
             # Profit warnings
             "profit warning", "advertencia de resultados", "deterioro significativo",

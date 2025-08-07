@@ -299,6 +299,8 @@ def calcular_relevancia_profesional(titulo, materia, entidad, contexto_adicional
     # Bonus por ser empresa IPSA - Aumentado para asegurar inclusión
     if es_ipsa:
         relevancia += 2.5  # Aumentado de 1.5 a 2.5
+        # Garantizar mínimo de 5.0 para empresas IPSA (para que pasen como moderados)
+        relevancia = max(relevancia, 5.0)
     # Bonus menor por ser empresa estratégica no-IPSA
     elif es_prioritaria:
         relevancia += 0.8
@@ -475,11 +477,12 @@ def filtrar_hechos_profesional(hechos, max_hechos=12):
         importantes_ordenados = sorted(importantes, key=lambda x: x['relevancia_calculada'], reverse=True)
         hechos_finales.extend(importantes_ordenados[:espacio_restante])
     
-    # 3. Incluir moderados si hay espacio (todos, no solo IPSA)
+    # 3. Incluir moderados si hay espacio (solo IPSA según las reglas)
     espacio_restante = max_hechos - len(hechos_finales)
     if espacio_restante > 0:
-        moderados_ordenados = sorted(moderados, key=lambda x: x['relevancia_calculada'], reverse=True)
-        hechos_finales.extend(moderados_ordenados[:espacio_restante])
+        moderados_ipsa = [h for h in moderados if h['es_ipsa']]
+        moderados_ipsa_ordenados = sorted(moderados_ipsa, key=lambda x: x['relevancia_calculada'], reverse=True)
+        hechos_finales.extend(moderados_ipsa_ordenados[:espacio_restante])
     
     # 4. NUNCA incluir rutinarios (regla estricta)
     

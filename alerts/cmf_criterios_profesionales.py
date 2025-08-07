@@ -188,15 +188,32 @@ CATEGORIAS_HECHOS = {
     "IMPORTANTE": {
         "peso": 7.5,
         "keywords": [
-            # Cambios en alta gerencia
+            # Cambios en alta gerencia y administración (SIEMPRE incluir)
             "renuncia gerente general", "renuncia ceo", "cambio gerente general",
             "cambio ceo", "renuncia cfo", "cambio cfo", "renuncia presidente",
-            "cambio presidente directorio", "cambio de administracion",
+            "cambio presidente directorio", "cambio de administracion", "cambio de administración",
+            "cambios en la administracion", "cambios en la administración",
             "nuevo gerente general", "nombra gerente general", "designa gerente general",
             "nombramiento gerente", "asume como gerente general",
             
+            # Compra/venta de acciones (SIEMPRE incluir)
+            "compra de acciones", "venta de acciones", "adquisicion de acciones",
+            "adquisición de acciones", "enajenacion de acciones", "enajenación de acciones",
+            "transaccion de acciones", "transacción de acciones", "compraventa de acciones",
+            
+            # Búsqueda de inversionistas (SIEMPRE incluir)
+            "busqueda de inversionista", "búsqueda de inversionista",
+            "busqueda de socio estrategico", "búsqueda de socio estratégico",
+            "proceso de venta", "proceso de búsqueda", "inversionista estrategico",
+            "inversionista estratégico", "socio estrategico", "socio estratégico",
+            
+            # Aumentos/disminuciones de capital (SIEMPRE incluir)
+            "aumento de capital", "disminucion de capital", "disminución de capital",
+            "reduccion de capital", "reducción de capital", "ampliacion de capital",
+            "ampliación de capital",
+            
             # Emisiones significativas
-            "emisión de bonos", "emisión de acciones", "aumento de capital",
+            "emisión de bonos", "emisión de acciones",
             "colocación de bonos", "programa de emisión", "emisión de deuda",
             "oferta de bonos", "oferta pública de bonos", "colocación exitosa",
             "colocación de valores", "colocación en mercados", "colocación internacional",
@@ -298,11 +315,10 @@ def calcular_relevancia_profesional(titulo, materia, entidad, contexto_adicional
     # Relevancia base según categoría
     relevancia = peso_base
     
-    # Bonus por ser empresa IPSA - Aumentado para asegurar inclusión
+    # Empresas IPSA siempre se incluyen con relevancia alta
     if es_ipsa:
-        relevancia += 2.5  # Aumentado de 1.5 a 2.5
-        # Garantizar mínimo de 5.0 para empresas IPSA (para que pasen como moderados)
-        relevancia = max(relevancia, 5.0)
+        # Garantizar mínimo de 7.0 para empresas IPSA (siempre se incluyen)
+        relevancia = max(relevancia + 2.5, 7.0)
     # Bonus menor por ser empresa estratégica no-IPSA
     elif es_prioritaria:
         relevancia += 0.8
@@ -413,13 +429,18 @@ def filtrar_hechos_profesional(hechos, max_hechos=12):
     Filtra hechos esenciales según criterios profesionales
     Máximo 12 hechos, priorizando por relevancia
     
-    Reglas de filtrado (según instrucciones de Kampala):
-    - Máximo 12 hechos (NUNCA más)
-    - 🔴 Críticos (9-10 pts) → Siempre incluir
-    - 🟡 Importantes (7-8.9 pts) → Incluir si hay espacio
-    - 🟢 Moderados (5-6.9 pts) → Solo si son IPSA
-    - ⚪ Rutinarios (<5 pts) → NUNCA incluir
-    - EXCLUIR todos los hechos relacionados con fondos
+    Reglas de filtrado actualizadas:
+    - Máximo 12 hechos
+    - Incluir SIEMPRE (relevancia >= 7):
+      * Todas las empresas IPSA (sin importar la materia)
+      * Cambios en la administración
+      * Compra/venta de acciones
+      * División, fusión o constitución de sociedades
+      * Búsqueda de inversionistas o socios estratégicos
+      * Aumentos o disminuciones de capital
+    - EXCLUIR siempre:
+      * Todos los fondos de inversión
+      * Hechos con relevancia < 7
     """
     # Primero, filtrar hechos relacionados con fondos
     hechos_sin_fondos = []
@@ -460,36 +481,19 @@ def filtrar_hechos_profesional(hechos, max_hechos=12):
         
         hechos_evaluados.append(hecho_evaluado)
     
-    # Separar por categorías según puntuación
-    criticos = [h for h in hechos_evaluados if h['relevancia_calculada'] >= 9]
-    importantes = [h for h in hechos_evaluados if 7 <= h['relevancia_calculada'] < 9]
-    moderados = [h for h in hechos_evaluados if 5 <= h['relevancia_calculada'] < 7]
-    rutinarios = [h for h in hechos_evaluados if h['relevancia_calculada'] < 5]
+    # Con los nuevos criterios, solo incluimos hechos con relevancia >= 7
+    # Esto incluye automáticamente:
+    # - Todas las empresas IPSA (mínimo 7.0)
+    # - Cambios en administración (7.5)
+    # - Compra/venta de acciones (7.5)
+    # - Fusiones/divisiones (9.0)
+    # - Búsqueda de inversionistas (7.5)
+    # - Aumentos/disminuciones de capital (7.5)
     
-    # Construir lista final según reglas
-    hechos_finales = []
+    hechos_relevantes = [h for h in hechos_evaluados if h['relevancia_calculada'] >= 7]
     
-    # 1. Incluir TODOS los críticos (siempre)
-    criticos_ordenados = sorted(criticos, key=lambda x: x['relevancia_calculada'], reverse=True)
-    hechos_finales.extend(criticos_ordenados)
-    
-    # 2. Incluir importantes si hay espacio
-    espacio_restante = max_hechos - len(hechos_finales)
-    if espacio_restante > 0:
-        importantes_ordenados = sorted(importantes, key=lambda x: x['relevancia_calculada'], reverse=True)
-        hechos_finales.extend(importantes_ordenados[:espacio_restante])
-    
-    # 3. Incluir moderados si hay espacio (solo IPSA según las reglas)
-    espacio_restante = max_hechos - len(hechos_finales)
-    if espacio_restante > 0:
-        moderados_ipsa = [h for h in moderados if h['es_ipsa']]
-        moderados_ipsa_ordenados = sorted(moderados_ipsa, key=lambda x: x['relevancia_calculada'], reverse=True)
-        hechos_finales.extend(moderados_ipsa_ordenados[:espacio_restante])
-    
-    # 4. NUNCA incluir rutinarios (regla estricta)
-    
-    # Ordenar lista final por relevancia
-    hechos_finales = sorted(hechos_finales, key=lambda x: x['relevancia_calculada'], reverse=True)
+    # Ordenar por relevancia descendente
+    hechos_finales = sorted(hechos_relevantes, key=lambda x: x['relevancia_calculada'], reverse=True)
     
     # Asegurar que no excedemos el máximo
     hechos_finales = hechos_finales[:max_hechos]
@@ -498,11 +502,16 @@ def filtrar_hechos_profesional(hechos, max_hechos=12):
     print(f"\n=== Filtrado Profesional CMF ===")
     print(f"Total hechos originales: {len(hechos)}")
     print(f"- Excluidos por ser fondos: {len(hechos) - len(hechos_sin_fondos)}")
-    print(f"- Críticos (9-10): {len(criticos)}")
-    print(f"- Importantes (7-8.9): {len(importantes)}")
-    print(f"- Moderados (5-6.9): {len(moderados)} (IPSA: {len([h for h in moderados if h['es_ipsa']])})")
-    print(f"- Rutinarios (<5): {len(rutinarios)} [DESCARTADOS]")
+    print(f"- Hechos con relevancia >= 7 (incluidos): {len(hechos_relevantes)}")
+    print(f"- Hechos con relevancia < 7 (excluidos): {len(hechos_evaluados) - len(hechos_relevantes)}")
     print(f"Total hechos seleccionados: {len(hechos_finales)}")
+    print(f"\nCriterios aplicados:")
+    print(f"- Empresas IPSA: SIEMPRE incluidas (relevancia mínima 7.0)")
+    print(f"- Cambios en administración: SIEMPRE incluidos")
+    print(f"- Compra/venta de acciones: SIEMPRE incluidos")
+    print(f"- Fusiones/divisiones: SIEMPRE incluidos")
+    print(f"- Búsqueda inversionistas: SIEMPRE incluidos")
+    print(f"- Aumentos/disminuciones capital: SIEMPRE incluidos")
     print(f"================================\n")
     
     return hechos_finales

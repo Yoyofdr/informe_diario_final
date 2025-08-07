@@ -272,11 +272,19 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
     valores_monedas = resultado_diario.get('valores_monedas', {})
     
     html = f"""<!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Informe Diario • {fecha}</title>
+    <!--[if mso]>
+    <xml>
+        <o:OfficeDocumentSettings>
+            <o:AllowPNG/>
+            <o:PixelsPerInch>96</o:PixelsPerInch>
+        </o:OfficeDocumentSettings>
+    </xml>
+    <![endif]-->
     <style>
         @media screen and (max-width: 600px) {{
             /* Ajustes para móviles */
@@ -637,15 +645,44 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
                                                         {hecho.get('resumen', '')}
                                                     </p>
-                                                    <table cellpadding="0" cellspacing="0">
+                                                    <!-- Botón compatible con Outlook -->
+                                                    <!--[if mso]>
+                                                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" 
+                                                        href="{url_hecho}" 
+                                                        style="height:40px;v-text-anchor:middle;width:180px;" 
+                                                        arcsize="15%" 
+                                                        stroke="f" 
+                                                        fillcolor="#7c3aed">
+                                                        <w:anchorlock/>
+                                                        <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:14px;font-weight:500;">Ver hecho esencial</center>
+                                                    </v:roundrect>
+                                                    <![endif]-->
+                                                    <!--[if !mso]><!-->
+                                                    <table cellpadding="0" cellspacing="0" border="0" role="presentation">
                                                         <tr>
-                                                            <td style="background-color: #7c3aed; border-radius: 6px;">
-                                                                <a href="{url_hecho}" class="button" style="display: inline-block; padding: 10px 20px; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 500;">
+                                                            <td align="left">
+                                                                <a href="{url_hecho}" 
+                                                                   style="background-color: #7c3aed; 
+                                                                          border: 1px solid #7c3aed;
+                                                                          border-radius: 6px; 
+                                                                          color: #ffffff; 
+                                                                          display: inline-block; 
+                                                                          font-family: Arial, sans-serif;
+                                                                          font-size: 14px; 
+                                                                          font-weight: 500; 
+                                                                          line-height: 1;
+                                                                          padding: 12px 24px;
+                                                                          text-align: center;
+                                                                          text-decoration: none; 
+                                                                          -webkit-border-radius: 6px; 
+                                                                          -moz-border-radius: 6px;
+                                                                          mso-hide: all;">
                                                                     Ver hecho esencial
                                                                 </a>
                                                             </td>
                                                         </tr>
                                                     </table>
+                                                    <!--<![endif]-->
                                                 </td>
                                             </tr>
                                         </table>

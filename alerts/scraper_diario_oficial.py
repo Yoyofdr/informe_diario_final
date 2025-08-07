@@ -332,12 +332,23 @@ def obtener_numero_edicion(fecha, driver=None):
             chrome_bin = os.environ.get('GOOGLE_CHROME_BIN')
             chromedriver_path = os.environ.get('CHROMEDRIVER_PATH')
             
-            if chrome_bin and chromedriver_path:
-                # Modo Heroku: usar binarios del buildpack
-                print(f"[CHROME] Usando Chrome de Heroku: {chrome_bin}")
-                print(f"[CHROME] Usando ChromeDriver de Heroku: {chromedriver_path}")
-                options.binary_location = chrome_bin
-                service = Service(chromedriver_path)
+            # Detectar Heroku por la presencia de PORT en lugar de variables específicas
+            is_heroku = os.environ.get('DYNO') is not None or os.environ.get('PORT') is not None
+            
+            if is_heroku:
+                # Modo Heroku: usar rutas estándar del buildpack chrome-for-testing
+                heroku_chrome_bin = '/app/.chrome-for-testing/chrome-linux64/chrome'
+                heroku_chromedriver = '/app/.chrome-for-testing/chromedriver-linux64/chromedriver'
+                
+                # Verificar si los binarios existen en las rutas esperadas
+                if os.path.exists(heroku_chrome_bin) and os.path.exists(heroku_chromedriver):
+                    print(f"[CHROME] Usando Chrome de Heroku: {heroku_chrome_bin}")
+                    print(f"[CHROME] Usando ChromeDriver de Heroku: {heroku_chromedriver}")
+                    options.binary_location = heroku_chrome_bin
+                    service = Service(heroku_chromedriver)
+                else:
+                    print("[CHROME] Binarios no encontrados en rutas estándar de Heroku, usando ChromeDriverManager")
+                    service = Service(ChromeDriverManager().install())
             else:
                 # Modo local: usar ChromeDriverManager
                 print("[CHROME] Usando ChromeDriverManager para desarrollo local")

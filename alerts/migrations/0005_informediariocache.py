@@ -10,11 +10,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='organizacion',
-            name='bank_account_status',
-            field=models.CharField(choices=[('pending', 'Pendiente'), ('connected', 'Conectada'), ('failed', 'Falló'), ('disconnected', 'Desconectada')], default='pending', help_text='CAMPO RESERVADO - No usar hasta activar funcionalidad bancaria', max_length=50),
-        ),
         migrations.CreateModel(
             name='InformeDiarioCache',
             fields=[

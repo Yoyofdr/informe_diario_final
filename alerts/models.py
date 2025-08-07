@@ -222,3 +222,46 @@ class DocumentoSII(models.Model):
         
     def __str__(self):
         return f"{self.get_tipo_documento_display()} {self.numero} - {self.titulo}"
+
+
+class InformeDiarioCache(models.Model):
+    """
+    Caché del informe diario generado para evitar regenerarlo
+    """
+    fecha = models.DateField(unique=True)
+    html_content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    # Metadata opcional
+    metadata = models.JSONField(default=dict, blank=True)
+    
+    def __str__(self):
+        return f"Informe del {self.fecha}"
+    
+    class Meta:
+        db_table = 'alerts_informediariocache'
+        ordering = ['-fecha']
+        indexes = [
+            models.Index(fields=['fecha']),
+        ]
+    
+    @classmethod
+    def get_or_none(cls, fecha):
+        """Obtiene el informe de una fecha o None si no existe"""
+        try:
+            return cls.objects.get(fecha=fecha)
+        except cls.DoesNotExist:
+            return None
+    
+    @classmethod
+    def save_report(cls, fecha, html_content, metadata=None):
+        """Guarda o actualiza el informe de una fecha"""
+        informe, created = cls.objects.update_or_create(
+            fecha=fecha,
+            defaults={
+                'html_content': html_content,
+                'metadata': metadata or {}
+            }
+        )
+        return informe

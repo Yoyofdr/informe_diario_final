@@ -37,6 +37,7 @@ from scripts.scrapers.scraper_cmf_mejorado import ScraperCMFMejorado
 from alerts.cmf_criterios_profesionales import filtrar_hechos_profesional, get_icono_categoria
 from alerts.scraper_sii import obtener_circulares_sii, obtener_resoluciones_exentas_sii, obtener_jurisprudencia_administrativa_sii
 from alerts.cmf_resumenes_ai import generar_resumen_cmf
+from alerts.utils.cache_informe import CacheInformeDiario
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -228,6 +229,15 @@ def generar_informe_oficial(fecha=None):
     
     # 4. Generar HTML del informe
     html = generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii)
+    
+    # 4.5 Guardar en caché de base de datos
+    try:
+        cache = CacheInformeDiario()
+        fecha_obj = datetime.strptime(fecha, "%d-%m-%Y").date()
+        cache.guardar_informe(html, fecha_obj)
+        logger.info("Informe guardado en caché de base de datos")
+    except Exception as e:
+        logger.error(f"Error guardando en caché: {e}")
     
     # 4. Guardar copia local
     filename = f"informe_diario_{fecha.replace('-', '_')}.html"

@@ -1,40 +1,48 @@
+#!/usr/bin/env python3
 """
-Función para enviar correo de bienvenida a nuevos usuarios
+Script para generar preview del correo de bienvenida
 """
 import os
 import sys
+import django
 from datetime import datetime
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from django.conf import settings
+from pathlib import Path
 import pytz
-from dotenv import load_dotenv
 
+# Configurar Django
+BASE_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(BASE_DIR))
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'market_sniper.settings')
+django.setup()
 
-# Cargar variables de entorno
-env_path = os.path.join(settings.BASE_DIR, '.env')
-if os.path.exists(env_path):
-    load_dotenv(env_path)
-
-
-def enviar_informe_bienvenida(email_destinatario, nombre_destinatario):
-    """
-    Envía un correo de bienvenida a un nuevo usuario
+# Generar preview
+if __name__ == "__main__":
+    # Formatear fecha actual
+    chile_tz = pytz.timezone('America/Santiago')
+    fecha_obj = datetime.now(chile_tz)
+    meses = {
+        1: "enero", 2: "febrero", 3: "marzo", 4: "abril",
+        5: "mayo", 6: "junio", 7: "julio", 8: "agosto",
+        9: "septiembre", 10: "octubre", 11: "noviembre", 12: "diciembre"
+    }
+    fecha_formato = f"{fecha_obj.day} de {meses[fecha_obj.month]}, {fecha_obj.year}"
     
-    Args:
-        email_destinatario (str): Email del nuevo usuario
-        nombre_destinatario (str): Nombre completo del nuevo usuario
+    # Determinar cuándo recibirá su primer informe
+    dia_semana = fecha_obj.weekday()
+    if dia_semana == 6:  # Domingo
+        primer_informe = "mañana lunes"
+    elif dia_semana == 5:  # Sábado
+        primer_informe = "el lunes"
+    else:
+        primer_informe = "mañana"
     
-    Returns:
-        bool: True si se envió correctamente, False en caso contrario
-    """
+    nombre_destinatario = "Rodrigo"
     
-    print(f"=== ENVIANDO CORREO DE BIENVENIDA A {email_destinatario} ===\n")
+    nombre_destinatario = "Rodrigo"
+    email_destinatario = "rodrigo@carvuk.com"
     
-    try:
-        # Crear mensaje HTML de bienvenida minimalista con colores del informe
-        html_content = f"""
+    # Crear mensaje HTML de bienvenida minimalista con colores del informe
+    html_content = f"""
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -65,7 +73,7 @@ def enviar_informe_bienvenida(email_destinatario, nombre_destinatario):
                         <td style="padding: 40px;">
                             
                             <p style="margin: 0 0 20px 0; font-size: 17px; color: #1e293b; line-height: 1.6;">
-                                Hola {nombre_destinatario},
+                                Hola {nombre_destinatario}
                             </p>
                             
                             <p style="margin: 0 0 25px 0; font-size: 16px; color: #475569; line-height: 1.6;">
@@ -104,37 +112,12 @@ def enviar_informe_bienvenida(email_destinatario, nombre_destinatario):
     
 </body>
 </html>
-        """
-        
-        # Configuración del servidor SMTP
-        smtp_server = os.environ.get('HOSTINGER_SMTP_SERVER', 'smtp.hostinger.com')
-        smtp_port = int(os.environ.get('HOSTINGER_SMTP_PORT', '587'))
-        smtp_user = os.environ.get('HOSTINGER_EMAIL_USER', 'rodrigo@carvuk.com')
-        smtp_password = os.environ.get('HOSTINGER_EMAIL_PASSWORD')
-        
-        if not smtp_password:
-            print("❌ Error: HOSTINGER_EMAIL_PASSWORD no está configurado")
-            return False
-        
-        # Enviar email
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = f"Cuenta creada exitosamente"
-        msg['From'] = smtp_user
-        msg['To'] = email_destinatario
-        
-        html_part = MIMEText(html_content, 'html')
-        msg.attach(html_part)
-        
-        # Enviar
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()
-        server.login(smtp_user, smtp_password)
-        server.send_message(msg)
-        server.quit()
-        
-        print(f"✅ Correo de bienvenida enviado exitosamente a {email_destinatario}")
-        return True
-        
-    except Exception as e:
-        print(f"❌ Error enviando correo de bienvenida: {str(e)}")
-        return False
+    """
+    
+    # Guardar archivo
+    filename = "preview_correo_bienvenida.html"
+    with open(filename, 'w', encoding='utf-8') as f:
+        f.write(html_content)
+    
+    print(f"✅ Preview guardado en: {filename}")
+    print(f"📧 Abre el archivo en tu navegador para ver cómo se ve el correo")

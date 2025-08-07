@@ -323,10 +323,26 @@ def obtener_numero_edicion(fecha, driver=None):
             options.add_argument('--disable-dev-shm-usage')
             options.add_argument('--disable-gpu')
             options.add_argument('--window-size=1920,1080')
+            options.add_argument('--disable-web-security')
+            options.add_argument('--disable-features=VizDisplayCompositor')
             # Agregar user agent para evitar detección
             options.add_argument('--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
             
-            service = Service(ChromeDriverManager().install())
+            # Configuración específica para Heroku usando el buildpack chrome-for-testing
+            chrome_bin = os.environ.get('GOOGLE_CHROME_BIN')
+            chromedriver_path = os.environ.get('CHROMEDRIVER_PATH')
+            
+            if chrome_bin and chromedriver_path:
+                # Modo Heroku: usar binarios del buildpack
+                print(f"[CHROME] Usando Chrome de Heroku: {chrome_bin}")
+                print(f"[CHROME] Usando ChromeDriver de Heroku: {chromedriver_path}")
+                options.binary_location = chrome_bin
+                service = Service(chromedriver_path)
+            else:
+                # Modo local: usar ChromeDriverManager
+                print("[CHROME] Usando ChromeDriverManager para desarrollo local")
+                service = Service(ChromeDriverManager().install())
+                
             driver_creado = webdriver.Chrome(service=service, options=options)
             driver_creado.set_page_load_timeout(30)
         

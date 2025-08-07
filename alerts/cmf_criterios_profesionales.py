@@ -415,11 +415,30 @@ def filtrar_hechos_profesional(hechos, max_hechos=12):
     - 🟡 Importantes (7-8.9 pts) → Incluir si hay espacio
     - 🟢 Moderados (5-6.9 pts) → Solo si son IPSA
     - ⚪ Rutinarios (<5 pts) → NUNCA incluir
+    - EXCLUIR todos los hechos relacionados con fondos
     """
-    # Calcular relevancia para cada hecho
+    # Primero, filtrar hechos relacionados con fondos
+    hechos_sin_fondos = []
+    for hecho in hechos:
+        titulo = hecho.get('titulo', '').lower()
+        materia = hecho.get('materia', '').lower()
+        entidad = hecho.get('entidad', '').lower()
+        
+        # Excluir si contiene palabras relacionadas con fondos
+        es_fondo = any(palabra in titulo or palabra in materia or palabra in entidad 
+                      for palabra in ['fondo', 'fondos', 'fund', 'funds', 'fip', 'fia', 
+                                     'fondo de inversion', 'fondo mutuo', 'mutual fund',
+                                     'investment fund', 'fondo inmobiliario'])
+        
+        if not es_fondo:
+            hechos_sin_fondos.append(hecho)
+        else:
+            print(f"  → Excluido (es fondo): {hecho.get('entidad', '')} - {hecho.get('titulo', '')[:50]}...")
+    
+    # Calcular relevancia para cada hecho que no es fondo
     hechos_evaluados = []
     
-    for hecho in hechos:
+    for hecho in hechos_sin_fondos:
         titulo = hecho.get('titulo', '')
         materia = hecho.get('materia', '')
         entidad = hecho.get('entidad', '')
@@ -473,6 +492,7 @@ def filtrar_hechos_profesional(hechos, max_hechos=12):
     # Log de filtrado para transparencia
     print(f"\n=== Filtrado Profesional CMF ===")
     print(f"Total hechos originales: {len(hechos)}")
+    print(f"- Excluidos por ser fondos: {len(hechos) - len(hechos_sin_fondos)}")
     print(f"- Críticos (9-10): {len(criticos)}")
     print(f"- Importantes (7-8.9): {len(importantes)}")
     print(f"- Moderados (5-6.9): {len(moderados)} (IPSA: {len([h for h in moderados if h['es_ipsa']])})")

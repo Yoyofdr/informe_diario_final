@@ -14,6 +14,7 @@ from email.mime.text import MIMEText
 from datetime import datetime, timedelta
 import logging
 from pathlib import Path
+import pytz
 
 # Cargar variables de entorno
 try:
@@ -203,7 +204,9 @@ def generar_informe_oficial(fecha=None):
     Genera y envía el informe oficial del día
     """
     if not fecha:
-        fecha = datetime.now().strftime("%d-%m-%Y")
+        # Usar timezone de Chile
+        chile_tz = pytz.timezone('America/Santiago')
+        fecha = datetime.now(chile_tz).strftime("%d-%m-%Y")
     
     logger.info(f"Generando informe para {fecha}")
     
@@ -296,8 +299,8 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                             <h1 style="margin: 0 0 8px 0; font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: -0.025em;">
                                 Informe Diario
                             </h1>
-                            <p style="margin: 0; color: #ffffff; font-size: 14px; font-weight: 500;">
-                                {fecha_formato}
+                            <p style="margin: 0; font-size: 14px; font-weight: 500;">
+                                <span style="color: #ffffff !important; text-decoration: none !important;">{fecha_formato}</span>
                             </p>
                         </td>
                     </tr>

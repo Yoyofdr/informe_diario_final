@@ -36,8 +36,10 @@ def enviar_informe_bienvenida(email_destinatario, nombre_destinatario):
     
     try:
         # Cambiar temporalmente el destinatario en las variables de entorno
-        original_email = os.environ.get('EMAIL_TO', 'rfernandezdelrio@uc.cl')
-        os.environ['EMAIL_TO'] = email_destinatario
+        original_email = os.environ.get('INFORME_DESTINATARIO_TEMP', 'rfernandezdelrio@uc.cl')
+        os.environ['INFORME_DESTINATARIO_TEMP'] = email_destinatario
+        os.environ['INFORME_ES_BIENVENIDA'] = 'true'
+        os.environ['INFORME_NOMBRE_TEMP'] = nombre_destinatario
         
         # Buscar el script integrado mejorado
         script_path = None
@@ -69,7 +71,9 @@ def enviar_informe_bienvenida(email_destinatario, nombre_destinatario):
         )
         
         # Restaurar el email original
-        os.environ['EMAIL_TO'] = original_email
+        os.environ['INFORME_DESTINATARIO_TEMP'] = original_email
+        os.environ['INFORME_ES_BIENVENIDA'] = 'false'
+        os.environ.pop('INFORME_NOMBRE_TEMP', None)
         
         if result.returncode == 0:
             print(f"\n✅ INFORME INTEGRADO ENVIADO EXITOSAMENTE")
@@ -84,7 +88,9 @@ def enviar_informe_bienvenida(email_destinatario, nombre_destinatario):
         print(f"\n❌ Error enviando informe de bienvenida: {str(e)}")
         # Restaurar el email original en caso de error
         if 'original_email' in locals():
-            os.environ['EMAIL_TO'] = original_email
+            os.environ['INFORME_DESTINATARIO_TEMP'] = original_email
+            os.environ['INFORME_ES_BIENVENIDA'] = 'false'
+            os.environ.pop('INFORME_NOMBRE_TEMP', None)
         return False
 
 

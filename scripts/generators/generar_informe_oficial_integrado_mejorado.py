@@ -335,7 +335,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                             <!-- MENSAJE DE BIENVENIDA -->
                             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 40px;">
                                 <tr>
-                                    <td style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 24px;">
+                                    <td style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; padding: 24px;">
                                         <h2 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 600; color: #059669;">
                                             ¡Bienvenido a Informe Diario{', ' + nombre_destinatario if nombre_destinatario else ''}!
                                         </h2>
@@ -371,8 +371,17 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     <p style="margin: 0; font-size: 14px; color: #6b7280;">
                                                         Leyes, decretos supremos y resoluciones de alcance general
                                                     </p>
+                                                <!--[if mso]>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
                                                 </td>
                                             </tr>
+                                        <![endif]-->
+                                        <!--[if !mso]><!-->
+                                                </td>
+                                            </tr>
+                                        <!--<![endif]-->
                                         </table>
                                     </td>
                                 </tr>"""
@@ -381,9 +390,19 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
             html += f"""
                                 <tr>
                                     <td style="padding-bottom: 16px;">
-                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;">
+                                        <!--[if mso]>
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0;">
                                             <tr>
-                                                <td class="section-padding" style="padding: 24px; border-top: 3px solid #6b7280; border-radius: 12px 12px 0 0;">
+                                                <td style="padding: 3px 0 0 0; background-color: #6b7280;">
+                                                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff;">
+                                                        <tr>
+                                                            <td class="section-padding" style="padding: 24px;">
+                                        <![endif]-->
+                                        <!--[if !mso]><!-->
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
+                                            <tr>
+                                                <td class="section-padding" style="padding: 24px; border-top: 3px solid #6b7280; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                        <!--<![endif]-->
                                                     <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
                                                         {pub.get('titulo', '')}
                                                     </h3>
@@ -428,8 +447,17 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                         </tr>
                                                     </table>
                                                     <!--<![endif]-->
+                                                <!--[if mso]>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
                                                 </td>
                                             </tr>
+                                        <![endif]-->
+                                        <!--[if !mso]><!-->
+                                                </td>
+                                            </tr>
+                                        <!--<![endif]-->
                                         </table>
                                     </td>
                                 </tr>"""
@@ -453,8 +481,17 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     <p style="margin: 0; font-size: 14px; color: #6b7280;">
                                                         Resoluciones y decretos de alcance específico
                                                     </p>
+                                                <!--[if mso]>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
                                                 </td>
                                             </tr>
+                                        <![endif]-->
+                                        <!--[if !mso]><!-->
+                                                </td>
+                                            </tr>
+                                        <!--<![endif]-->
                                         </table>
                                     </td>
                                 </tr>"""
@@ -463,9 +500,19 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
             html += f"""
                                 <tr>
                                     <td style="padding-bottom: 16px;">
-                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;">
+                                        <!--[if mso]>
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0;">
                                             <tr>
-                                                <td class="section-padding" style="padding: 24px; border-top: 3px solid #94a3b8; border-radius: 12px 12px 0 0;">
+                                                <td style="padding: 3px 0 0 0; background-color: #94a3b8;">
+                                                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff;">
+                                                        <tr>
+                                                            <td class="section-padding" style="padding: 24px;">
+                                        <![endif]-->
+                                        <!--[if !mso]><!-->
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
+                                            <tr>
+                                                <td class="section-padding" style="padding: 24px; border-top: 3px solid #94a3b8; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                        <!--<![endif]-->
                                                     <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
                                                         {pub.get('titulo', '')}
                                                     </h3>
@@ -510,8 +557,17 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                         </tr>
                                                     </table>
                                                     <!--<![endif]-->
+                                                <!--[if mso]>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
                                                 </td>
                                             </tr>
+                                        <![endif]-->
+                                        <!--[if !mso]><!-->
+                                                </td>
+                                            </tr>
+                                        <!--<![endif]-->
                                         </table>
                                     </td>
                                 </tr>"""
@@ -535,8 +591,17 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     <p style="margin: 0; font-size: 14px; color: #6b7280;">
                                                         Avisos importantes y notificaciones
                                                     </p>
+                                                <!--[if mso]>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
                                                 </td>
                                             </tr>
+                                        <![endif]-->
+                                        <!--[if !mso]><!-->
+                                                </td>
+                                            </tr>
+                                        <!--<![endif]-->
                                         </table>
                                     </td>
                                 </tr>"""
@@ -545,9 +610,19 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
             html += f"""
                                 <tr>
                                     <td style="padding-bottom: 16px;">
-                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;">
+                                        <!--[if mso]>
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0;">
                                             <tr>
-                                                <td class="section-padding" style="padding: 24px; border-top: 3px solid #64748b; border-radius: 12px 12px 0 0;">
+                                                <td style="padding: 3px 0 0 0; background-color: #64748b;">
+                                                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff;">
+                                                        <tr>
+                                                            <td class="section-padding" style="padding: 24px;">
+                                        <![endif]-->
+                                        <!--[if !mso]><!-->
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
+                                            <tr>
+                                                <td class="section-padding" style="padding: 24px; border-top: 3px solid #64748b; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                        <!--<![endif]-->
                                                     <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
                                                         {pub.get('titulo', '')}
                                                     </h3>
@@ -592,8 +667,17 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                         </tr>
                                                     </table>
                                                     <!--<![endif]-->
+                                                <!--[if mso]>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
                                                 </td>
                                             </tr>
+                                        <![endif]-->
+                                        <!--[if !mso]><!-->
+                                                </td>
+                                            </tr>
+                                        <!--<![endif]-->
                                         </table>
                                     </td>
                                 </tr>"""
@@ -617,8 +701,17 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     <p style="margin: 0; font-size: 14px; color: #2563eb;">
                                                         Resoluciones, circulares y oficios
                                                     </p>
+                                                <!--[if mso]>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
                                                 </td>
                                             </tr>
+                                        <![endif]-->
+                                        <!--[if !mso]><!-->
+                                                </td>
+                                            </tr>
+                                        <!--<![endif]-->
                                         </table>
                                     </td>
                                 </tr>"""
@@ -628,14 +721,23 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
             html += """
                                 <tr>
                                     <td style="padding-bottom: 16px;">
-                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px;">
                                             <tr>
                                                 <td class="section-padding" style="padding: 24px; text-align: center;">
                                                     <p style="margin: 0; font-size: 14px; color: #64748b; font-style: italic;">
                                                         No se encontraron circulares, resoluciones ni jurisprudencia nueva
                                                     </p>
+                                                <!--[if mso]>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
                                                 </td>
                                             </tr>
+                                        <![endif]-->
+                                        <!--[if !mso]><!-->
+                                                </td>
+                                            </tr>
+                                        <!--<![endif]-->
                                         </table>
                                     </td>
                                 </tr>"""
@@ -659,9 +761,19 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                 html += f"""
                                 <tr>
                                     <td style="padding-bottom: 16px;">
-                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;">
+                                        <!--[if mso]>
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0;">
                                             <tr>
-                                                <td class="section-padding" style="padding: 24px; border-top: 3px solid #2563eb; border-radius: 12px 12px 0 0;">
+                                                <td style="padding: 3px 0 0 0; background-color: #2563eb;">
+                                                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff;">
+                                                        <tr>
+                                                            <td class="section-padding" style="padding: 24px;">
+                                        <![endif]-->
+                                        <!--[if !mso]><!-->
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
+                                            <tr>
+                                                <td class="section-padding" style="padding: 24px; border-top: 3px solid #2563eb; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                        <!--<![endif]-->
                                                     <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
                                                         {titulo_completo}
                                                     </h3>
@@ -709,8 +821,17 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                         </tr>
                                                     </table>
                                                     <!--<![endif]-->
+                                                <!--[if mso]>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
                                                 </td>
                                             </tr>
+                                        <![endif]-->
+                                        <!--[if !mso]><!-->
+                                                </td>
+                                            </tr>
+                                        <!--<![endif]-->
                                         </table>
                                     </td>
                                 </tr>"""
@@ -734,8 +855,17 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     <p style="margin: 0; font-size: 14px; color: #7c3aed;">
                                                         Información relevante del mercado de valores
                                                     </p>
+                                                <!--[if mso]>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
                                                 </td>
                                             </tr>
+                                        <![endif]-->
+                                        <!--[if !mso]><!-->
+                                                </td>
+                                            </tr>
+                                        <!--<![endif]-->
                                         </table>
                                     </td>
                                 </tr>"""
@@ -749,9 +879,19 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
             html += f"""
                                 <tr>
                                     <td style="padding-bottom: 16px;">
-                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;">
+                                        <!--[if mso]>
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0;">
                                             <tr>
-                                                <td class="section-padding" style="padding: 24px; border-top: 3px solid #7c3aed; border-radius: 12px 12px 0 0;">
+                                                <td style="padding: 3px 0 0 0; background-color: #7c3aed;">
+                                                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff;">
+                                                        <tr>
+                                                            <td class="section-padding" style="padding: 24px;">
+                                        <![endif]-->
+                                        <!--[if !mso]><!-->
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
+                                            <tr>
+                                                <td class="section-padding" style="padding: 24px; border-top: 3px solid #7c3aed; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                        <!--<![endif]-->
                                                     <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
                                                         {hecho.get('entidad', '')}
                                                     </h3>
@@ -799,8 +939,17 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                         </tr>
                                                     </table>
                                                     <!--<![endif]-->
+                                                <!--[if mso]>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
                                                 </td>
                                             </tr>
+                                        <![endif]-->
+                                        <!--[if !mso]><!-->
+                                                </td>
+                                            </tr>
+                                        <!--<![endif]-->
                                         </table>
                                     </td>
                                 </tr>"""

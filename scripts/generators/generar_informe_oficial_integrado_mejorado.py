@@ -390,15 +390,44 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
                                                         {pub.get('resumen', '')}
                                                     </p>
-                                                    <table cellpadding="0" cellspacing="0">
+                                                    <!-- Botón compatible con Outlook -->
+                                                    <!--[if mso]>
+                                                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" 
+                                                        href="{pub.get('url_pdf', '#')}" 
+                                                        style="height:40px;v-text-anchor:middle;width:180px;" 
+                                                        arcsize="15%" 
+                                                        stroke="f" 
+                                                        fillcolor="#6b7280">
+                                                        <w:anchorlock/>
+                                                        <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:14px;font-weight:500;">Ver documento oficial</center>
+                                                    </v:roundrect>
+                                                    <![endif]-->
+                                                    <!--[if !mso]><!-->
+                                                    <table cellpadding="0" cellspacing="0" border="0" role="presentation">
                                                         <tr>
-                                                            <td style="background-color: #6b7280; border-radius: 6px;">
-                                                                <a href="{pub.get('url_pdf', '#')}" class="button" style="display: inline-block; padding: 10px 20px; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 500;">
+                                                            <td align="left">
+                                                                <a href="{pub.get('url_pdf', '#')}" 
+                                                                   style="background-color: #6b7280; 
+                                                                          border: 1px solid #6b7280;
+                                                                          border-radius: 6px; 
+                                                                          color: #ffffff; 
+                                                                          display: inline-block; 
+                                                                          font-family: Arial, sans-serif;
+                                                                          font-size: 14px; 
+                                                                          font-weight: 500; 
+                                                                          line-height: 1;
+                                                                          padding: 12px 24px;
+                                                                          text-align: center;
+                                                                          text-decoration: none; 
+                                                                          -webkit-border-radius: 6px; 
+                                                                          -moz-border-radius: 6px;
+                                                                          mso-hide: all;">
                                                                     Ver documento oficial
                                                                 </a>
                                                             </td>
                                                         </tr>
                                                     </table>
+                                                    <!--<![endif]-->
                                                 </td>
                                             </tr>
                                         </table>
@@ -443,15 +472,44 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
                                                         {pub.get('resumen', '')}
                                                     </p>
-                                                    <table cellpadding="0" cellspacing="0">
+                                                    <!-- Botón compatible con Outlook -->
+                                                    <!--[if mso]>
+                                                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" 
+                                                        href="{pub.get('url_pdf', '#')}" 
+                                                        style="height:40px;v-text-anchor:middle;width:180px;" 
+                                                        arcsize="15%" 
+                                                        stroke="f" 
+                                                        fillcolor="#94a3b8">
+                                                        <w:anchorlock/>
+                                                        <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:14px;font-weight:500;">Ver documento oficial</center>
+                                                    </v:roundrect>
+                                                    <![endif]-->
+                                                    <!--[if !mso]><!-->
+                                                    <table cellpadding="0" cellspacing="0" border="0" role="presentation">
                                                         <tr>
-                                                            <td style="background-color: #94a3b8; border-radius: 6px;">
-                                                                <a href="{pub.get('url_pdf', '#')}" class="button" style="display: inline-block; padding: 10px 20px; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 500;">
+                                                            <td align="left">
+                                                                <a href="{pub.get('url_pdf', '#')}" 
+                                                                   style="background-color: #94a3b8; 
+                                                                          border: 1px solid #94a3b8;
+                                                                          border-radius: 6px; 
+                                                                          color: #ffffff; 
+                                                                          display: inline-block; 
+                                                                          font-family: Arial, sans-serif;
+                                                                          font-size: 14px; 
+                                                                          font-weight: 500; 
+                                                                          line-height: 1;
+                                                                          padding: 12px 24px;
+                                                                          text-align: center;
+                                                                          text-decoration: none; 
+                                                                          -webkit-border-radius: 6px; 
+                                                                          -moz-border-radius: 6px;
+                                                                          mso-hide: all;">
                                                                     Ver documento oficial
                                                                 </a>
                                                             </td>
                                                         </tr>
                                                     </table>
+                                                    <!--<![endif]-->
                                                 </td>
                                             </tr>
                                         </table>
@@ -496,15 +554,44 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
                                                         {pub.get('resumen', '')}
                                                     </p>
-                                                    <table cellpadding="0" cellspacing="0">
+                                                    <!-- Botón compatible con Outlook -->
+                                                    <!--[if mso]>
+                                                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" 
+                                                        href="{pub.get('url_pdf', '#')}" 
+                                                        style="height:40px;v-text-anchor:middle;width:180px;" 
+                                                        arcsize="15%" 
+                                                        stroke="f" 
+                                                        fillcolor="#64748b">
+                                                        <w:anchorlock/>
+                                                        <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:14px;font-weight:500;">Ver documento oficial</center>
+                                                    </v:roundrect>
+                                                    <![endif]-->
+                                                    <!--[if !mso]><!-->
+                                                    <table cellpadding="0" cellspacing="0" border="0" role="presentation">
                                                         <tr>
-                                                            <td style="background-color: #64748b; border-radius: 6px;">
-                                                                <a href="{pub.get('url_pdf', '#')}" class="button" style="display: inline-block; padding: 10px 20px; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 500;">
+                                                            <td align="left">
+                                                                <a href="{pub.get('url_pdf', '#')}" 
+                                                                   style="background-color: #64748b; 
+                                                                          border: 1px solid #64748b;
+                                                                          border-radius: 6px; 
+                                                                          color: #ffffff; 
+                                                                          display: inline-block; 
+                                                                          font-family: Arial, sans-serif;
+                                                                          font-size: 14px; 
+                                                                          font-weight: 500; 
+                                                                          line-height: 1;
+                                                                          padding: 12px 24px;
+                                                                          text-align: center;
+                                                                          text-decoration: none; 
+                                                                          -webkit-border-radius: 6px; 
+                                                                          -moz-border-radius: 6px;
+                                                                          mso-hide: all;">
                                                                     Ver documento oficial
                                                                 </a>
                                                             </td>
                                                         </tr>
                                                     </table>
+                                                    <!--<![endif]-->
                                                 </td>
                                             </tr>
                                         </table>
@@ -584,15 +671,44 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
                                                         {pub.get('titulo', 'Sin descripción disponible')}
                                                     </p>
-                                                    <table cellpadding="0" cellspacing="0">
+                                                    <!-- Botón compatible con Outlook -->
+                                                    <!--[if mso]>
+                                                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" 
+                                                        href="{url_documento}" 
+                                                        style="height:40px;v-text-anchor:middle;width:160px;" 
+                                                        arcsize="15%" 
+                                                        stroke="f" 
+                                                        fillcolor="#2563eb">
+                                                        <w:anchorlock/>
+                                                        <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:14px;font-weight:500;">Ver documento SII</center>
+                                                    </v:roundrect>
+                                                    <![endif]-->
+                                                    <!--[if !mso]><!-->
+                                                    <table cellpadding="0" cellspacing="0" border="0" role="presentation">
                                                         <tr>
-                                                            <td style="background-color: #2563eb; border-radius: 6px;">
-                                                                <a href="{url_documento}" class="button" style="display: inline-block; padding: 10px 20px; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 500;">
+                                                            <td align="left">
+                                                                <a href="{url_documento}" 
+                                                                   style="background-color: #2563eb; 
+                                                                          border: 1px solid #2563eb;
+                                                                          border-radius: 6px; 
+                                                                          color: #ffffff; 
+                                                                          display: inline-block; 
+                                                                          font-family: Arial, sans-serif;
+                                                                          font-size: 14px; 
+                                                                          font-weight: 500; 
+                                                                          line-height: 1;
+                                                                          padding: 12px 24px;
+                                                                          text-align: center;
+                                                                          text-decoration: none; 
+                                                                          -webkit-border-radius: 6px; 
+                                                                          -moz-border-radius: 6px;
+                                                                          mso-hide: all;">
                                                                     Ver documento SII
                                                                 </a>
                                                             </td>
                                                         </tr>
                                                     </table>
+                                                    <!--<![endif]-->
                                                 </td>
                                             </tr>
                                         </table>

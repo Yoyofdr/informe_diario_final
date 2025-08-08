@@ -1140,6 +1140,11 @@ def enviar_informe_email(html, fecha):
     fecha_formato = formatear_fecha_espanol(fecha_obj)
     
     logger.info(f"📧 Preparando envío a {len(destinatarios)} destinatarios...")
+    print(f"📧 Preparando envío a {len(destinatarios)} destinatarios...")  # También imprimir para mayor visibilidad
+    
+    # Mostrar los primeros 5 destinatarios para verificar
+    logger.info(f"Primeros destinatarios: {destinatarios[:5]}...")
+    print(f"Primeros destinatarios: {destinatarios[:5]}...")
     
     # Conectar al servidor SMTP una sola vez
     try:
@@ -1182,6 +1187,12 @@ def enviar_informe_email(html, fecha):
         logger.info(f"   ✅ Enviados exitosamente: {enviados}")
         logger.info(f"   ❌ Errores: {errores}")
         logger.info(f"   📧 Total destinatarios: {len(destinatarios)}")
+        
+        # También imprimir para mayor visibilidad
+        print(f"\n📊 RESUMEN DE ENVÍO:")
+        print(f"   ✅ Enviados exitosamente: {enviados}")
+        print(f"   ❌ Errores: {errores}")
+        print(f"   📧 Total destinatarios: {len(destinatarios)}")
         
     except Exception as e:
         logger.error(f"Error crítico al conectar con servidor SMTP: {str(e)}")

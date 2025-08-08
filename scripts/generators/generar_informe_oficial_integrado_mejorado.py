@@ -1154,6 +1154,7 @@ def enviar_informe_email(html, fecha):
         
         enviados = 0
         errores = 0
+        emails_fallidos = []
         
         # Enviar a cada destinatario
         for email_destinatario in destinatarios:
@@ -1177,9 +1178,23 @@ def enviar_informe_email(html, fecha):
                 server.send_message(msg)
                 enviados += 1
                 logger.info(f"✅ Enviado a: {email_destinatario}")
+                print(f"✅ Enviado a: {email_destinatario}")  # También imprimir
             except Exception as e:
                 errores += 1
+                emails_fallidos.append(email_destinatario)
                 logger.error(f"❌ Error enviando a {email_destinatario}: {str(e)}")
+                print(f"❌ Error enviando a {email_destinatario}: {str(e)}")  # También imprimir
+                
+                # Si es un error de autenticación o conexión, reconectar
+                if "connection" in str(e).lower() or "auth" in str(e).lower():
+                    try:
+                        logger.info("Reconectando al servidor SMTP...")
+                        server.quit()
+                        server = smtplib.SMTP(smtp_server, smtp_port)
+                        server.starttls()
+                        server.login(de_email, password)
+                    except:
+                        pass
         
         server.quit()
         
@@ -1193,6 +1208,13 @@ def enviar_informe_email(html, fecha):
         print(f"   ✅ Enviados exitosamente: {enviados}")
         print(f"   ❌ Errores: {errores}")
         print(f"   📧 Total destinatarios: {len(destinatarios)}")
+        
+        if emails_fallidos:
+            logger.error(f"\n❌ EMAILS QUE FALLARON:")
+            print(f"\n❌ EMAILS QUE FALLARON:")
+            for email in emails_fallidos:
+                logger.error(f"   - {email}")
+                print(f"   - {email}")
         
     except Exception as e:
         logger.error(f"Error crítico al conectar con servidor SMTP: {str(e)}")

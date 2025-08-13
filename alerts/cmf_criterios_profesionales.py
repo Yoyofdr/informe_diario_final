@@ -317,15 +317,13 @@ CATEGORIAS_HECHOS = {
             "reduccion de capital", "reducción de capital", "ampliacion de capital",
             "ampliación de capital",
             
-            # Emisiones significativas
+            # Emisiones significativas (removidas colocaciones)
             "emisión de bonos", "emisión de acciones",
-            "colocación de bonos", "programa de emisión", "emisión de deuda",
-            "oferta de bonos", "oferta pública de bonos", "colocación exitosa",
-            "colocación de valores", "colocación en mercados", "colocación internacional",
+            "programa de emisión", "emisión de deuda",
+            "oferta de bonos", "oferta pública de bonos",
             # Sin tildes para compatibilidad
             "emision de bonos", "emision de acciones",
-            "colocacion de bonos", "programa de emision", "emision de deuda",
-            "colocacion de valores", "colocacion en mercados",
+            "programa de emision", "emision de deuda",
             
             # Contratos materiales
             "contrato material", "adjudicacion", "licitacion ganada",
@@ -561,14 +559,16 @@ def filtrar_hechos_profesional(hechos, max_hechos=12):
       * Aumentos o disminuciones de capital
     - EXCLUIR siempre:
       * Todos los fondos de inversión
+      * Colocación de valores (bonos, acciones, etc.)
       * Hechos con relevancia < 7
     """
-    # Primero, filtrar hechos relacionados con fondos
-    hechos_sin_fondos = []
+    # Primero, filtrar hechos relacionados con fondos y colocación de valores
+    hechos_filtrados = []
     for hecho in hechos:
         titulo = hecho.get('titulo', '').lower()
         materia = hecho.get('materia', '').lower()
         entidad = hecho.get('entidad', '').lower()
+        resumen = hecho.get('resumen', '').lower()
         
         # Excluir si contiene palabras relacionadas con fondos
         es_fondo = any(palabra in titulo or palabra in materia or palabra in entidad 
@@ -576,15 +576,27 @@ def filtrar_hechos_profesional(hechos, max_hechos=12):
                                      'fondo de inversion', 'fondo mutuo', 'mutual fund',
                                      'investment fund', 'fondo inmobiliario'])
         
-        if not es_fondo:
-            hechos_sin_fondos.append(hecho)
+        # Excluir si es colocación de valores
+        es_colocacion = any(palabra in titulo or palabra in materia or palabra in resumen
+                           for palabra in ['colocación de valores', 'colocacion de valores',
+                                          'colocación de bonos', 'colocacion de bonos',
+                                          'colocación exitosa', 'colocacion exitosa',
+                                          'colocación de acciones', 'colocacion de acciones',
+                                          'colocación en el mercado', 'colocacion en el mercado',
+                                          'colocación internacional', 'colocacion internacional'])
+        
+        if not es_fondo and not es_colocacion:
+            hechos_filtrados.append(hecho)
         else:
-            print(f"  → Excluido (es fondo): {hecho.get('entidad', '')} - {hecho.get('titulo', '')[:50]}...")
+            if es_fondo:
+                print(f"  → Excluido (es fondo): {hecho.get('entidad', '')} - {hecho.get('titulo', '')[:50]}...")
+            elif es_colocacion:
+                print(f"  → Excluido (colocación de valores): {hecho.get('entidad', '')} - {hecho.get('titulo', '')[:50]}...")
     
-    # Calcular relevancia para cada hecho que no es fondo
+    # Calcular relevancia para cada hecho que no es fondo ni colocación
     hechos_evaluados = []
     
-    for hecho in hechos_sin_fondos:
+    for hecho in hechos_filtrados:
         titulo = hecho.get('titulo', '')
         materia = hecho.get('materia', '')
         entidad = hecho.get('entidad', '')
@@ -624,7 +636,7 @@ def filtrar_hechos_profesional(hechos, max_hechos=12):
     # Log de filtrado para transparencia
     print(f"\n=== Filtrado Profesional CMF ===")
     print(f"Total hechos originales: {len(hechos)}")
-    print(f"- Excluidos por ser fondos: {len(hechos) - len(hechos_sin_fondos)}")
+    print(f"- Excluidos (fondos + colocaciones): {len(hechos) - len(hechos_filtrados)}")
     print(f"- Hechos con relevancia >= 7 (incluidos): {len(hechos_relevantes)}")
     print(f"- Hechos con relevancia < 7 (excluidos): {len(hechos_evaluados) - len(hechos_relevantes)}")
     print(f"Total hechos seleccionados: {len(hechos_finales)}")
@@ -636,6 +648,7 @@ def filtrar_hechos_profesional(hechos, max_hechos=12):
     print(f"- Fusiones/divisiones: SIEMPRE incluidos")
     print(f"- Búsqueda inversionistas: SIEMPRE incluidos")
     print(f"- Aumentos/disminuciones capital: SIEMPRE incluidos")
+    print(f"- Colocación de valores: SIEMPRE EXCLUIDOS")
     print(f"================================\n")
     
     return hechos_finales

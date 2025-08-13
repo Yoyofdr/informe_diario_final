@@ -272,7 +272,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
     valores_monedas = resultado_diario.get('valores_monedas', {})
     
     html = f"""<!DOCTYPE html>
-<html lang="es" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

@@ -1,0 +1,500 @@
+2025-08-13T02:39:01.957177+00:00 app[web.1]: [2025-08-13 02:39:01 +0000] [2] [INFO] Handling signal: term
+2025-08-13T02:39:02.057595+00:00 app[web.1]: [2025-08-13 02:39:02 +0000] [2] [INFO] Shutting down: Master
+2025-08-13T02:39:02.115553+00:00 heroku[web.1]: Process exited with status 0
+2025-08-13T02:39:05.923681+00:00 heroku[web.1]: Starting process with command `gunicorn market_sniper.wsgi --log-file -`
+2025-08-13T02:39:06.427547+00:00 app[web.1]: Python buildpack: Detected 512 MB available memory and 8 CPU cores.
+2025-08-13T02:39:06.427568+00:00 app[web.1]: Python buildpack: Defaulting WEB_CONCURRENCY to 2 based on the available memory.
+2025-08-13T02:39:06.557061+00:00 heroku[worker.1]: Starting process with command `python manage.py run_scheduler`
+2025-08-13T02:39:06.688730+00:00 app[web.1]: [2025-08-13 02:39:06 +0000] [2] [INFO] Starting gunicorn 21.2.0
+2025-08-13T02:39:06.688969+00:00 app[web.1]: [2025-08-13 02:39:06 +0000] [2] [INFO] Listening at: http://0.0.0.0:19452 (2)
+2025-08-13T02:39:06.689025+00:00 app[web.1]: [2025-08-13 02:39:06 +0000] [2] [INFO] Using worker: sync
+2025-08-13T02:39:06.691255+00:00 app[web.1]: [2025-08-13 02:39:06 +0000] [9] [INFO] Booting worker with pid: 9
+2025-08-13T02:39:06.789274+00:00 app[web.1]: [2025-08-13 02:39:06 +0000] [10] [INFO] Booting worker with pid: 10
+2025-08-13T02:39:07.200458+00:00 heroku[web.1]: State changed from starting to up
+2025-08-13T02:39:07.233843+00:00 heroku[worker.1]: State changed from starting to up
+2025-08-13T02:39:08.000000+00:00 app[api]: Build succeeded
+2025-08-13T02:39:08.876458+00:00 app[worker.1]: Iniciando el programador...
+2025-08-13T02:39:08.876673+00:00 app[worker.1]: Tarea programada para ejecutarse todos los días a las 13:00 UTC (9:00 AM Chile - horario invierno).
+2025-08-13T02:39:08.876674+00:00 app[worker.1]: Presiona CTRL+C para detener el programador.
+2025-08-13T02:39:20.476469+00:00 app[api]: Set INFORME_DESTINATARIOS_PRUEBA config vars by user rfernandezdelrio@uc.cl
+2025-08-13T02:39:20.476469+00:00 app[api]: Running release v179 commands by user rfernandezdelrio@uc.cl
+2025-08-13T02:39:21.308274+00:00 app[api]: Starting process with command `/bin/sh -c 'if curl $HEROKU_RELEASE_LOG_STREAM --silent --connect-timeout 10 --retry 3 --retry-delay 1 >/tmp/log-stream; then
+2025-08-13T02:39:21.308274+00:00 app[api]: chmod u+x /tmp/log-stream
+2025-08-13T02:39:21.308274+00:00 app[api]: /tmp/log-stream /bin/sh -c '"'"'python manage.py migrate'"'"'
+2025-08-13T02:39:21.308274+00:00 app[api]: else
+2025-08-13T02:39:21.308274+00:00 app[api]: python manage.py migrate
+2025-08-13T02:39:21.308274+00:00 app[api]: fi'` by user rfernandezdelrio@uc.cl
+2025-08-13T02:39:30.186924+00:00 app[api]: Starting process with command `python manage.py enviar_informes_diarios` by user rfernandezdelrio@uc.cl
+2025-08-13T02:39:37.017583+00:00 heroku[release.3227]: Starting process with command `/bin/sh -c 'if curl https://heroku-release-output.s3.amazonaws.com/log-stream?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAZSXS6CXKUD5IMVTI%2F20250813%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250813T023921Z&X-Amz-Expires=900&X-Amz-SignedHeaders=host&X-Amz-Signature=d0983da96f6017d0fdda487399a6e1df0396e463f972262cbf7efd00b7b2e498 --silent --connect-timeout 10 --retry 3 --retry-delay 1 >/tmp/log-stream; then
+2025-08-13T02:39:37.649177+00:00 heroku[release.3227]: State changed from starting to up
+2025-08-13T02:39:38.981242+00:00 app[release.3227]: Operations to perform:
+2025-08-13T02:39:38.981279+00:00 app[release.3227]: Apply all migrations: admin, admin_interface, alerts, auth, contenttypes, sessions
+2025-08-13T02:39:38.996289+00:00 app[release.3227]: Running migrations:
+2025-08-13T02:39:38.996290+00:00 app[release.3227]: No migrations to apply.
+2025-08-13T02:39:39.011396+00:00 app[release.3227]: Your models in app(s): 'alerts' have changes that are not yet reflected in a migration, and so won't be applied.
+2025-08-13T02:39:39.011397+00:00 app[release.3227]: Run 'manage.py makemigrations' to make new migrations, and then re-run 'manage.py migrate' to apply them.
+2025-08-13T02:39:39.212544+00:00 heroku[release.3227]: Process exited with status 0
+2025-08-13T02:39:39.234783+00:00 heroku[release.3227]: State changed from up to complete
+2025-08-13T02:39:39.819713+00:00 app[api]: Release v179 created by user rfernandezdelrio@uc.cl
+2025-08-13T02:39:40.278867+00:00 heroku[web.1]: Restarting
+2025-08-13T02:39:40.330982+00:00 heroku[web.1]: State changed from up to starting
+2025-08-13T02:39:40.406207+00:00 heroku[worker.1]: Restarting
+2025-08-13T02:39:40.408617+00:00 heroku[worker.1]: State changed from up to starting
+2025-08-13T02:39:40.964423+00:00 heroku[web.1]: Stopping all processes with SIGTERM
+2025-08-13T02:39:40.982789+00:00 app[web.1]: [2025-08-13 02:39:40 +0000] [10] [INFO] Worker exiting (pid: 10)
+2025-08-13T02:39:40.982826+00:00 app[web.1]: [2025-08-13 02:39:40 +0000] [9] [INFO] Worker exiting (pid: 9)
+2025-08-13T02:39:40.982827+00:00 app[web.1]: [2025-08-13 02:39:40 +0000] [2] [INFO] Handling signal: term
+2025-08-13T02:39:41.044903+00:00 heroku[worker.1]: Stopping all processes with SIGTERM
+2025-08-13T02:39:41.083236+00:00 app[web.1]: [2025-08-13 02:39:41 +0000] [2] [INFO] Shutting down: Master
+2025-08-13T02:39:41.111760+00:00 heroku[worker.1]: Process exited with status 143
+2025-08-13T02:39:41.139551+00:00 heroku[web.1]: Process exited with status 0
+2025-08-13T02:39:46.412905+00:00 heroku[run.6372]: State changed from starting to up
+2025-08-13T02:39:55.760014+00:00 heroku[web.1]: Starting process with command `gunicorn market_sniper.wsgi --log-file -`
+2025-08-13T02:39:56.206094+00:00 app[web.1]: Python buildpack: Detected 512 MB available memory and 8 CPU cores.
+2025-08-13T02:39:56.206188+00:00 app[web.1]: Python buildpack: Defaulting WEB_CONCURRENCY to 2 based on the available memory.
+2025-08-13T02:39:56.376213+00:00 heroku[worker.1]: Starting process with command `python manage.py run_scheduler`
+2025-08-13T02:39:56.434061+00:00 app[web.1]: [2025-08-13 02:39:56 +0000] [2] [INFO] Starting gunicorn 21.2.0
+2025-08-13T02:39:56.434295+00:00 app[web.1]: [2025-08-13 02:39:56 +0000] [2] [INFO] Listening at: http://0.0.0.0:36801 (2)
+2025-08-13T02:39:56.434337+00:00 app[web.1]: [2025-08-13 02:39:56 +0000] [2] [INFO] Using worker: sync
+2025-08-13T02:39:56.436505+00:00 app[web.1]: [2025-08-13 02:39:56 +0000] [9] [INFO] Booting worker with pid: 9
+2025-08-13T02:39:56.530127+00:00 app[web.1]: [2025-08-13 02:39:56 +0000] [10] [INFO] Booting worker with pid: 10
+2025-08-13T02:39:56.876707+00:00 heroku[web.1]: State changed from starting to up
+2025-08-13T02:39:57.061557+00:00 heroku[worker.1]: State changed from starting to up
+2025-08-13T02:39:58.069505+00:00 app[worker.1]: Iniciando el programador...
+2025-08-13T02:39:58.069673+00:00 app[worker.1]: Tarea programada para ejecutarse todos los días a las 13:00 UTC (9:00 AM Chile - horario invierno).
+2025-08-13T02:39:58.069673+00:00 app[worker.1]: Presiona CTRL+C para detener el programador.
+2025-08-13T02:40:39.305953+00:00 heroku[run.6372]: Process exited with status 0
+2025-08-13T02:40:39.331234+00:00 heroku[run.6372]: State changed from up to complete
+2025-08-13T02:40:52.522808+00:00 app[api]: Running release v180 commands by user rfernandezdelrio@uc.cl
+2025-08-13T02:40:52.522808+00:00 app[api]: Remove INFORME_DESTINATARIOS_PRUEBA config vars by user rfernandezdelrio@uc.cl
+2025-08-13T02:40:53.699656+00:00 app[api]: Starting process with command `/bin/sh -c 'if curl $HEROKU_RELEASE_LOG_STREAM --silent --connect-timeout 10 --retry 3 --retry-delay 1 >/tmp/log-stream; then
+2025-08-13T02:40:53.699656+00:00 app[api]: chmod u+x /tmp/log-stream
+2025-08-13T02:40:53.699656+00:00 app[api]: /tmp/log-stream /bin/sh -c '"'"'python manage.py migrate'"'"'
+2025-08-13T02:40:53.699656+00:00 app[api]: else
+2025-08-13T02:40:53.699656+00:00 app[api]: python manage.py migrate
+2025-08-13T02:40:53.699656+00:00 app[api]: fi'` by user rfernandezdelrio@uc.cl
+2025-08-13T02:41:09.584094+00:00 heroku[release.8786]: Starting process with command `/bin/sh -c 'if curl https://heroku-release-output.s3.amazonaws.com/log-stream?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAZSXS6CXKUD5IMVTI%2F20250813%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250813T024053Z&X-Amz-Expires=900&X-Amz-SignedHeaders=host&X-Amz-Signature=b27f2c7def7a12d14e3851eb5a172241becfa0cd09f39af78ae38ac89b5698d6 --silent --connect-timeout 10 --retry 3 --retry-delay 1 >/tmp/log-stream; then
+2025-08-13T02:41:10.171702+00:00 heroku[release.8786]: State changed from starting to up
+2025-08-13T02:41:11.484289+00:00 app[release.8786]: Operations to perform:
+2025-08-13T02:41:11.484309+00:00 app[release.8786]: Apply all migrations: admin, admin_interface, alerts, auth, contenttypes, sessions
+2025-08-13T02:41:11.499564+00:00 app[release.8786]: Running migrations:
+2025-08-13T02:41:11.499565+00:00 app[release.8786]: No migrations to apply.
+2025-08-13T02:41:11.514534+00:00 app[release.8786]: Your models in app(s): 'alerts' have changes that are not yet reflected in a migration, and so won't be applied.
+2025-08-13T02:41:11.514535+00:00 app[release.8786]: Run 'manage.py makemigrations' to make new migrations, and then re-run 'manage.py migrate' to apply them.
+2025-08-13T02:41:11.677054+00:00 heroku[release.8786]: Process exited with status 0
+2025-08-13T02:41:11.697984+00:00 heroku[release.8786]: State changed from up to complete
+2025-08-13T02:41:12.354830+00:00 app[api]: Release v180 created by user rfernandezdelrio@uc.cl
+2025-08-13T02:41:12.837919+00:00 heroku[web.1]: Restarting
+2025-08-13T02:41:12.897453+00:00 heroku[web.1]: State changed from up to starting
+2025-08-13T02:41:12.971534+00:00 heroku[worker.1]: Restarting
+2025-08-13T02:41:12.973604+00:00 heroku[worker.1]: State changed from up to starting
+2025-08-13T02:41:13.420819+00:00 heroku[web.1]: Stopping all processes with SIGTERM
+2025-08-13T02:41:13.436565+00:00 app[web.1]: [2025-08-13 02:41:13 +0000] [9] [INFO] Worker exiting (pid: 9)
+2025-08-13T02:41:13.436578+00:00 app[web.1]: [2025-08-13 02:41:13 +0000] [10] [INFO] Worker exiting (pid: 10)
+2025-08-13T02:41:13.436623+00:00 app[web.1]: [2025-08-13 02:41:13 +0000] [2] [INFO] Handling signal: term
+2025-08-13T02:41:13.537013+00:00 app[web.1]: [2025-08-13 02:41:13 +0000] [2] [INFO] Shutting down: Master
+2025-08-13T02:41:13.594096+00:00 heroku[web.1]: Process exited with status 0
+2025-08-13T02:41:13.833069+00:00 heroku[worker.1]: Stopping all processes with SIGTERM
+2025-08-13T02:41:13.918359+00:00 heroku[worker.1]: Process exited with status 143
+2025-08-13T02:41:28.811307+00:00 heroku[worker.1]: Starting process with command `python manage.py run_scheduler`
+2025-08-13T02:41:29.405114+00:00 heroku[worker.1]: State changed from starting to up
+2025-08-13T02:41:29.973078+00:00 heroku[web.1]: Starting process with command `gunicorn market_sniper.wsgi --log-file -`
+2025-08-13T02:41:30.482724+00:00 app[worker.1]: Iniciando el programador...
+2025-08-13T02:41:30.482868+00:00 app[worker.1]: Tarea programada para ejecutarse todos los días a las 13:00 UTC (9:00 AM Chile - horario invierno).
+2025-08-13T02:41:30.482868+00:00 app[worker.1]: Presiona CTRL+C para detener el programador.
+2025-08-13T02:41:30.604701+00:00 app[web.1]: Python buildpack: Detected 512 MB available memory and 8 CPU cores.
+2025-08-13T02:41:30.604725+00:00 app[web.1]: Python buildpack: Defaulting WEB_CONCURRENCY to 2 based on the available memory.
+2025-08-13T02:41:30.904222+00:00 app[web.1]: [2025-08-13 02:41:30 +0000] [2] [INFO] Starting gunicorn 21.2.0
+2025-08-13T02:41:30.904559+00:00 app[web.1]: [2025-08-13 02:41:30 +0000] [2] [INFO] Listening at: http://0.0.0.0:57849 (2)
+2025-08-13T02:41:30.904601+00:00 app[web.1]: [2025-08-13 02:41:30 +0000] [2] [INFO] Using worker: sync
+2025-08-13T02:41:30.906913+00:00 app[web.1]: [2025-08-13 02:41:30 +0000] [9] [INFO] Booting worker with pid: 9
+2025-08-13T02:41:30.990662+00:00 app[web.1]: [2025-08-13 02:41:30 +0000] [10] [INFO] Booting worker with pid: 10
+2025-08-13T02:41:31.394576+00:00 heroku[web.1]: State changed from starting to up
+2025-08-13T03:07:10.000000+00:00 app[api]: Build started by user rfernandezdelrio@uc.cl
+2025-08-13T03:07:16.000000+00:00 app[api]: Build started by user rfernandezdelrio@uc.cl
+2025-08-13T03:08:14.873078+00:00 app[api]: Deploy b737c417 by user rfernandezdelrio@uc.cl
+2025-08-13T03:08:14.873078+00:00 app[api]: Running release v181 commands by user rfernandezdelrio@uc.cl
+2025-08-13T03:08:15.729644+00:00 app[api]: Starting process with command `/bin/sh -c 'if curl $HEROKU_RELEASE_LOG_STREAM --silent --connect-timeout 10 --retry 3 --retry-delay 1 >/tmp/log-stream; then
+2025-08-13T03:08:15.729644+00:00 app[api]: chmod u+x /tmp/log-stream
+2025-08-13T03:08:15.729644+00:00 app[api]: /tmp/log-stream /bin/sh -c '"'"'python manage.py migrate'"'"'
+2025-08-13T03:08:15.729644+00:00 app[api]: else
+2025-08-13T03:08:15.729644+00:00 app[api]: python manage.py migrate
+2025-08-13T03:08:15.729644+00:00 app[api]: fi'` by user rfernandezdelrio@uc.cl
+2025-08-13T03:08:19.226592+00:00 app[api]: Deploy b737c417 by user rfernandezdelrio@uc.cl
+2025-08-13T03:08:19.226592+00:00 app[api]: Running release v182 commands by user rfernandezdelrio@uc.cl
+2025-08-13T03:08:20.065743+00:00 app[api]: Starting process with command `/bin/sh -c 'if curl $HEROKU_RELEASE_LOG_STREAM --silent --connect-timeout 10 --retry 3 --retry-delay 1 >/tmp/log-stream; then
+2025-08-13T03:08:20.065743+00:00 app[api]: chmod u+x /tmp/log-stream
+2025-08-13T03:08:20.065743+00:00 app[api]: /tmp/log-stream /bin/sh -c '"'"'python manage.py migrate'"'"'
+2025-08-13T03:08:20.065743+00:00 app[api]: else
+2025-08-13T03:08:20.065743+00:00 app[api]: python manage.py migrate
+2025-08-13T03:08:20.065743+00:00 app[api]: fi'` by user rfernandezdelrio@uc.cl
+2025-08-13T03:08:31.255739+00:00 heroku[release.1479]: Starting process with command `/bin/sh -c 'if curl https://heroku-release-output.s3.amazonaws.com/log-stream?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAZSXS6CXKUD5IMVTI%2F20250813%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250813T030815Z&X-Amz-Expires=900&X-Amz-SignedHeaders=host&X-Amz-Signature=e4d48d25e45af74750ee2d044b3367b409b481486265beef839bf9c5236091b3 --silent --connect-timeout 10 --retry 3 --retry-delay 1 >/tmp/log-stream; then
+2025-08-13T03:08:31.880188+00:00 heroku[release.1479]: State changed from starting to up
+2025-08-13T03:08:33.166085+00:00 app[release.1479]: Operations to perform:
+2025-08-13T03:08:33.166110+00:00 app[release.1479]: Apply all migrations: admin, admin_interface, alerts, auth, contenttypes, sessions
+2025-08-13T03:08:33.181142+00:00 app[release.1479]: Running migrations:
+2025-08-13T03:08:33.181143+00:00 app[release.1479]: No migrations to apply.
+2025-08-13T03:08:33.196151+00:00 app[release.1479]: Your models in app(s): 'alerts' have changes that are not yet reflected in a migration, and so won't be applied.
+2025-08-13T03:08:33.196152+00:00 app[release.1479]: Run 'manage.py makemigrations' to make new migrations, and then re-run 'manage.py migrate' to apply them.
+2025-08-13T03:08:33.375097+00:00 heroku[release.1479]: Process exited with status 0
+2025-08-13T03:08:33.397106+00:00 heroku[release.1479]: State changed from up to complete
+2025-08-13T03:08:33.957252+00:00 app[api]: Release v181 created by user rfernandezdelrio@uc.cl
+2025-08-13T03:08:34.185873+00:00 heroku[web.1]: Restarting
+2025-08-13T03:08:34.236508+00:00 heroku[web.1]: State changed from up to starting
+2025-08-13T03:08:34.303988+00:00 heroku[worker.1]: Restarting
+2025-08-13T03:08:34.307293+00:00 heroku[worker.1]: State changed from up to starting
+2025-08-13T03:08:34.828283+00:00 heroku[worker.1]: Stopping all processes with SIGTERM
+2025-08-13T03:08:34.874100+00:00 heroku[web.1]: Stopping all processes with SIGTERM
+2025-08-13T03:08:34.895510+00:00 app[web.1]: [2025-08-13 03:08:34 +0000] [2] [INFO] Handling signal: term
+2025-08-13T03:08:34.900232+00:00 heroku[worker.1]: Process exited with status 143
+2025-08-13T03:08:34.901540+00:00 app[web.1]: [2025-08-13 03:08:34 +0000] [9] [INFO] Worker exiting (pid: 9)
+2025-08-13T03:08:34.901541+00:00 app[web.1]: [2025-08-13 03:08:34 +0000] [10] [INFO] Worker exiting (pid: 10)
+2025-08-13T03:08:34.995893+00:00 app[web.1]: [2025-08-13 03:08:34 +0000] [2] [INFO] Shutting down: Master
+2025-08-13T03:08:35.075198+00:00 heroku[web.1]: Process exited with status 0
+2025-08-13T03:08:35.465773+00:00 heroku[release.7786]: Starting process with command `/bin/sh -c 'if curl https://heroku-release-output.s3.amazonaws.com/log-stream?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAZSXS6CXKUD5IMVTI%2F20250813%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250813T030819Z&X-Amz-Expires=900&X-Amz-SignedHeaders=host&X-Amz-Signature=99672dd5ee1bb23736e04d2d0a1f0223c781ec5815597f0ae43536a9d33c3922 --silent --connect-timeout 10 --retry 3 --retry-delay 1 >/tmp/log-stream; then
+2025-08-13T03:08:36.020558+00:00 heroku[release.7786]: State changed from starting to up
+2025-08-13T03:08:37.399032+00:00 app[release.7786]: Operations to perform:
+2025-08-13T03:08:37.399055+00:00 app[release.7786]: Apply all migrations: admin, admin_interface, alerts, auth, contenttypes, sessions
+2025-08-13T03:08:37.413905+00:00 app[release.7786]: Running migrations:
+2025-08-13T03:08:37.413912+00:00 app[release.7786]: No migrations to apply.
+2025-08-13T03:08:37.428843+00:00 app[release.7786]: Your models in app(s): 'alerts' have changes that are not yet reflected in a migration, and so won't be applied.
+2025-08-13T03:08:37.428844+00:00 app[release.7786]: Run 'manage.py makemigrations' to make new migrations, and then re-run 'manage.py migrate' to apply them.
+2025-08-13T03:08:37.602126+00:00 heroku[release.7786]: Process exited with status 0
+2025-08-13T03:08:37.622951+00:00 heroku[release.7786]: State changed from up to complete
+2025-08-13T03:08:38.167330+00:00 app[api]: Release v182 created by user rfernandezdelrio@uc.cl
+2025-08-13T03:08:38.460552+00:00 heroku[web.1]: Restarting
+2025-08-13T03:08:38.573717+00:00 heroku[worker.1]: Restarting
+2025-08-13T03:08:49.543100+00:00 heroku[web.1]: Starting process with command `gunicorn market_sniper.wsgi --log-file -`
+2025-08-13T03:08:49.907068+00:00 heroku[worker.1]: Starting process with command `python manage.py run_scheduler`
+2025-08-13T03:08:50.187557+00:00 app[web.1]: Python buildpack: Detected 512 MB available memory and 8 CPU cores.
+2025-08-13T03:08:50.187636+00:00 app[web.1]: Python buildpack: Defaulting WEB_CONCURRENCY to 2 based on the available memory.
+2025-08-13T03:08:50.415950+00:00 app[web.1]: [2025-08-13 03:08:50 +0000] [2] [INFO] Starting gunicorn 21.2.0
+2025-08-13T03:08:50.416179+00:00 app[web.1]: [2025-08-13 03:08:50 +0000] [2] [INFO] Listening at: http://0.0.0.0:42006 (2)
+2025-08-13T03:08:50.416214+00:00 app[web.1]: [2025-08-13 03:08:50 +0000] [2] [INFO] Using worker: sync
+2025-08-13T03:08:50.418202+00:00 app[web.1]: [2025-08-13 03:08:50 +0000] [9] [INFO] Booting worker with pid: 9
+2025-08-13T03:08:50.493432+00:00 app[web.1]: [2025-08-13 03:08:50 +0000] [10] [INFO] Booting worker with pid: 10
+2025-08-13T03:08:51.108921+00:00 heroku[worker.1]: Stopping all processes with SIGTERM
+2025-08-13T03:08:51.185979+00:00 heroku[worker.1]: Process exited with status 143
+2025-08-13T03:08:51.281884+00:00 heroku[web.1]: Stopping all processes with SIGTERM
+2025-08-13T03:08:51.296635+00:00 app[web.1]: [2025-08-13 03:08:51 +0000] [9] [INFO] Worker exiting (pid: 9)
+2025-08-13T03:08:51.296639+00:00 app[web.1]: [2025-08-13 03:08:51 +0000] [10] [INFO] Worker exiting (pid: 10)
+2025-08-13T03:08:51.296822+00:00 app[web.1]: [2025-08-13 03:08:51 +0000] [2] [INFO] Handling signal: term
+2025-08-13T03:08:51.301050+00:00 app[web.1]: [2025-08-13 03:08:51 +0000] [2] [ERROR] Worker (pid:9) was sent SIGTERM!
+2025-08-13T03:08:51.301276+00:00 app[web.1]: [2025-08-13 03:08:51 +0000] [2] [ERROR] Worker (pid:10) was sent SIGTERM!
+2025-08-13T03:08:51.397219+00:00 app[web.1]: [2025-08-13 03:08:51 +0000] [2] [INFO] Shutting down: Master
+2025-08-13T03:08:51.450126+00:00 heroku[web.1]: Process exited with status 0
+2025-08-13T03:08:53.000000+00:00 app[api]: Build succeeded
+2025-08-13T03:08:54.126422+00:00 heroku[worker.1]: Starting process with command `python manage.py run_scheduler`
+2025-08-13T03:08:54.669332+00:00 heroku[web.1]: Starting process with command `gunicorn market_sniper.wsgi --log-file -`
+2025-08-13T03:08:54.689137+00:00 heroku[worker.1]: State changed from starting to up
+2025-08-13T03:08:55.254683+00:00 app[web.1]: Python buildpack: Detected 512 MB available memory and 8 CPU cores.
+2025-08-13T03:08:55.254819+00:00 app[web.1]: Python buildpack: Defaulting WEB_CONCURRENCY to 2 based on the available memory.
+2025-08-13T03:08:55.587961+00:00 app[web.1]: [2025-08-13 03:08:55 +0000] [2] [INFO] Starting gunicorn 21.2.0
+2025-08-13T03:08:55.588269+00:00 app[web.1]: [2025-08-13 03:08:55 +0000] [2] [INFO] Listening at: http://0.0.0.0:46132 (2)
+2025-08-13T03:08:55.588317+00:00 app[web.1]: [2025-08-13 03:08:55 +0000] [2] [INFO] Using worker: sync
+2025-08-13T03:08:55.590607+00:00 app[web.1]: [2025-08-13 03:08:55 +0000] [9] [INFO] Booting worker with pid: 9
+2025-08-13T03:08:55.612796+00:00 app[web.1]: [2025-08-13 03:08:55 +0000] [10] [INFO] Booting worker with pid: 10
+2025-08-13T03:08:55.770232+00:00 app[worker.1]: Iniciando el programador...
+2025-08-13T03:08:55.770391+00:00 app[worker.1]: Tarea programada para ejecutarse todos los días a las 13:00 UTC (9:00 AM Chile - horario invierno).
+2025-08-13T03:08:55.770391+00:00 app[worker.1]: Presiona CTRL+C para detener el programador.
+2025-08-13T03:08:55.969225+00:00 heroku[web.1]: State changed from starting to up
+2025-08-13T03:08:57.000000+00:00 app[api]: Build succeeded
+2025-08-13T03:10:50.471794+00:00 app[api]: Starting process with command `python manage.py shell` by user rfernandezdelrio@uc.cl
+2025-08-13T03:11:06.729248+00:00 heroku[run.8261]: State changed from starting to up
+2025-08-13T03:11:10.685290+00:00 heroku[run.8261]: Process exited with status 0
+2025-08-13T03:11:10.718583+00:00 heroku[run.8261]: State changed from up to complete
+2025-08-13T03:13:56.151140+00:00 app[api]: Starting process with command `ls -la scripts/generators/` by user rfernandezdelrio@uc.cl
+2025-08-13T03:14:15.052093+00:00 heroku[run.1054]: State changed from starting to up
+2025-08-13T03:14:18.076460+00:00 heroku[run.1054]: Process exited with status 0
+2025-08-13T03:14:18.097278+00:00 heroku[run.1054]: State changed from up to complete
+2025-08-13T03:20:49.548076+00:00 app[web.1]: 10.1.48.234 - - [13/Aug/2025:03:20:49 +0000] "GET / HTTP/1.1" 200 41521 "-" "curl/7.87.0"
+2025-08-13T03:20:49.548611+00:00 heroku[router]: at=info method=GET path="/" host=informediariochile.cl request_id=0dda4de1-f7bc-a25e-ef50-fce26484380d fwd="200.83.85.89" dyno=web.1 connect=0ms service=284ms status=200 bytes=41521 protocol=http2.0 tls=true tls_version=tls1.3
+2025-08-13T03:22:12.494139+00:00 app[web.1]: 10.1.47.195 - - [13/Aug/2025:03:22:12 +0000] "GET / HTTP/1.1" 200 41521 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+2025-08-13T03:22:12.494507+00:00 heroku[router]: at=info method=GET path="/" host=informediariochile.cl request_id=2ea4edd0-4a5c-8609-d9aa-f92bc659a547 fwd="200.83.85.89" dyno=web.1 connect=0ms service=104ms status=200 bytes=41521 protocol=http2.0 tls=true tls_version=tls1.3
+2025-08-13T03:22:13.009832+00:00 app[web.1]: Not Found: /favicon.ico
+2025-08-13T03:22:13.010207+00:00 heroku[router]: at=info method=GET path="/favicon.ico" host=informediariochile.cl request_id=6e1e2e8a-94c1-b1c8-bcf1-09969a4b9b96 fwd="200.83.85.89" dyno=web.1 connect=0ms service=10ms status=404 bytes=4074 protocol=http2.0 tls=true tls_version=tls1.3
+2025-08-13T03:22:13.010225+00:00 app[web.1]: 10.1.47.195 - - [13/Aug/2025:03:22:13 +0000] "GET /favicon.ico HTTP/1.1" 404 4074 "https://informediariochile.cl/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+2025-08-13T03:25:19.000000+00:00 app[api]: Build started by user rfernandezdelrio@uc.cl
+2025-08-13T03:25:30.000000+00:00 app[api]: Build started by user rfernandezdelrio@uc.cl
+2025-08-13T03:26:19.919056+00:00 app[api]: Running release v183 commands by user rfernandezdelrio@uc.cl
+2025-08-13T03:26:19.919056+00:00 app[api]: Deploy 739c36e2 by user rfernandezdelrio@uc.cl
+2025-08-13T03:26:20.909665+00:00 app[api]: Starting process with command `/bin/sh -c 'if curl $HEROKU_RELEASE_LOG_STREAM --silent --connect-timeout 10 --retry 3 --retry-delay 1 >/tmp/log-stream; then
+2025-08-13T03:26:20.909665+00:00 app[api]: chmod u+x /tmp/log-stream
+2025-08-13T03:26:20.909665+00:00 app[api]: /tmp/log-stream /bin/sh -c '"'"'python manage.py migrate'"'"'
+2025-08-13T03:26:20.909665+00:00 app[api]: else
+2025-08-13T03:26:20.909665+00:00 app[api]: python manage.py migrate
+2025-08-13T03:26:20.909665+00:00 app[api]: fi'` by user rfernandezdelrio@uc.cl
+2025-08-13T03:26:27.213482+00:00 app[api]: Deploy 739c36e2 by user rfernandezdelrio@uc.cl
+2025-08-13T03:26:27.213482+00:00 app[api]: Running release v184 commands by user rfernandezdelrio@uc.cl
+2025-08-13T03:26:27.863925+00:00 app[api]: Starting process with command `/bin/sh -c 'if curl $HEROKU_RELEASE_LOG_STREAM --silent --connect-timeout 10 --retry 3 --retry-delay 1 >/tmp/log-stream; then
+2025-08-13T03:26:27.863925+00:00 app[api]: chmod u+x /tmp/log-stream
+2025-08-13T03:26:27.863925+00:00 app[api]: /tmp/log-stream /bin/sh -c '"'"'python manage.py migrate'"'"'
+2025-08-13T03:26:27.863925+00:00 app[api]: else
+2025-08-13T03:26:27.863925+00:00 app[api]: python manage.py migrate
+2025-08-13T03:26:27.863925+00:00 app[api]: fi'` by user rfernandezdelrio@uc.cl
+2025-08-13T03:26:36.818785+00:00 heroku[release.7456]: Starting process with command `/bin/sh -c 'if curl https://heroku-release-output.s3.amazonaws.com/log-stream?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAZSXS6CXKUD5IMVTI%2F20250813%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250813T032620Z&X-Amz-Expires=900&X-Amz-SignedHeaders=host&X-Amz-Signature=170391e0c8b773f6ff4b7f2c1851daf580f2123192affb244fa8e01b951eb447 --silent --connect-timeout 10 --retry 3 --retry-delay 1 >/tmp/log-stream; then
+2025-08-13T03:26:37.453409+00:00 heroku[release.7456]: State changed from starting to up
+2025-08-13T03:26:39.003183+00:00 app[release.7456]: Operations to perform:
+2025-08-13T03:26:39.003238+00:00 app[release.7456]: Apply all migrations: admin, admin_interface, alerts, auth, contenttypes, sessions
+2025-08-13T03:26:39.019072+00:00 app[release.7456]: Running migrations:
+2025-08-13T03:26:39.019074+00:00 app[release.7456]: No migrations to apply.
+2025-08-13T03:26:39.036209+00:00 app[release.7456]: Your models in app(s): 'alerts' have changes that are not yet reflected in a migration, and so won't be applied.
+2025-08-13T03:26:39.036210+00:00 app[release.7456]: Run 'manage.py makemigrations' to make new migrations, and then re-run 'manage.py migrate' to apply them.
+2025-08-13T03:26:39.241098+00:00 heroku[release.7456]: Process exited with status 0
+2025-08-13T03:26:39.267937+00:00 heroku[release.7456]: State changed from up to complete
+2025-08-13T03:26:39.825569+00:00 app[api]: Release v183 created by user rfernandezdelrio@uc.cl
+2025-08-13T03:26:40.958272+00:00 heroku[web.1]: Restarting
+2025-08-13T03:26:41.013763+00:00 heroku[web.1]: State changed from up to starting
+2025-08-13T03:26:41.083472+00:00 heroku[worker.1]: Restarting
+2025-08-13T03:26:41.086862+00:00 heroku[worker.1]: State changed from up to starting
+2025-08-13T03:26:41.569094+00:00 heroku[worker.1]: Stopping all processes with SIGTERM
+2025-08-13T03:26:41.644411+00:00 heroku[worker.1]: Process exited with status 143
+2025-08-13T03:26:41.863826+00:00 heroku[web.1]: Stopping all processes with SIGTERM
+2025-08-13T03:26:41.893363+00:00 app[web.1]: [2025-08-13 03:26:41 +0000] [9] [INFO] Worker exiting (pid: 9)
+2025-08-13T03:26:41.893379+00:00 app[web.1]: [2025-08-13 03:26:41 +0000] [2] [INFO] Handling signal: term
+2025-08-13T03:26:41.897563+00:00 app[web.1]: [2025-08-13 03:26:41 +0000] [10] [INFO] Worker exiting (pid: 10)
+2025-08-13T03:26:41.900314+00:00 app[web.1]: [2025-08-13 03:26:41 +0000] [2] [ERROR] Worker (pid:9) was sent SIGTERM!
+2025-08-13T03:26:42.093689+00:00 app[web.1]: [2025-08-13 03:26:42 +0000] [2] [INFO] Shutting down: Master
+2025-08-13T03:26:42.189568+00:00 heroku[web.1]: Process exited with status 0
+2025-08-13T03:26:43.357722+00:00 heroku[release.5765]: Starting process with command `/bin/sh -c 'if curl https://heroku-release-output.s3.amazonaws.com/log-stream?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAZSXS6CXKUD5IMVTI%2F20250813%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250813T032627Z&X-Amz-Expires=900&X-Amz-SignedHeaders=host&X-Amz-Signature=1663232838a998efc9d5acf18fda795e5e735c48da7763951217992cd4c4091f --silent --connect-timeout 10 --retry 3 --retry-delay 1 >/tmp/log-stream; then
+2025-08-13T03:26:43.980950+00:00 heroku[release.5765]: State changed from starting to up
+2025-08-13T03:26:45.407308+00:00 app[release.5765]: Operations to perform:
+2025-08-13T03:26:45.407323+00:00 app[release.5765]: Apply all migrations: admin, admin_interface, alerts, auth, contenttypes, sessions
+2025-08-13T03:26:45.422451+00:00 app[release.5765]: Running migrations:
+2025-08-13T03:26:45.422452+00:00 app[release.5765]: No migrations to apply.
+2025-08-13T03:26:45.438180+00:00 app[release.5765]: Your models in app(s): 'alerts' have changes that are not yet reflected in a migration, and so won't be applied.
+2025-08-13T03:26:45.438181+00:00 app[release.5765]: Run 'manage.py makemigrations' to make new migrations, and then re-run 'manage.py migrate' to apply them.
+2025-08-13T03:26:45.617693+00:00 heroku[release.5765]: Process exited with status 0
+2025-08-13T03:26:45.641971+00:00 heroku[release.5765]: State changed from up to complete
+2025-08-13T03:26:46.150702+00:00 app[api]: Release v184 created by user rfernandezdelrio@uc.cl
+2025-08-13T03:26:46.356138+00:00 heroku[web.1]: Restarting
+2025-08-13T03:26:46.474389+00:00 heroku[worker.1]: Restarting
+2025-08-13T03:26:54.000000+00:00 app[api]: Build succeeded
+2025-08-13T03:26:56.481117+00:00 heroku[web.1]: Starting process with command `gunicorn market_sniper.wsgi --log-file -`
+2025-08-13T03:26:56.628343+00:00 heroku[worker.1]: Starting process with command `python manage.py run_scheduler`
+2025-08-13T03:26:56.944610+00:00 app[web.1]: Python buildpack: Detected 512 MB available memory and 8 CPU cores.
+2025-08-13T03:26:56.944692+00:00 app[web.1]: Python buildpack: Defaulting WEB_CONCURRENCY to 2 based on the available memory.
+2025-08-13T03:26:57.183521+00:00 app[web.1]: [2025-08-13 03:26:57 +0000] [2] [INFO] Starting gunicorn 21.2.0
+2025-08-13T03:26:57.183748+00:00 app[web.1]: [2025-08-13 03:26:57 +0000] [2] [INFO] Listening at: http://0.0.0.0:4764 (2)
+2025-08-13T03:26:57.183787+00:00 app[web.1]: [2025-08-13 03:26:57 +0000] [2] [INFO] Using worker: sync
+2025-08-13T03:26:57.185636+00:00 app[web.1]: [2025-08-13 03:26:57 +0000] [9] [INFO] Booting worker with pid: 9
+2025-08-13T03:26:57.265991+00:00 app[web.1]: [2025-08-13 03:26:57 +0000] [10] [INFO] Booting worker with pid: 10
+2025-08-13T03:26:57.767635+00:00 heroku[worker.1]: Stopping all processes with SIGTERM
+2025-08-13T03:26:57.828720+00:00 heroku[worker.1]: Process exited with status 143
+2025-08-13T03:26:58.120766+00:00 heroku[web.1]: Stopping all processes with SIGTERM
+2025-08-13T03:26:58.136771+00:00 app[web.1]: [2025-08-13 03:26:58 +0000] [9] [INFO] Worker exiting (pid: 9)
+2025-08-13T03:26:58.136804+00:00 app[web.1]: [2025-08-13 03:26:58 +0000] [10] [INFO] Worker exiting (pid: 10)
+2025-08-13T03:26:58.136876+00:00 app[web.1]: [2025-08-13 03:26:58 +0000] [2] [INFO] Handling signal: term
+2025-08-13T03:26:58.237264+00:00 app[web.1]: [2025-08-13 03:26:58 +0000] [2] [INFO] Shutting down: Master
+2025-08-13T03:26:58.296944+00:00 heroku[web.1]: Process exited with status 0
+2025-08-13T03:27:02.044514+00:00 heroku[web.1]: Starting process with command `gunicorn market_sniper.wsgi --log-file -`
+2025-08-13T03:27:02.110976+00:00 heroku[worker.1]: Starting process with command `python manage.py run_scheduler`
+2025-08-13T03:27:02.521694+00:00 app[web.1]: Python buildpack: Detected 512 MB available memory and 8 CPU cores.
+2025-08-13T03:27:02.521790+00:00 app[web.1]: Python buildpack: Defaulting WEB_CONCURRENCY to 2 based on the available memory.
+2025-08-13T03:27:02.697699+00:00 heroku[worker.1]: State changed from starting to up
+2025-08-13T03:27:02.766143+00:00 app[web.1]: [2025-08-13 03:27:02 +0000] [2] [INFO] Starting gunicorn 21.2.0
+2025-08-13T03:27:02.766414+00:00 app[web.1]: [2025-08-13 03:27:02 +0000] [2] [INFO] Listening at: http://0.0.0.0:49644 (2)
+2025-08-13T03:27:02.766446+00:00 app[web.1]: [2025-08-13 03:27:02 +0000] [2] [INFO] Using worker: sync
+2025-08-13T03:27:02.768466+00:00 app[web.1]: [2025-08-13 03:27:02 +0000] [9] [INFO] Booting worker with pid: 9
+2025-08-13T03:27:02.777741+00:00 app[web.1]: [2025-08-13 03:27:02 +0000] [10] [INFO] Booting worker with pid: 10
+2025-08-13T03:27:03.000000+00:00 app[api]: Build succeeded
+2025-08-13T03:27:03.244850+00:00 heroku[web.1]: State changed from starting to up
+2025-08-13T03:27:03.807920+00:00 app[worker.1]: Iniciando el programador...
+2025-08-13T03:27:03.808096+00:00 app[worker.1]: Tarea programada para ejecutarse todos los días a las 13:00 UTC (9:00 AM Chile - horario invierno).
+2025-08-13T03:27:03.808096+00:00 app[worker.1]: Presiona CTRL+C para detener el programador.
+2025-08-13T03:34:06.000000+00:00 app[api]: Build started by user rfernandezdelrio@uc.cl
+2025-08-13T03:34:15.000000+00:00 app[api]: Build started by user rfernandezdelrio@uc.cl
+2025-08-13T03:35:08.103359+00:00 app[api]: Running release v185 commands by user rfernandezdelrio@uc.cl
+2025-08-13T03:35:08.103359+00:00 app[api]: Deploy 90b5b349 by user rfernandezdelrio@uc.cl
+2025-08-13T03:35:08.938382+00:00 app[api]: Starting process with command `/bin/sh -c 'if curl $HEROKU_RELEASE_LOG_STREAM --silent --connect-timeout 10 --retry 3 --retry-delay 1 >/tmp/log-stream; then
+2025-08-13T03:35:08.938382+00:00 app[api]: chmod u+x /tmp/log-stream
+2025-08-13T03:35:08.938382+00:00 app[api]: /tmp/log-stream /bin/sh -c '"'"'python manage.py migrate'"'"'
+2025-08-13T03:35:08.938382+00:00 app[api]: else
+2025-08-13T03:35:08.938382+00:00 app[api]: python manage.py migrate
+2025-08-13T03:35:08.938382+00:00 app[api]: fi'` by user rfernandezdelrio@uc.cl
+2025-08-13T03:35:11.127726+00:00 app[api]: Deploy 90b5b349 by user rfernandezdelrio@uc.cl
+2025-08-13T03:35:11.127726+00:00 app[api]: Running release v186 commands by user rfernandezdelrio@uc.cl
+2025-08-13T03:35:11.899641+00:00 app[api]: Starting process with command `/bin/sh -c 'if curl $HEROKU_RELEASE_LOG_STREAM --silent --connect-timeout 10 --retry 3 --retry-delay 1 >/tmp/log-stream; then
+2025-08-13T03:35:11.899641+00:00 app[api]: chmod u+x /tmp/log-stream
+2025-08-13T03:35:11.899641+00:00 app[api]: /tmp/log-stream /bin/sh -c '"'"'python manage.py migrate'"'"'
+2025-08-13T03:35:11.899641+00:00 app[api]: else
+2025-08-13T03:35:11.899641+00:00 app[api]: python manage.py migrate
+2025-08-13T03:35:11.899641+00:00 app[api]: fi'` by user rfernandezdelrio@uc.cl
+2025-08-13T03:35:24.388848+00:00 heroku[release.5168]: Starting process with command `/bin/sh -c 'if curl https://heroku-release-output.s3.amazonaws.com/log-stream?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAZSXS6CXKUD5IMVTI%2F20250813%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250813T033508Z&X-Amz-Expires=900&X-Amz-SignedHeaders=host&X-Amz-Signature=01c8fa08927b4a8eee857094595f70a65069dad826659f8325e93c84a163cd31 --silent --connect-timeout 10 --retry 3 --retry-delay 1 >/tmp/log-stream; then
+2025-08-13T03:35:24.973502+00:00 heroku[release.5168]: State changed from starting to up
+2025-08-13T03:35:26.438910+00:00 app[release.5168]: Operations to perform:
+2025-08-13T03:35:26.438932+00:00 app[release.5168]: Apply all migrations: admin, admin_interface, alerts, auth, contenttypes, sessions
+2025-08-13T03:35:26.453831+00:00 app[release.5168]: Running migrations:
+2025-08-13T03:35:26.453832+00:00 app[release.5168]: No migrations to apply.
+2025-08-13T03:35:26.468687+00:00 app[release.5168]: Your models in app(s): 'alerts' have changes that are not yet reflected in a migration, and so won't be applied.
+2025-08-13T03:35:26.468688+00:00 app[release.5168]: Run 'manage.py makemigrations' to make new migrations, and then re-run 'manage.py migrate' to apply them.
+2025-08-13T03:35:26.634880+00:00 heroku[release.5168]: Process exited with status 0
+2025-08-13T03:35:26.655407+00:00 heroku[release.5168]: State changed from up to complete
+2025-08-13T03:35:27.261316+00:00 app[api]: Release v185 created by user rfernandezdelrio@uc.cl
+2025-08-13T03:35:27.725822+00:00 heroku[release.4125]: Starting process with command `/bin/sh -c 'if curl https://heroku-release-output.s3.amazonaws.com/log-stream?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAZSXS6CXKUD5IMVTI%2F20250813%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250813T033511Z&X-Amz-Expires=900&X-Amz-SignedHeaders=host&X-Amz-Signature=6d64dfca3efae5320bcfa21558b9fac53a2e0ac0e15f134c8f67c94d8472b463 --silent --connect-timeout 10 --retry 3 --retry-delay 1 >/tmp/log-stream; then
+2025-08-13T03:35:27.764674+00:00 heroku[web.1]: Restarting
+2025-08-13T03:35:27.820262+00:00 heroku[web.1]: State changed from up to starting
+2025-08-13T03:35:27.887750+00:00 heroku[worker.1]: Restarting
+2025-08-13T03:35:27.890578+00:00 heroku[worker.1]: State changed from up to starting
+2025-08-13T03:35:28.339439+00:00 heroku[release.4125]: State changed from starting to up
+2025-08-13T03:35:28.404560+00:00 heroku[web.1]: Stopping all processes with SIGTERM
+2025-08-13T03:35:28.422534+00:00 app[web.1]: [2025-08-13 03:35:28 +0000] [10] [INFO] Worker exiting (pid: 10)
+2025-08-13T03:35:28.422546+00:00 app[web.1]: [2025-08-13 03:35:28 +0000] [9] [INFO] Worker exiting (pid: 9)
+2025-08-13T03:35:28.422598+00:00 app[web.1]: [2025-08-13 03:35:28 +0000] [2] [INFO] Handling signal: term
+2025-08-13T03:35:28.434398+00:00 heroku[worker.1]: Stopping all processes with SIGTERM
+2025-08-13T03:35:28.505238+00:00 heroku[worker.1]: Process exited with status 143
+2025-08-13T03:35:28.523024+00:00 app[web.1]: [2025-08-13 03:35:28 +0000] [2] [INFO] Shutting down: Master
+2025-08-13T03:35:28.576812+00:00 heroku[web.1]: Process exited with status 0
+2025-08-13T03:35:29.698039+00:00 app[release.4125]: Operations to perform:
+2025-08-13T03:35:29.698066+00:00 app[release.4125]: Apply all migrations: admin, admin_interface, alerts, auth, contenttypes, sessions
+2025-08-13T03:35:29.713412+00:00 app[release.4125]: Running migrations:
+2025-08-13T03:35:29.713413+00:00 app[release.4125]: No migrations to apply.
+2025-08-13T03:35:29.728555+00:00 app[release.4125]: Your models in app(s): 'alerts' have changes that are not yet reflected in a migration, and so won't be applied.
+2025-08-13T03:35:29.728557+00:00 app[release.4125]: Run 'manage.py makemigrations' to make new migrations, and then re-run 'manage.py migrate' to apply them.
+2025-08-13T03:35:29.951925+00:00 heroku[release.4125]: Process exited with status 0
+2025-08-13T03:35:29.973726+00:00 heroku[release.4125]: State changed from up to complete
+2025-08-13T03:35:30.442374+00:00 app[api]: Release v186 created by user rfernandezdelrio@uc.cl
+2025-08-13T03:35:30.723496+00:00 heroku[web.1]: Restarting
+2025-08-13T03:35:30.844754+00:00 heroku[worker.1]: Restarting
+2025-08-13T03:35:43.000000+00:00 app[api]: Build succeeded
+2025-08-13T03:35:43.203787+00:00 heroku[web.1]: Starting process with command `gunicorn market_sniper.wsgi --log-file -`
+2025-08-13T03:35:43.681501+00:00 app[web.1]: Python buildpack: Detected 512 MB available memory and 8 CPU cores.
+2025-08-13T03:35:43.681568+00:00 app[web.1]: Python buildpack: Defaulting WEB_CONCURRENCY to 2 based on the available memory.
+2025-08-13T03:35:43.700257+00:00 heroku[worker.1]: Starting process with command `python manage.py run_scheduler`
+2025-08-13T03:35:43.913160+00:00 app[web.1]: [2025-08-13 03:35:43 +0000] [2] [INFO] Starting gunicorn 21.2.0
+2025-08-13T03:35:43.913393+00:00 app[web.1]: [2025-08-13 03:35:43 +0000] [2] [INFO] Listening at: http://0.0.0.0:27130 (2)
+2025-08-13T03:35:43.913417+00:00 app[web.1]: [2025-08-13 03:35:43 +0000] [2] [INFO] Using worker: sync
+2025-08-13T03:35:43.915360+00:00 app[web.1]: [2025-08-13 03:35:43 +0000] [9] [INFO] Booting worker with pid: 9
+2025-08-13T03:35:43.939299+00:00 app[web.1]: [2025-08-13 03:35:43 +0000] [10] [INFO] Booting worker with pid: 10
+2025-08-13T03:35:44.827080+00:00 heroku[web.1]: Stopping all processes with SIGTERM
+2025-08-13T03:35:44.842133+00:00 app[web.1]: [2025-08-13 03:35:44 +0000] [10] [INFO] Worker exiting (pid: 10)
+2025-08-13T03:35:44.842146+00:00 app[web.1]: [2025-08-13 03:35:44 +0000] [9] [INFO] Worker exiting (pid: 9)
+2025-08-13T03:35:44.842265+00:00 app[web.1]: [2025-08-13 03:35:44 +0000] [2] [INFO] Handling signal: term
+2025-08-13T03:35:44.942671+00:00 app[web.1]: [2025-08-13 03:35:44 +0000] [2] [INFO] Shutting down: Master
+2025-08-13T03:35:45.002817+00:00 heroku[web.1]: Process exited with status 0
+2025-08-13T03:35:45.043193+00:00 heroku[worker.1]: Stopping all processes with SIGTERM
+2025-08-13T03:35:45.118215+00:00 heroku[worker.1]: Process exited with status 143
+2025-08-13T03:35:46.000000+00:00 app[api]: Build succeeded
+2025-08-13T03:35:46.207336+00:00 heroku[worker.1]: Starting process with command `python manage.py run_scheduler`
+2025-08-13T03:35:46.763277+00:00 heroku[worker.1]: State changed from starting to up
+2025-08-13T03:35:46.807765+00:00 heroku[web.1]: Starting process with command `gunicorn market_sniper.wsgi --log-file -`
+2025-08-13T03:35:47.348521+00:00 app[web.1]: Python buildpack: Detected 512 MB available memory and 8 CPU cores.
+2025-08-13T03:35:47.348597+00:00 app[web.1]: Python buildpack: Defaulting WEB_CONCURRENCY to 2 based on the available memory.
+2025-08-13T03:35:47.608148+00:00 app[web.1]: [2025-08-13 03:35:47 +0000] [2] [INFO] Starting gunicorn 21.2.0
+2025-08-13T03:35:47.608457+00:00 app[web.1]: [2025-08-13 03:35:47 +0000] [2] [INFO] Listening at: http://0.0.0.0:50675 (2)
+2025-08-13T03:35:47.608494+00:00 app[web.1]: [2025-08-13 03:35:47 +0000] [2] [INFO] Using worker: sync
+2025-08-13T03:35:47.610809+00:00 app[web.1]: [2025-08-13 03:35:47 +0000] [9] [INFO] Booting worker with pid: 9
+2025-08-13T03:35:47.691114+00:00 app[web.1]: [2025-08-13 03:35:47 +0000] [10] [INFO] Booting worker with pid: 10
+2025-08-13T03:35:47.795765+00:00 app[worker.1]: Iniciando el programador...
+2025-08-13T03:35:47.795944+00:00 app[worker.1]: Tarea programada para ejecutarse todos los días a las 13:00 UTC (9:00 AM Chile - horario invierno).
+2025-08-13T03:35:47.795944+00:00 app[worker.1]: Presiona CTRL+C para detener el programador.
+2025-08-13T03:35:48.063413+00:00 heroku[web.1]: State changed from starting to up
+2025-08-13T08:58:02.486484+00:00 app[web.1]: Not Found: /.git/HEAD
+2025-08-13T08:58:02.486931+00:00 app[web.1]: 10.1.82.117 - - [13/Aug/2025:08:58:02 +0000] "GET /.git/HEAD HTTP/1.1" 404 4071 "-" "-"
+2025-08-13T08:58:02.487029+00:00 heroku[router]: at=info method=GET path="/.git/HEAD" host=www.informediariochile.cl request_id=85562a4a-157b-6348-c14e-356dcaf9bf15 fwd="185.177.72.204" dyno=web.1 connect=0ms service=369ms status=404 bytes=4071 protocol=http1.1 tls=false
+2025-08-13T08:58:02.577014+00:00 app[web.1]: 10.1.28.107 - - [13/Aug/2025:08:58:02 +0000] "GET / HTTP/1.1" 200 41521 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+2025-08-13T08:58:02.577376+00:00 heroku[router]: at=info method=GET path="/" host=www.informediariochile.cl request_id=c5d5e60c-ff47-4a87-ee5e-44a11cf6519f fwd="185.177.72.204" dyno=web.1 connect=0ms service=460ms status=200 bytes=41521 protocol=http1.1 tls=false
+2025-08-13T13:00:17.921132+00:00 app[worker.1]: [2025-08-13 13:00:17] Iniciando tarea: 'Envío Informe Diario Oficial'...
+2025-08-13T13:00:21.093357+00:00 app[worker.1]: 🚀 Iniciando envío de informes para 13-08-2025...
+2025-08-13T13:00:21.093959+00:00 app[worker.1]: [EDITION] Buscando número de edición para fecha: 13-08-2025
+2025-08-13T13:00:21.094032+00:00 app[worker.1]: [CHROME] Usando Chrome de Heroku: /app/.chrome-for-testing/chrome-linux64/chrome
+2025-08-13T13:00:21.094033+00:00 app[worker.1]: [CHROME] Usando ChromeDriver de Heroku: /app/.chrome-for-testing/chromedriver-linux64/chromedriver
+2025-08-13T13:00:21.597225+00:00 app[worker.1]: [EDITION] Navegando a: https://www.diariooficial.interior.gob.cl/publicaciones/2025/08/13/
+2025-08-13T13:00:35.677761+00:00 app[worker.1]: [EDITION] No se encontró selector de ediciones: Message:
+2025-08-13T13:00:35.677777+00:00 app[worker.1]: Stacktrace:
+2025-08-13T13:00:35.677778+00:00 app[worker.1]: #0 0x5615bd92d01a <unknown>
+2025-08-13T13:00:35.677778+00:00 app[worker.1]: #1 0x5615bd3cca70 <unknown>
+2025-08-13T13:00:35.677778+00:00 app[worker.1]: #2 0x5615bd41e907 <unknown>
+2025-08-13T13:00:35.677778+00:00 app[worker.1]: #3 0x5615bd41eb01 <unknown>
+2025-08-13T13:00:35.677779+00:00 app[worker.1]: #4 0x5615bd46cd54 <unknown>
+2025-08-13T13:00:35.677779+00:00 app[worker.1]: #5 0x5615bd44440d <unknown>
+2025-08-13T13:00:35.677779+00:00 app[worker.1]: #6 0x5615bd46a14f <unknown>
+2025-08-13T13:00:35.677779+00:00 app[worker.1]: #7 0x5615bd4441b3 <unknown>
+2025-08-13T13:00:35.677779+00:00 app[worker.1]: #8 0x5615bd41059b <unknown>
+2025-08-13T13:00:35.677780+00:00 app[worker.1]: #9 0x5615bd411971 <unknown>
+2025-08-13T13:00:35.677780+00:00 app[worker.1]: #10 0x5615bd8f21eb <unknown>
+2025-08-13T13:00:35.677780+00:00 app[worker.1]: #11 0x5615bd8f5f39 <unknown>
+2025-08-13T13:00:35.677780+00:00 app[worker.1]: #12 0x5615bd8d92c9 <unknown>
+2025-08-13T13:00:35.677780+00:00 app[worker.1]: #13 0x5615bd8f6ae8 <unknown>
+2025-08-13T13:00:35.677780+00:00 app[worker.1]: #14 0x5615bd8bdbaf <unknown>
+2025-08-13T13:00:35.677781+00:00 app[worker.1]: #15 0x5615bd91a0a8 <unknown>
+2025-08-13T13:00:35.677781+00:00 app[worker.1]: #16 0x5615bd91a286 <unknown>
+2025-08-13T13:00:35.677781+00:00 app[worker.1]: #17 0x5615bd92bff6 <unknown>
+2025-08-13T13:00:35.677781+00:00 app[worker.1]: #18 0x7fde05989aa4 <unknown>
+2025-08-13T13:00:35.677781+00:00 app[worker.1]: #19 0x7fde05a16c3c <unknown>
+2025-08-13T13:00:35.677781+00:00 app[worker.1]: 
+2025-08-13T13:00:35.689177+00:00 app[worker.1]: [EDITION] No se pudo detectar el número de edición automáticamente
+2025-08-13T13:00:35.749436+00:00 app[worker.1]: [EDITION] Usando estimación por defecto
+2025-08-13T13:00:35.749443+00:00 app[worker.1]: [INFO] No se pudo obtener número de edición para 13-08-2025, usando valor vacío
+2025-08-13T13:01:08.689559+00:00 app[worker.1]: [RELEVANTE] Decreto número 270, de 2023.- Aprueba Reglamento sobre condiciones de habitabilidad, bienestar, seguridad y equipamiento de las embarcaciones pesqueras artesanales y embarcaciones menores prestadoras de servicio a la acuicultura
+2025-08-13T13:01:08.689570+00:00 app[worker.1]: Razón: Establece nuevos procedimientos y requisitos de cumplimiento obligatorio para un sector económico completo, afectando a la pesca artesanal y acuicultura a nivel nacional.
+2025-08-13T13:01:14.004533+00:00 app[worker.1]: [RELEVANTE] Decreto exento número 244, de 2025.- Determina el componente variable para el cálculo del impuesto específico establecido en la ley N° 18.502
+2025-08-13T13:01:14.004552+00:00 app[worker.1]: Razón: Modifica un impuesto específico, lo que impacta a un sector económico completo a nivel nacional.
+2025-08-13T13:01:14.004555+00:00 app[worker.1]: 
+2025-08-13T13:01:14.004556+00:00 app[worker.1]: [RESUMEN FINAL] Total documentos: 11
+2025-08-13T13:01:14.004556+00:00 app[worker.1]: [RESUMEN FINAL] Licitaciones incluidas: 0
+2025-08-13T13:01:14.004556+00:00 app[worker.1]: [RESUMEN FINAL] Publicaciones en informe: 2
+2025-08-13T13:01:14.712392+00:00 app[worker.1]: → Excluido (es fondo): AMERIS DOVER STREET XI FONDO DE INVERSIÓN - Reparto de utilidades (pago de dividendos)...
+2025-08-13T13:01:14.712415+00:00 app[worker.1]: → Excluido (colocación de valores): TANNER SERVICIOS FINANCIEROS S.A. - Colocación de valores en mercados internacionales ...
+2025-08-13T13:01:14.712416+00:00 app[worker.1]: → Excluido (colocación de valores): FACTOTAL S.A. - Colocación de valores en mercados internacionales ...
+2025-08-13T13:01:14.712437+00:00 app[worker.1]: → Excluido (es fondo): FONDO DE INVERSION PATIO OFICINAS II - Otros...
+2025-08-13T13:01:14.712448+00:00 app[worker.1]: → Excluido (colocación de valores): CAJA DE COMPENSACION DE ASIGNACION FAMILIAR DE LOS ANDES - Colocación de valores en mercados internacionales ...
+2025-08-13T13:01:14.712921+00:00 app[worker.1]: 
+2025-08-13T13:01:14.712922+00:00 app[worker.1]: === Filtrado Profesional CMF ===
+2025-08-13T13:01:14.712923+00:00 app[worker.1]: Total hechos originales: 9
+2025-08-13T13:01:14.712932+00:00 app[worker.1]: - Excluidos (fondos + colocaciones): 5
+2025-08-13T13:01:14.712932+00:00 app[worker.1]: - Hechos con relevancia >= 7 (incluidos): 1
+2025-08-13T13:01:14.712933+00:00 app[worker.1]: - Hechos con relevancia < 7 (excluidos): 3
+2025-08-13T13:01:14.712942+00:00 app[worker.1]: Total hechos seleccionados: 1
+2025-08-13T13:01:14.712942+00:00 app[worker.1]: 
+2025-08-13T13:01:14.712942+00:00 app[worker.1]: Criterios aplicados:
+2025-08-13T13:01:14.712945+00:00 app[worker.1]: - Empresas IPSA: SIEMPRE incluidas (relevancia mínima 7.0)
+2025-08-13T13:01:14.712953+00:00 app[worker.1]: - 500 empresas importantes: SIEMPRE incluidas (relevancia mínima 7.0)
+2025-08-13T13:01:14.712953+00:00 app[worker.1]: - Cambios en administración: SIEMPRE incluidos
+2025-08-13T13:01:14.712957+00:00 app[worker.1]: - Compra/venta de acciones: SIEMPRE incluidos
+2025-08-13T13:01:14.712959+00:00 app[worker.1]: - Fusiones/divisiones: SIEMPRE incluidos
+2025-08-13T13:01:14.712967+00:00 app[worker.1]: - Búsqueda inversionistas: SIEMPRE incluidos
+2025-08-13T13:01:14.712967+00:00 app[worker.1]: - Aumentos/disminuciones capital: SIEMPRE incluidos
+2025-08-13T13:01:14.712976+00:00 app[worker.1]: - Colocación de valores: SIEMPRE EXCLUIDOS
+2025-08-13T13:01:14.712976+00:00 app[worker.1]: ================================
+2025-08-13T13:01:14.712976+00:00 app[worker.1]: 
+2025-08-13T13:01:17.338420+00:00 app[worker.1]: [SII] Se encontraron 51 circulares para 2025
+2025-08-13T13:01:18.946225+00:00 app[worker.1]: [SII] Se encontraron 99 resoluciones exentas para 2025
+2025-08-13T13:01:18.946472+00:00 app[worker.1]: [SII] Jurisprudencia administrativa temporalmente no disponible (requiere implementación con Selenium)
+2025-08-13T13:01:18.946512+00:00 app[worker.1]: [SII] Obteniendo novedades tributarias recientes hasta el 12-08-2025...
+2025-08-13T13:01:18.946801+00:00 app[worker.1]: [SII] No hay resoluciones de los últimos 1 días, mostrando las 3 más recientes
+2025-08-13T13:01:18.946802+00:00 app[worker.1]: [SII] Resumen de novedades:
+2025-08-13T13:01:18.946806+00:00 app[worker.1]: - Circulares: 2
+2025-08-13T13:01:18.946816+00:00 app[worker.1]: - Resoluciones Exentas: 3
+2025-08-13T13:01:18.946817+00:00 app[worker.1]: - Jurisprudencia Administrativa: 0
+2025-08-13T13:01:18.946826+00:00 app[worker.1]: - Total: 5
+2025-08-13T13:01:18.993687+00:00 app[worker.1]: ✅ Informe guardado en base de datos para fecha: 2025-08-13
+2025-08-13T13:01:18.995348+00:00 app[worker.1]: 📧 Preparando envío a 20 destinatarios...
+2025-08-13T13:01:18.995382+00:00 app[worker.1]: Primeros destinatarios: ['rodrigo@carvuk.com', 'prueba@prueba.com', 'conchabernardita@gmail.com', 'luzmabruna@hotmail.com', 'bconcha1@miuandes.cl']...
+2025-08-13T13:01:27.603678+00:00 app[worker.1]: ✅ Enviado a: rodrigo@carvuk.com
+2025-08-13T13:01:36.055666+00:00 app[worker.1]: ✅ Enviado a: prueba@prueba.com
+2025-08-13T13:01:45.653545+00:00 app[worker.1]: ✅ Enviado a: conchabernardita@gmail.com
+2025-08-13T13:01:51.332475+00:00 app[worker.1]: ✅ Enviado a: luzmabruna@hotmail.com
+2025-08-13T13:01:57.488173+00:00 app[worker.1]: ✅ Enviado a: bconcha1@miuandes.cl
+2025-08-13T13:02:03.305566+00:00 app[worker.1]: ✅ Enviado a: wfwea@uc.cl
+2025-08-13T13:02:09.455520+00:00 app[worker.1]: ✅ Enviado a: q@uc.cl
+2025-08-13T13:02:15.284321+00:00 app[worker.1]: ✅ Enviado a: rf@ic.cl
+2025-08-13T13:02:24.326980+00:00 app[worker.1]: ✅ Enviado a: rf@ec.cl
+2025-08-13T13:02:30.799925+00:00 app[worker.1]: ✅ Enviado a: dae@qlc.cl
+2025-08-13T13:02:36.460109+00:00 app[worker.1]: ✅ Enviado a: rfernandezdelrio@ql.cl
+2025-08-13T13:02:42.042328+00:00 app[worker.1]: ✅ Enviado a: rfernandezdelrio@uc.cl
+2025-08-13T13:02:51.455261+00:00 app[worker.1]: ✅ Enviado a: prueba_202508020459@informediariochile.cl
+2025-08-13T13:03:02.258299+00:00 app[worker.1]: ✅ Enviado a: yoyomero@live.com
+2025-08-13T13:03:13.676145+00:00 app[worker.1]: ✅ Enviado a: rf@lc.cl
+2025-08-13T13:03:24.303646+00:00 app[worker.1]: ✅ Enviado a: lvarela@bye.cl
+2025-08-13T13:03:34.698792+00:00 app[worker.1]: ✅ Enviado a: mizcue@bye.cl
+2025-08-13T13:03:43.080062+00:00 app[worker.1]: ✅ Enviado a: bjottar@bye.cl
+2025-08-13T13:03:53.463651+00:00 app[worker.1]: ✅ Enviado a: mulloa@bye.cl
+2025-08-13T13:04:02.014020+00:00 app[worker.1]: ✅ Enviado a: fsteinmetz@bsvv.cl
+2025-08-13T13:04:02.096097+00:00 app[worker.1]: 
+2025-08-13T13:04:02.096098+00:00 app[worker.1]: 📊 RESUMEN DE ENVÍO:
+2025-08-13T13:04:02.096099+00:00 app[worker.1]: ✅ Enviados exitosamente: 20
+2025-08-13T13:04:02.096100+00:00 app[worker.1]: ❌ Errores: 0
+2025-08-13T13:04:02.096104+00:00 app[worker.1]: 📧 Total destinatarios: 20
+2025-08-13T13:04:02.096136+00:00 app[worker.1]: ✅ Informes enviados exitosamente para 13-08-2025
+2025-08-13T13:04:02.096185+00:00 app[worker.1]: [2025-08-13 13:04:02] Tarea 'Envío Informe Diario Oficial' finalizada exitosamente.

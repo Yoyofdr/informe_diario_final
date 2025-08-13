@@ -277,14 +277,6 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Informe Diario • {fecha}</title>
-    <!--[if mso]>
-    <xml>
-        <o:OfficeDocumentSettings>
-            <o:AllowPNG/>
-            <o:PixelsPerInch>96</o:PixelsPerInch>
-        </o:OfficeDocumentSettings>
-    </xml>
-    <![endif]-->
     <style>
         @media screen and (max-width: 600px) {{
             /* Ajustes para móviles */
@@ -381,16 +373,9 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
             html += f"""
                                 <tr>
                                     <td style="padding-bottom: 16px;">
-                                        <!--[if mso]>
-                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0;">
                                             <tr>
-                                                <td style="padding: 24px; border-top: 3px solid #6b7280;">
-                                        <![endif]-->
-                                        <!--[if !mso]><!-->
-                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
-                                            <tr>
-                                                <td style="padding: 24px; border-top: 3px solid #6b7280;">
-                                        <!--<![endif]-->
+                                                <td style="padding: 20px; border-top: 3px solid #6b7280;">
                                                     <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
                                                         {pub.get('titulo', '')}
                                                     </h3>
@@ -558,16 +543,9 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
             html += f"""
                                 <tr>
                                     <td style="padding-bottom: 16px;">
-                                        <!--[if mso]>
-                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0;">
                                             <tr>
-                                                <td style="padding: 24px; border-top: 3px solid #64748b;">
-                                        <![endif]-->
-                                        <!--[if !mso]><!-->
-                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
-                                            <tr>
-                                                <td class="section-padding" style="padding: 24px; border-top: 3px solid #64748b; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
-                                        <!--<![endif]-->
+                                                <td style="padding: 20px; border-top: 3px solid #64748b;">
                                                     <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
                                                         {pub.get('titulo', '')}
                                                     </h3>

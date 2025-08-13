@@ -15,6 +15,9 @@ from datetime import datetime
 import pytz
 import logging
 
+# Agregar el directorio raíz al path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
 # Configurar Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'market_sniper.settings')
 import django
@@ -22,7 +25,7 @@ django.setup()
 
 from alerts.models import InformeDiarioCache, Destinatario
 from alerts.scraper_diario_oficial import obtener_sumario_diario_oficial
-from alerts.scraper_cmf import obtener_hechos_esenciales_dia
+from scripts.scrapers.scraper_cmf_mejorado import obtener_hechos_esenciales_dia
 from alerts.scrapers.scraper_sii import obtener_publicaciones_sii_hoy
 from alerts.cmf_criterios_profesionales import filtrar_hechos_profesional
 

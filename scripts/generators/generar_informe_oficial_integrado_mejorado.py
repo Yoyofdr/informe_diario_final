@@ -371,21 +371,9 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     <p style="margin: 0; font-size: 14px; color: #6b7280;">
                                                         Leyes, decretos supremos y resoluciones de alcance general
                                                     </p>
-                                                <!--[if mso]>
-                                                                    </td>
-                                                                </tr>
-                                                            </table>
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                            </v:textbox>
-                                        </v:roundrect>
-                                        <![endif]-->
-                                        <!--[if !mso]><!-->
                                                 </td>
                                             </tr>
                                         </table>
-                                        <!--<![endif]-->
                                     </td>
                                 </tr>"""
         
@@ -394,26 +382,14 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                 <tr>
                                     <td style="padding-bottom: 16px;">
                                         <!--[if mso]>
-                                        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" 
-                                            style="width:100%;height:100%;" 
-                                            arcsize="3%" 
-                                            stroke="t" 
-                                            strokecolor="#e2e8f0"
-                                            strokeweight="1px"
-                                            fillcolor="#ffffff">
-                                            <v:stroke dashstyle="solid"/>
-                                            <v:textbox style="mso-fit-shape-to-text:true" inset="0,0,0,0">
-                                                <table width="100%" cellpadding="0" cellspacing="0">
-                                                    <tr>
-                                                        <td style="background-color: #6b7280; padding: 3px;">
-                                                            <table width="100%" cellpadding="0" cellspacing="0">
-                                                                <tr>
-                                                                    <td style="background-color: #ffffff; padding: 21px 24px 24px 24px;">
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0;">
+                                            <tr>
+                                                <td style="padding: 24px; border-top: 3px solid #6b7280;">
                                         <![endif]-->
                                         <!--[if !mso]><!-->
-                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
                                             <tr>
-                                                <td class="section-padding" style="padding: 24px; border-top: 3px solid #6b7280; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                                <td style="padding: 24px; border-top: 3px solid #6b7280;">
                                         <!--<![endif]-->
                                                     <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
                                                         {pub.get('titulo', '')}
@@ -423,15 +399,16 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     </p>
                                                     <!-- Botón compatible con Outlook -->
                                                     <!--[if mso]>
-                                                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" 
-                                                        href="{pub.get('url_pdf', '#')}" 
-                                                        style="height:40px;v-text-anchor:middle;width:180px;" 
-                                                        arcsize="15%" 
-                                                        stroke="f" 
-                                                        fillcolor="#6b7280">
-                                                        <w:anchorlock/>
-                                                        <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:14px;font-weight:500;">Ver documento oficial</center>
-                                                    </v:roundrect>
+                                                    <table cellspacing="0" cellpadding="0" style="margin-top: 10px;">
+                                                        <tr>
+                                                            <td align="center" style="background-color: #6b7280; padding: 12px 24px;">
+                                                                <a href="{pub.get('url_pdf', '#')}" 
+                                                                   style="color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; font-weight: 500; text-decoration: none; display: block;">
+                                                                    Ver documento oficial
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
                                                     <![endif]-->
                                                     <!--[if !mso]><!-->
                                                     <table cellpadding="0" cellspacing="0" border="0" role="presentation">
@@ -449,31 +426,16 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                                           line-height: 1;
                                                                           padding: 12px 24px;
                                                                           text-align: center;
-                                                                          text-decoration: none; 
-                                                                          -webkit-border-radius: 6px; 
-                                                                          -moz-border-radius: 6px;
-                                                                          mso-hide: all;">
+                                                                          text-decoration: none;">
                                                                     Ver documento oficial
                                                                 </a>
                                                             </td>
                                                         </tr>
                                                     </table>
                                                     <!--<![endif]-->
-                                                <!--[if mso]>
-                                                                    </td>
-                                                                </tr>
-                                                            </table>
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                            </v:textbox>
-                                        </v:roundrect>
-                                        <![endif]-->
-                                        <!--[if !mso]><!-->
                                                 </td>
                                             </tr>
                                         </table>
-                                        <!--<![endif]-->
                                     </td>
                                 </tr>"""
         
@@ -496,21 +458,9 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     <p style="margin: 0; font-size: 14px; color: #6b7280;">
                                                         Resoluciones y decretos de alcance específico
                                                     </p>
-                                                <!--[if mso]>
-                                                                    </td>
-                                                                </tr>
-                                                            </table>
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                            </v:textbox>
-                                        </v:roundrect>
-                                        <![endif]-->
-                                        <!--[if !mso]><!-->
                                                 </td>
                                             </tr>
                                         </table>
-                                        <!--<![endif]-->
                                     </td>
                                 </tr>"""
         
@@ -519,26 +469,14 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                 <tr>
                                     <td style="padding-bottom: 16px;">
                                         <!--[if mso]>
-                                        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" 
-                                            style="width:100%;height:100%;" 
-                                            arcsize="3%" 
-                                            stroke="t" 
-                                            strokecolor="#e2e8f0"
-                                            strokeweight="1px"
-                                            fillcolor="#ffffff">
-                                            <v:stroke dashstyle="solid"/>
-                                            <v:textbox style="mso-fit-shape-to-text:true" inset="0,0,0,0">
-                                                <table width="100%" cellpadding="0" cellspacing="0">
-                                                    <tr>
-                                                        <td style="background-color: #94a3b8; padding: 3px;">
-                                                            <table width="100%" cellpadding="0" cellspacing="0">
-                                                                <tr>
-                                                                    <td style="background-color: #ffffff; padding: 21px 24px 24px 24px;">
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0;">
+                                            <tr>
+                                                <td style="padding: 24px; border-top: 3px solid #94a3b8;">
                                         <![endif]-->
                                         <!--[if !mso]><!-->
-                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
                                             <tr>
-                                                <td class="section-padding" style="padding: 24px; border-top: 3px solid #94a3b8; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                                <td style="padding: 24px; border-top: 3px solid #94a3b8;">
                                         <!--<![endif]-->
                                                     <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
                                                         {pub.get('titulo', '')}
@@ -548,15 +486,16 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     </p>
                                                     <!-- Botón compatible con Outlook -->
                                                     <!--[if mso]>
-                                                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" 
-                                                        href="{pub.get('url_pdf', '#')}" 
-                                                        style="height:40px;v-text-anchor:middle;width:180px;" 
-                                                        arcsize="15%" 
-                                                        stroke="f" 
-                                                        fillcolor="#94a3b8">
-                                                        <w:anchorlock/>
-                                                        <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:14px;font-weight:500;">Ver documento oficial</center>
-                                                    </v:roundrect>
+                                                    <table cellspacing="0" cellpadding="0" style="margin-top: 10px;">
+                                                        <tr>
+                                                            <td align="center" style="background-color: #94a3b8; padding: 12px 24px;">
+                                                                <a href="{pub.get('url_pdf', '#')}" 
+                                                                   style="color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; font-weight: 500; text-decoration: none; display: block;">
+                                                                    Ver documento oficial
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
                                                     <![endif]-->
                                                     <!--[if !mso]><!-->
                                                     <table cellpadding="0" cellspacing="0" border="0" role="presentation">
@@ -584,21 +523,9 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                         </tr>
                                                     </table>
                                                     <!--<![endif]-->
-                                                <!--[if mso]>
-                                                                    </td>
-                                                                </tr>
-                                                            </table>
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                            </v:textbox>
-                                        </v:roundrect>
-                                        <![endif]-->
-                                        <!--[if !mso]><!-->
                                                 </td>
                                             </tr>
                                         </table>
-                                        <!--<![endif]-->
                                     </td>
                                 </tr>"""
         
@@ -621,21 +548,9 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     <p style="margin: 0; font-size: 14px; color: #6b7280;">
                                                         Avisos importantes y notificaciones
                                                     </p>
-                                                <!--[if mso]>
-                                                                    </td>
-                                                                </tr>
-                                                            </table>
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                            </v:textbox>
-                                        </v:roundrect>
-                                        <![endif]-->
-                                        <!--[if !mso]><!-->
                                                 </td>
                                             </tr>
                                         </table>
-                                        <!--<![endif]-->
                                     </td>
                                 </tr>"""
         
@@ -709,21 +624,9 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                         </tr>
                                                     </table>
                                                     <!--<![endif]-->
-                                                <!--[if mso]>
-                                                                    </td>
-                                                                </tr>
-                                                            </table>
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                            </v:textbox>
-                                        </v:roundrect>
-                                        <![endif]-->
-                                        <!--[if !mso]><!-->
                                                 </td>
                                             </tr>
                                         </table>
-                                        <!--<![endif]-->
                                     </td>
                                 </tr>"""
         
@@ -746,21 +649,9 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     <p style="margin: 0; font-size: 14px; color: #2563eb;">
                                                         Resoluciones, circulares y oficios
                                                     </p>
-                                                <!--[if mso]>
-                                                                    </td>
-                                                                </tr>
-                                                            </table>
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                            </v:textbox>
-                                        </v:roundrect>
-                                        <![endif]-->
-                                        <!--[if !mso]><!-->
                                                 </td>
                                             </tr>
                                         </table>
-                                        <!--<![endif]-->
                                     </td>
                                 </tr>"""
         
@@ -775,21 +666,9 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     <p style="margin: 0; font-size: 14px; color: #64748b; font-style: italic;">
                                                         No se encontraron circulares, resoluciones ni jurisprudencia nueva
                                                     </p>
-                                                <!--[if mso]>
-                                                                    </td>
-                                                                </tr>
-                                                            </table>
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                            </v:textbox>
-                                        </v:roundrect>
-                                        <![endif]-->
-                                        <!--[if !mso]><!-->
                                                 </td>
                                             </tr>
                                         </table>
-                                        <!--<![endif]-->
                                     </td>
                                 </tr>"""
         else:
@@ -881,21 +760,9 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                         </tr>
                                                     </table>
                                                     <!--<![endif]-->
-                                                <!--[if mso]>
-                                                                    </td>
-                                                                </tr>
-                                                            </table>
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                            </v:textbox>
-                                        </v:roundrect>
-                                        <![endif]-->
-                                        <!--[if !mso]><!-->
                                                 </td>
                                             </tr>
                                         </table>
-                                        <!--<![endif]-->
                                     </td>
                                 </tr>"""
         
@@ -918,21 +785,9 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     <p style="margin: 0; font-size: 14px; color: #7c3aed;">
                                                         Información relevante del mercado de valores
                                                     </p>
-                                                <!--[if mso]>
-                                                                    </td>
-                                                                </tr>
-                                                            </table>
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                            </v:textbox>
-                                        </v:roundrect>
-                                        <![endif]-->
-                                        <!--[if !mso]><!-->
                                                 </td>
                                             </tr>
                                         </table>
-                                        <!--<![endif]-->
                                     </td>
                                 </tr>"""
         
@@ -1014,21 +869,9 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                         </tr>
                                                     </table>
                                                     <!--<![endif]-->
-                                                <!--[if mso]>
-                                                                    </td>
-                                                                </tr>
-                                                            </table>
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                            </v:textbox>
-                                        </v:roundrect>
-                                        <![endif]-->
-                                        <!--[if !mso]><!-->
                                                 </td>
                                             </tr>
                                         </table>
-                                        <!--<![endif]-->
                                     </td>
                                 </tr>"""
         

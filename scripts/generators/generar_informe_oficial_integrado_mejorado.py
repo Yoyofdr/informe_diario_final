@@ -1116,11 +1116,18 @@ def enviar_informe_email(html, fecha):
     # Verificar si es un informe de bienvenida (solo para casos especiales)
     es_bienvenida = os.getenv('INFORME_ES_BIENVENIDA', 'false') == 'true'
     
+    # Verificar si hay destinatarios específicos para prueba
+    destinatarios_prueba = os.getenv('INFORME_DESTINATARIOS_PRUEBA', '')
+    
     if es_bienvenida:
         # Caso especial: envío de bienvenida a un solo destinatario
         para_email = os.getenv('INFORME_DESTINATARIO_TEMP', 'rfernandezdelrio@uc.cl')
         destinatarios = [para_email]
         logger.info("Modo bienvenida: enviando a un solo destinatario")
+    elif destinatarios_prueba:
+        # Modo prueba: enviar solo a destinatarios específicos
+        destinatarios = [email.strip() for email in destinatarios_prueba.split(',')]
+        logger.info(f"MODO PRUEBA: enviando solo a {len(destinatarios)} destinatarios específicos: {destinatarios}")
     else:
         # Caso normal: obtener TODOS los destinatarios de la base de datos
         destinatarios = list(Destinatario.objects.values_list('email', flat=True))

@@ -559,21 +559,9 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                 <tr>
                                     <td style="padding-bottom: 16px;">
                                         <!--[if mso]>
-                                        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" 
-                                            style="width:100%;height:100%;" 
-                                            arcsize="3%" 
-                                            stroke="t" 
-                                            strokecolor="#e2e8f0"
-                                            strokeweight="1px"
-                                            fillcolor="#ffffff">
-                                            <v:stroke dashstyle="solid"/>
-                                            <v:textbox style="mso-fit-shape-to-text:true" inset="0,0,0,0">
-                                                <table width="100%" cellpadding="0" cellspacing="0">
-                                                    <tr>
-                                                        <td style="background-color: #64748b; padding: 3px;">
-                                                            <table width="100%" cellpadding="0" cellspacing="0">
-                                                                <tr>
-                                                                    <td style="background-color: #ffffff; padding: 21px 24px 24px 24px;">
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0;">
+                                            <tr>
+                                                <td style="padding: 24px; border-top: 3px solid #64748b;">
                                         <![endif]-->
                                         <!--[if !mso]><!-->
                                         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
@@ -588,15 +576,15 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     </p>
                                                     <!-- Botón compatible con Outlook -->
                                                     <!--[if mso]>
-                                                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" 
-                                                        href="{pub.get('url_pdf', '#')}" 
-                                                        style="height:40px;v-text-anchor:middle;width:180px;" 
-                                                        arcsize="15%" 
-                                                        stroke="f" 
-                                                        fillcolor="#64748b">
-                                                        <w:anchorlock/>
-                                                        <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:14px;font-weight:500;">Ver documento oficial</center>
-                                                    </v:roundrect>
+                                                    <table cellspacing="0" cellpadding="0" style="margin-top: 10px;">
+                                                        <tr>
+                                                            <td align="center" style="background-color: #64748b; padding: 12px 24px;">
+                                                                <a href="{pub.get('url_pdf', '#')}" style="color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; font-weight: 500; text-decoration: none; display: block;">
+                                                                    Ver documento oficial
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
                                                     <![endif]-->
                                                     <!--[if !mso]><!-->
                                                     <table cellpadding="0" cellspacing="0" border="0" role="presentation">
@@ -692,21 +680,9 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                 <tr>
                                     <td style="padding-bottom: 16px;">
                                         <!--[if mso]>
-                                        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" 
-                                            style="width:100%;height:100%;" 
-                                            arcsize="3%" 
-                                            stroke="t" 
-                                            strokecolor="#e2e8f0"
-                                            strokeweight="1px"
-                                            fillcolor="#ffffff">
-                                            <v:stroke dashstyle="solid"/>
-                                            <v:textbox style="mso-fit-shape-to-text:true" inset="0,0,0,0">
-                                                <table width="100%" cellpadding="0" cellspacing="0">
-                                                    <tr>
-                                                        <td style="background-color: #2563eb; padding: 3px;">
-                                                            <table width="100%" cellpadding="0" cellspacing="0">
-                                                                <tr>
-                                                                    <td style="background-color: #ffffff; padding: 21px 24px 24px 24px;">
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0;">
+                                            <tr>
+                                                <td style="padding: 24px; border-top: 3px solid #2563eb;">
                                         <![endif]-->
                                         <!--[if !mso]><!-->
                                         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
@@ -802,21 +778,9 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                 <tr>
                                     <td style="padding-bottom: 16px;">
                                         <!--[if mso]>
-                                        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" 
-                                            style="width:100%;height:100%;" 
-                                            arcsize="3%" 
-                                            stroke="t" 
-                                            strokecolor="#e2e8f0"
-                                            strokeweight="1px"
-                                            fillcolor="#ffffff">
-                                            <v:stroke dashstyle="solid"/>
-                                            <v:textbox style="mso-fit-shape-to-text:true" inset="0,0,0,0">
-                                                <table width="100%" cellpadding="0" cellspacing="0">
-                                                    <tr>
-                                                        <td style="background-color: #7c3aed; padding: 3px;">
-                                                            <table width="100%" cellpadding="0" cellspacing="0">
-                                                                <tr>
-                                                                    <td style="background-color: #ffffff; padding: 21px 24px 24px 24px;">
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0;">
+                                            <tr>
+                                                <td style="padding: 24px; border-top: 3px solid #7c3aed;">
                                         <![endif]-->
                                         <!--[if !mso]><!-->
                                         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">

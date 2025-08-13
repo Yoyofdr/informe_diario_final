@@ -516,7 +516,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                                           text-decoration: none; 
                                                                           -webkit-border-radius: 6px; 
                                                                           -moz-border-radius: 6px;
-                                                                          mso-hide: all;">
+                                                                          ">
                                                                     Ver documento oficial
                                                                 </a>
                                                             </td>
@@ -617,7 +617,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                                           text-decoration: none; 
                                                                           -webkit-border-radius: 6px; 
                                                                           -moz-border-radius: 6px;
-                                                                          mso-hide: all;">
+                                                                          ">
                                                                     Ver documento oficial
                                                                 </a>
                                                             </td>
@@ -724,15 +724,16 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     </p>
                                                     <!-- Botón compatible con Outlook -->
                                                     <!--[if mso]>
-                                                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" 
-                                                        href="{url_documento}" 
-                                                        style="height:40px;v-text-anchor:middle;width:160px;" 
-                                                        arcsize="15%" 
-                                                        stroke="f" 
-                                                        fillcolor="#2563eb">
-                                                        <w:anchorlock/>
-                                                        <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:14px;font-weight:500;">Ver documento SII</center>
-                                                    </v:roundrect>
+                                                    <table cellspacing="0" cellpadding="0" style="margin-top: 10px;">
+                                                        <tr>
+                                                            <td align="center" style="background-color: #2563eb; padding: 12px 24px;">
+                                                                <a href="{url_documento}" 
+                                                                   style="color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; font-weight: 500; text-decoration: none; display: block;">
+                                                                    Ver documento SII
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
                                                     <![endif]-->
                                                     <!--[if !mso]><!-->
                                                     <table cellpadding="0" cellspacing="0" border="0" role="presentation">
@@ -753,7 +754,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                                           text-decoration: none; 
                                                                           -webkit-border-radius: 6px; 
                                                                           -moz-border-radius: 6px;
-                                                                          mso-hide: all;">
+                                                                          ">
                                                                     Ver documento SII
                                                                 </a>
                                                             </td>
@@ -833,15 +834,16 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     </p>
                                                     <!-- Botón compatible con Outlook -->
                                                     <!--[if mso]>
-                                                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" 
-                                                        href="{url_hecho}" 
-                                                        style="height:40px;v-text-anchor:middle;width:180px;" 
-                                                        arcsize="15%" 
-                                                        stroke="f" 
-                                                        fillcolor="#7c3aed">
-                                                        <w:anchorlock/>
-                                                        <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:14px;font-weight:500;">Ver hecho esencial</center>
-                                                    </v:roundrect>
+                                                    <table cellspacing="0" cellpadding="0" style="margin-top: 10px;">
+                                                        <tr>
+                                                            <td align="center" style="background-color: #7c3aed; padding: 12px 24px;">
+                                                                <a href="{url_hecho}" 
+                                                                   style="color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; font-weight: 500; text-decoration: none; display: block;">
+                                                                    Ver hecho esencial
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
                                                     <![endif]-->
                                                     <!--[if !mso]><!-->
                                                     <table cellpadding="0" cellspacing="0" border="0" role="presentation">
@@ -862,7 +864,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                                           text-decoration: none; 
                                                                           -webkit-border-radius: 6px; 
                                                                           -moz-border-radius: 6px;
-                                                                          mso-hide: all;">
+                                                                          ">
                                                                     Ver hecho esencial
                                                                 </a>
                                                             </td>

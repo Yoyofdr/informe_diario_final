@@ -383,24 +383,18 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                         {pub.get('resumen', '')}
                                                     </p>
                                                     <!-- Botón compatible con Outlook -->
-                                                    <table cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
                                                         <tr>
-                                                            <td align="left">
-                                                                <a href="{pub.get('url_pdf', '#')}" 
-                                                                   style="background-color: #6b7280; 
-                                                                          border: 1px solid #6b7280;
-                                                                          border-radius: 6px; 
-                                                                          color: #ffffff; 
-                                                                          display: inline-block; 
-                                                                          font-family: Arial, sans-serif;
-                                                                          font-size: 14px; 
-                                                                          font-weight: 500; 
-                                                                          line-height: 1;
-                                                                          padding: 12px 24px;
-                                                                          text-align: center;
-                                                                          text-decoration: none;">
-                                                                    Ver documento oficial
-                                                                </a>
+                                                            <td>
+                                                                <table border="0" cellspacing="0" cellpadding="0">
+                                                                    <tr>
+                                                                        <td align="center" style="border-radius: 6px;" bgcolor="#6b7280">
+                                                                            <a href="{pub.get('url_pdf', '#')}" target="_blank" style="font-size: 14px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 12px 24px; border: 1px solid #6b7280; display: inline-block; font-weight: 500;">
+                                                                                Ver documento oficial
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
                                                             </td>
                                                         </tr>
                                                     </table>
@@ -449,27 +443,18 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                         {pub.get('resumen', '')}
                                                     </p>
                                                     <!-- Botón compatible con Outlook -->
-                                                    <table cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
                                                         <tr>
-                                                            <td align="left">
-                                                                <a href="{pub.get('url_pdf', '#')}" 
-                                                                   style="background-color: #94a3b8; 
-                                                                          border: 1px solid #94a3b8;
-                                                                          border-radius: 6px; 
-                                                                          color: #ffffff; 
-                                                                          display: inline-block; 
-                                                                          font-family: Arial, sans-serif;
-                                                                          font-size: 14px; 
-                                                                          font-weight: 500; 
-                                                                          line-height: 1;
-                                                                          padding: 12px 24px;
-                                                                          text-align: center;
-                                                                          text-decoration: none; 
-                                                                          -webkit-border-radius: 6px; 
-                                                                          -moz-border-radius: 6px;
-                                                                          ">
-                                                                    Ver documento oficial
-                                                                </a>
+                                                            <td>
+                                                                <table border="0" cellspacing="0" cellpadding="0">
+                                                                    <tr>
+                                                                        <td align="center" style="border-radius: 6px;" bgcolor="#94a3b8">
+                                                                            <a href="{pub.get('url_pdf', '#')}" target="_blank" style="font-size: 14px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 12px 24px; border: 1px solid #94a3b8; display: inline-block; font-weight: 500;">
+                                                                                Ver documento oficial
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
                                                             </td>
                                                         </tr>
                                                     </table>
@@ -518,27 +503,18 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                         {pub.get('resumen', '')}
                                                     </p>
                                                     <!-- Botón compatible con Outlook -->
-                                                    <table cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
                                                         <tr>
-                                                            <td align="left">
-                                                                <a href="{pub.get('url_pdf', '#')}" 
-                                                                   style="background-color: #64748b; 
-                                                                          border: 1px solid #64748b;
-                                                                          border-radius: 6px; 
-                                                                          color: #ffffff; 
-                                                                          display: inline-block; 
-                                                                          font-family: Arial, sans-serif;
-                                                                          font-size: 14px; 
-                                                                          font-weight: 500; 
-                                                                          line-height: 1;
-                                                                          padding: 12px 24px;
-                                                                          text-align: center;
-                                                                          text-decoration: none; 
-                                                                          -webkit-border-radius: 6px; 
-                                                                          -moz-border-radius: 6px;
-                                                                          ">
-                                                                    Ver documento oficial
-                                                                </a>
+                                                            <td>
+                                                                <table border="0" cellspacing="0" cellpadding="0">
+                                                                    <tr>
+                                                                        <td align="center" style="border-radius: 6px;" bgcolor="#64748b">
+                                                                            <a href="{pub.get('url_pdf', '#')}" target="_blank" style="font-size: 14px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 12px 24px; border: 1px solid #64748b; display: inline-block; font-weight: 500;">
+                                                                                Ver documento oficial
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
                                                             </td>
                                                         </tr>
                                                     </table>
@@ -622,27 +598,18 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                         {pub.get('titulo', 'Sin descripción disponible')}
                                                     </p>
                                                     <!-- Botón compatible con Outlook -->
-                                                    <table cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
                                                         <tr>
-                                                            <td align="left">
-                                                                <a href="{url_documento}" 
-                                                                   style="background-color: #2563eb; 
-                                                                          border: 1px solid #2563eb;
-                                                                          border-radius: 6px; 
-                                                                          color: #ffffff; 
-                                                                          display: inline-block; 
-                                                                          font-family: Arial, sans-serif;
-                                                                          font-size: 14px; 
-                                                                          font-weight: 500; 
-                                                                          line-height: 1;
-                                                                          padding: 12px 24px;
-                                                                          text-align: center;
-                                                                          text-decoration: none; 
-                                                                          -webkit-border-radius: 6px; 
-                                                                          -moz-border-radius: 6px;
-                                                                          ">
-                                                                    Ver documento SII
-                                                                </a>
+                                                            <td>
+                                                                <table border="0" cellspacing="0" cellpadding="0">
+                                                                    <tr>
+                                                                        <td align="center" style="border-radius: 6px;" bgcolor="#2563eb">
+                                                                            <a href="{url_documento}" target="_blank" style="font-size: 14px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 12px 24px; border: 1px solid #2563eb; display: inline-block; font-weight: 500;">
+                                                                                Ver documento SII
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
                                                             </td>
                                                         </tr>
                                                     </table>
@@ -699,27 +666,18 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                         {hecho.get('resumen', '')}
                                                     </p>
                                                     <!-- Botón compatible con Outlook -->
-                                                    <table cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
                                                         <tr>
-                                                            <td align="left">
-                                                                <a href="{url_hecho}" 
-                                                                   style="background-color: #7c3aed; 
-                                                                          border: 1px solid #7c3aed;
-                                                                          border-radius: 6px; 
-                                                                          color: #ffffff; 
-                                                                          display: inline-block; 
-                                                                          font-family: Arial, sans-serif;
-                                                                          font-size: 14px; 
-                                                                          font-weight: 500; 
-                                                                          line-height: 1;
-                                                                          padding: 12px 24px;
-                                                                          text-align: center;
-                                                                          text-decoration: none; 
-                                                                          -webkit-border-radius: 6px; 
-                                                                          -moz-border-radius: 6px;
-                                                                          ">
-                                                                    Ver hecho esencial
-                                                                </a>
+                                                            <td>
+                                                                <table border="0" cellspacing="0" cellpadding="0">
+                                                                    <tr>
+                                                                        <td align="center" style="border-radius: 6px;" bgcolor="#7c3aed">
+                                                                            <a href="{url_hecho}" target="_blank" style="font-size: 14px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 12px 24px; border: 1px solid #7c3aed; display: inline-block; font-weight: 500;">
+                                                                                Ver hecho esencial
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
                                                             </td>
                                                         </tr>
                                                     </table>

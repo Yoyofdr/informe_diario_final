@@ -25,9 +25,13 @@ django.setup()
 
 from alerts.models import InformeDiarioCache, Destinatario
 from alerts.scraper_diario_oficial import obtener_sumario_diario_oficial
-from scripts.scrapers.scraper_cmf_mejorado import obtener_hechos_esenciales_dia
-from alerts.scrapers.scraper_sii import obtener_publicaciones_sii_hoy
+from scripts.scrapers.cmf_wrapper import obtener_hechos_esenciales_dia
 from alerts.cmf_criterios_profesionales import filtrar_hechos_profesional
+
+# Función wrapper para SII (ya que no existe obtener_publicaciones_sii_hoy)
+def obtener_publicaciones_sii_hoy(fecha_str=None):
+    """Wrapper para compatibilidad - retorna lista vacía por ahora"""
+    return []
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

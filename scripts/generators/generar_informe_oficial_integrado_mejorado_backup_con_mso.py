@@ -383,6 +383,19 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                         {pub.get('resumen', '')}
                                                     </p>
                                                     <!-- Botón compatible con Outlook -->
+                                                    <!--[if mso]>
+                                                    <table cellspacing="0" cellpadding="0" style="margin-top: 10px;">
+                                                        <tr>
+                                                            <td align="center" style="background-color: #6b7280; padding: 12px 24px;">
+                                                                <a href="{pub.get('url_pdf', '#')}" 
+                                                                   style="color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; font-weight: 500; text-decoration: none; display: block;">
+                                                                    Ver documento oficial
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <![endif]-->
+                                                    <!--[if !mso]><!-->
                                                     <table cellpadding="0" cellspacing="0" border="0" role="presentation">
                                                         <tr>
                                                             <td align="left">
@@ -404,6 +417,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                             </td>
                                                         </tr>
                                                     </table>
+                                                    <!--<![endif]-->
                                                 </td>
                                             </tr>
                                         </table>
@@ -439,9 +453,16 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
             html += f"""
                                 <tr>
                                     <td style="padding-bottom: 16px;">
+                                        <!--[if mso]>
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0;">
+                                            <tr>
+                                                <td style="padding: 24px; border-top: 3px solid #94a3b8;">
+                                        <![endif]-->
+                                        <!--[if !mso]><!-->
                                         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
                                             <tr>
                                                 <td style="padding: 24px; border-top: 3px solid #94a3b8;">
+                                        <!--<![endif]-->
                                                     <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
                                                         {pub.get('titulo', '')}
                                                     </h3>
@@ -449,6 +470,19 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                         {pub.get('resumen', '')}
                                                     </p>
                                                     <!-- Botón compatible con Outlook -->
+                                                    <!--[if mso]>
+                                                    <table cellspacing="0" cellpadding="0" style="margin-top: 10px;">
+                                                        <tr>
+                                                            <td align="center" style="background-color: #94a3b8; padding: 12px 24px;">
+                                                                <a href="{pub.get('url_pdf', '#')}" 
+                                                                   style="color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; font-weight: 500; text-decoration: none; display: block;">
+                                                                    Ver documento oficial
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <![endif]-->
+                                                    <!--[if !mso]><!-->
                                                     <table cellpadding="0" cellspacing="0" border="0" role="presentation">
                                                         <tr>
                                                             <td align="left">
@@ -473,6 +507,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                             </td>
                                                         </tr>
                                                     </table>
+                                                    <!--<![endif]-->
                                                 </td>
                                             </tr>
                                         </table>
@@ -518,6 +553,18 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                         {pub.get('resumen', '')}
                                                     </p>
                                                     <!-- Botón compatible con Outlook -->
+                                                    <!--[if mso]>
+                                                    <table cellspacing="0" cellpadding="0" style="margin-top: 10px;">
+                                                        <tr>
+                                                            <td align="center" style="background-color: #64748b; padding: 12px 24px;">
+                                                                <a href="{pub.get('url_pdf', '#')}" style="color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; font-weight: 500; text-decoration: none; display: block;">
+                                                                    Ver documento oficial
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <![endif]-->
+                                                    <!--[if !mso]><!-->
                                                     <table cellpadding="0" cellspacing="0" border="0" role="presentation">
                                                         <tr>
                                                             <td align="left">
@@ -542,6 +589,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                             </td>
                                                         </tr>
                                                     </table>
+                                                    <!--<![endif]-->
                                                 </td>
                                             </tr>
                                         </table>
@@ -609,9 +657,16 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                 html += f"""
                                 <tr>
                                     <td style="padding-bottom: 16px;">
+                                        <!--[if mso]>
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0;">
+                                            <tr>
+                                                <td style="padding: 24px; border-top: 3px solid #2563eb;">
+                                        <![endif]-->
+                                        <!--[if !mso]><!-->
                                         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
                                             <tr>
                                                 <td class="section-padding" style="padding: 24px; border-top: 3px solid #2563eb; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                        <!--<![endif]-->
                                                     <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
                                                         {titulo_completo}
                                                     </h3>
@@ -622,6 +677,19 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                         {pub.get('titulo', 'Sin descripción disponible')}
                                                     </p>
                                                     <!-- Botón compatible con Outlook -->
+                                                    <!--[if mso]>
+                                                    <table cellspacing="0" cellpadding="0" style="margin-top: 10px;">
+                                                        <tr>
+                                                            <td align="center" style="background-color: #2563eb; padding: 12px 24px;">
+                                                                <a href="{url_documento}" 
+                                                                   style="color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; font-weight: 500; text-decoration: none; display: block;">
+                                                                    Ver documento SII
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <![endif]-->
+                                                    <!--[if !mso]><!-->
                                                     <table cellpadding="0" cellspacing="0" border="0" role="presentation">
                                                         <tr>
                                                             <td align="left">
@@ -646,6 +714,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                             </td>
                                                         </tr>
                                                     </table>
+                                                    <!--<![endif]-->
                                                 </td>
                                             </tr>
                                         </table>
@@ -686,9 +755,16 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
             html += f"""
                                 <tr>
                                     <td style="padding-bottom: 16px;">
+                                        <!--[if mso]>
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0;">
+                                            <tr>
+                                                <td style="padding: 24px; border-top: 3px solid #7c3aed;">
+                                        <![endif]-->
+                                        <!--[if !mso]><!-->
                                         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
                                             <tr>
                                                 <td class="section-padding" style="padding: 24px; border-top: 3px solid #7c3aed; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                        <!--<![endif]-->
                                                     <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
                                                         {hecho.get('entidad', '')}
                                                     </h3>
@@ -699,6 +775,19 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                         {hecho.get('resumen', '')}
                                                     </p>
                                                     <!-- Botón compatible con Outlook -->
+                                                    <!--[if mso]>
+                                                    <table cellspacing="0" cellpadding="0" style="margin-top: 10px;">
+                                                        <tr>
+                                                            <td align="center" style="background-color: #7c3aed; padding: 12px 24px;">
+                                                                <a href="{url_hecho}" 
+                                                                   style="color: #ffffff; font-family: Arial, sans-serif; font-size: 14px; font-weight: 500; text-decoration: none; display: block;">
+                                                                    Ver hecho esencial
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <![endif]-->
+                                                    <!--[if !mso]><!-->
                                                     <table cellpadding="0" cellspacing="0" border="0" role="presentation">
                                                         <tr>
                                                             <td align="left">
@@ -723,6 +812,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                             </td>
                                                         </tr>
                                                     </table>
+                                                    <!--<![endif]-->
                                                 </td>
                                             </tr>
                                         </table>

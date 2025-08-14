@@ -262,9 +262,11 @@
                     <p class="mb-2"><strong>Organización:</strong> {{ organizacion.nombre }}</p>
                     
                     <div class="d-flex flex-wrap gap-2 mb-3 mt-3">
+                        {% if es_admin %}
                         <a href="{% url 'alerts:panel_organizacion' %}" class="btn btn-primary btn-custom">
                             Gestionar destinatarios
                         </a>
+                        {% endif %}
                         <a href="{% url 'alerts:password_change' %}" class="btn btn-outline-warning btn-custom">
                             Cambiar contraseña
                         </a>

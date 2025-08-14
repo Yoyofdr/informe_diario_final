@@ -90,22 +90,36 @@ def dashboard(request):
     Muestra nombre, estado de prueba/suscripción, acceso a gestión de destinatarios y resumen de destinatarios.
     """
     user = request.user
-    # Buscar organización donde el usuario es admin
+    # Primero buscar si el usuario es admin de alguna organización
     try:
         organizacion = Organizacion.objects.select_related('admin').get(admin=user)
+        es_admin = True
     except Organizacion.DoesNotExist:
-        organizacion = None
+        # Si no es admin, buscar si es destinatario de alguna organización
+        try:
+            destinatario = Destinatario.objects.select_related('organizacion').get(email=user.email)
+            organizacion = destinatario.organizacion
+            es_admin = False
+        except Destinatario.DoesNotExist:
+            organizacion = None
+            es_admin = False
+    
     destinatarios = Destinatario.objects.select_related('organizacion').filter(organizacion=organizacion) if organizacion else []
+    
     # Estado de acceso (ahora siempre gratuito)
     if organizacion:
-        estado = "Acceso gratuito activo"
+        if es_admin:
+            estado = "Acceso gratuito activo (Administrador)"
+        else:
+            estado = "Acceso gratuito activo"
     else:
         estado = "Sin organización asociada"
     return render(request, 'alerts/dashboard_chennai.html', {
         'user': user,
         'organizacion': organizacion,
         'destinatarios': destinatarios,
-        'estado': estado
+        'estado': estado,
+        'es_admin': es_admin if organizacion else False
     })
 
 
@@ -344,13 +358,25 @@ def registro_prueba(request):
                     org = Organizacion.objects.filter(dominio=dominio).first()
                     if not org:
                         # Crear nueva organización si no existe
+                        print(f"[REGISTRO] Creando nueva organización para dominio: {dominio}")
                         org = Organizacion.objects.create(
                             nombre=empresa_nombre,
                             dominio=dominio,
                             admin=user
                         )
-                    # Si ya existe, simplemente usar la organización existente
-                    # El usuario se agregará como destinatario más abajo
+                        print(f"[REGISTRO] Organización creada: {org.nombre} (ID: {org.id})")
+                    else:
+                        # Si ya existe, verificar si el usuario debería ser admin
+                        print(f"[REGISTRO] Ya existe org para {dominio}: {org.nombre} (admin: {org.admin.email})")
+                        # IMPORTANTE: Si la org existente no tiene admin, asignar este usuario
+                        if not org.admin:
+                            org.admin = user
+                            org.save()
+                            print(f"[REGISTRO] Usuario asignado como admin de org existente")
+                    
+                    # Verificar que realmente se creó/obtuvo la organización
+                    if not org or not org.id:
+                        raise Exception(f"Error crítico: No se pudo crear/obtener organización para {dominio}")
                     
                     # IMPORTANTE: Agregar al admin como destinatario principal
                     print(f"[REGISTRO] Creando destinatario para org: {org.id}")

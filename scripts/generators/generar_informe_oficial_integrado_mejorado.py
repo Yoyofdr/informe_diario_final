@@ -15,6 +15,9 @@ from datetime import datetime, timedelta
 import logging
 from pathlib import Path
 import pytz
+import email.utils
+import time
+from collections import defaultdict
 
 # Cargar variables de entorno
 try:
@@ -818,8 +821,45 @@ def enviar_informe_email(html, fecha):
         errores = 0
         emails_fallidos = []
         
-        # Enviar a cada destinatario
+        # Configuración de throttling para dominios Microsoft
+        microsoft_domains = ('@outlook.', '@hotmail.', '@live.', '@msn.', '@outlook.es', '@outlook.cl')
+        office365_domains = ('@bye.cl', '@pgb.cl', '@carvuk.com')  # Agregar dominios conocidos de clientes con M365
+        
+        # Control de ventana de tiempo para throttling
+        ventana = defaultdict(lambda: {'count': 0, 'ts': time.time()})
+        limite_por_minuto = {
+            'microsoft': 20,  # 20 emails por minuto para dominios Microsoft
+            'office365': 25,  # 25 emails por minuto para clientes M365
+            'otros': 60       # 60 emails por minuto para otros
+        }
+        
+        def get_bucket(email):
+            """Determina el bucket del email para throttling"""
+            email_lower = email.lower()
+            if any(email_lower.endswith(d) for d in microsoft_domains):
+                return 'microsoft'
+            if any(email_lower.endswith(d) for d in office365_domains):
+                return 'office365'
+            return 'otros'
+        
+        # Enviar a cada destinatario con throttling
         for email_destinatario in destinatarios:
+            # Determinar bucket y aplicar throttling
+            bucket = get_bucket(email_destinatario)
+            now = time.time()
+            
+            # Resetear ventana si pasó 1 minuto
+            if now - ventana[bucket]['ts'] >= 60:
+                ventana[bucket] = {'count': 0, 'ts': now}
+            
+            # Si alcanzamos el límite, esperar
+            if ventana[bucket]['count'] >= limite_por_minuto.get(bucket, 60):
+                sleep_time = 60 - (now - ventana[bucket]['ts'])
+                if sleep_time > 0:
+                    logger.info(f"⏳ Throttling: esperando {sleep_time:.1f}s para bucket {bucket}")
+                    time.sleep(sleep_time)
+                ventana[bucket] = {'count': 0, 'ts': time.time()}
+            
             # Crear mensaje individual para cada destinatario
             msg = MIMEMultipart('alternative')
             msg['From'] = de_email
@@ -831,15 +871,27 @@ def enviar_informe_email(html, fecha):
             else:
                 msg['Subject'] = f"Informe Diario • {fecha_formato}"
             
+            # IMPORTANTE: Agregar headers recomendados para mejor entregabilidad
+            msg['Date'] = email.utils.formatdate(localtime=True)
+            msg['Message-ID'] = email.utils.make_msgid(domain="informediariochile.cl")
+            msg['MIME-Version'] = '1.0'
+            
+            # Headers opcionales pero recomendados
+            msg['List-Unsubscribe'] = f'<https://informediariochile.cl/unsubscribe?email={email_destinatario}>'
+            msg['List-Unsubscribe-Post'] = 'List-Unsubscribe=One-Click'
+            msg['X-Mailer'] = 'Informe Diario Chile v1.0'
+            msg['X-Priority'] = '3'  # Normal priority
+            
             # Agregar contenido HTML
             html_part = MIMEText(html, 'html', 'utf-8')
             msg.attach(html_part)
             
             try:
-                # Enviar mensaje individual
-                server.send_message(msg)
+                # Enviar mensaje individual con envelope-from explícito
+                server.send_message(msg, from_addr=de_email, to_addrs=[email_destinatario])
                 enviados += 1
-                logger.info(f"✅ Enviado a: {email_destinatario}")
+                ventana[bucket]['count'] += 1
+                logger.info(f"✅ Enviado a: {email_destinatario} [bucket: {bucket}]")
                 print(f"✅ Enviado a: {email_destinatario}")  # También imprimir
             except Exception as e:
                 errores += 1

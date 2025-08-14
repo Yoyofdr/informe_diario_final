@@ -558,7 +558,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                             <tr>
                                                 <td class="section-padding" style="padding: 24px; text-align: center;">
                                                     <p style="margin: 0; font-size: 14px; color: #64748b; font-style: italic;">
-                                                        No se encontraron circulares, resoluciones ni jurisprudencia nueva
+                                                        No se encontraron circulares, resoluciones ni jurisprudencia relevante
                                                     </p>
                                                 </td>
                                             </tr>

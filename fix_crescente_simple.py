@@ -1,3 +1,11 @@
+import os
+import sys
+import django
+
+# Configurar Django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'market_sniper.settings')
+django.setup()
+
 from django.contrib.auth.models import User
 from alerts.models import Organizacion, Destinatario
 

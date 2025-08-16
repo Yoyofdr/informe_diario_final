@@ -15,9 +15,9 @@ from datetime import datetime, timedelta
 import logging
 from pathlib import Path
 import pytz
-import email.utils
 import time
 from collections import defaultdict
+from email import utils as email_utils
 
 # Cargar variables de entorno
 try:
@@ -872,8 +872,8 @@ def enviar_informe_email(html, fecha):
                 msg['Subject'] = f"Informe Diario • {fecha_formato}"
             
             # IMPORTANTE: Agregar headers recomendados para mejor entregabilidad
-            msg['Date'] = email.utils.formatdate(localtime=True)
-            msg['Message-ID'] = email.utils.make_msgid(domain="informediariochile.cl")
+            msg['Date'] = email_utils.formatdate(localtime=True)
+            msg['Message-ID'] = email_utils.make_msgid(domain="informediariochile.cl")
             msg['MIME-Version'] = '1.0'
             
             # Headers opcionales pero recomendados

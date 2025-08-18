@@ -1,40 +1,14 @@
+#!/usr/bin/env python3
 """
-Función para enviar correo de bienvenida a nuevos usuarios
+Preview del correo de bienvenida en localhost
 """
-import os
-import sys
+import http.server
+import socketserver
+import webbrowser
 from datetime import datetime
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from django.conf import settings
-import pytz
-from dotenv import load_dotenv
 
-
-# Cargar variables de entorno
-env_path = os.path.join(settings.BASE_DIR, '.env')
-if os.path.exists(env_path):
-    load_dotenv(env_path)
-
-
-def enviar_informe_bienvenida(email_destinatario, nombre_destinatario):
-    """
-    Envía un correo de bienvenida a un nuevo usuario
-    
-    Args:
-        email_destinatario (str): Email del nuevo usuario
-        nombre_destinatario (str): Nombre completo del nuevo usuario
-    
-    Returns:
-        bool: True si se envió correctamente, False en caso contrario
-    """
-    
-    print(f"=== ENVIANDO CORREO DE BIENVENIDA A {email_destinatario} ===\n")
-    
-    try:
-        # Crear mensaje HTML de bienvenida minimalista con colores del informe
-        html_content = f"""
+# HTML del correo de bienvenida
+html_content = """
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -65,7 +39,7 @@ def enviar_informe_bienvenida(email_destinatario, nombre_destinatario):
                         <td style="padding: 40px;">
                             
                             <p style="margin: 0 0 20px 0; font-size: 17px; color: #1e293b; line-height: 1.6;">
-                                Hola {nombre_destinatario},
+                                Hola Juan Pérez,
                             </p>
                             
                             <p style="margin: 0 0 25px 0; font-size: 16px; color: #475569; line-height: 1.6;">
@@ -73,7 +47,7 @@ def enviar_informe_bienvenida(email_destinatario, nombre_destinatario):
                             </p>
                             
                             <p style="margin: 0 0 30px 0; font-size: 16px; color: #475569; line-height: 1.6;">
-                                <strong style="color: #1e293b;">Email:</strong> {email_destinatario}
+                                <strong style="color: #1e293b;">Email:</strong> juan.perez@ejemplo.com
                             </p>
                             
                             <p style="margin: 0 0 30px 0; font-size: 16px; color: #475569; line-height: 1.6;">
@@ -104,37 +78,24 @@ def enviar_informe_bienvenida(email_destinatario, nombre_destinatario):
     
 </body>
 </html>
-        """
-        
-        # Configuración del servidor SMTP
-        smtp_server = os.environ.get('SMTP_SERVER', 'smtp.hostinger.com')
-        smtp_port = int(os.environ.get('SMTP_PORT', '587'))
-        smtp_user = 'contacto@informediariochile.cl'  # Usar el email oficial
-        smtp_password = os.environ.get('HOSTINGER_EMAIL_PASSWORD')
-        
-        if not smtp_password:
-            print("❌ Error: HOSTINGER_EMAIL_PASSWORD no está configurado")
-            return False
-        
-        # Enviar email
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = f"Cuenta creada exitosamente"
-        msg['From'] = smtp_user
-        msg['To'] = email_destinatario
-        
-        html_part = MIMEText(html_content, 'html')
-        msg.attach(html_part)
-        
-        # Enviar
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()
-        server.login(smtp_user, smtp_password)
-        server.send_message(msg)
-        server.quit()
-        
-        print(f"✅ Correo de bienvenida enviado exitosamente a {email_destinatario}")
-        return True
-        
-    except Exception as e:
-        print(f"❌ Error enviando correo de bienvenida: {str(e)}")
-        return False
+"""
+
+# Crear servidor HTTP
+class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/html; charset=utf-8")
+        self.end_headers()
+        self.wfile.write(html_content.encode())
+
+PORT = 8002
+print(f"🚀 Servidor iniciado en http://localhost:{PORT}")
+print("📧 Mostrando preview del correo de bienvenida")
+print("   Presiona Ctrl+C para detener el servidor")
+
+# Abrir navegador automáticamente
+webbrowser.open(f'http://localhost:{PORT}')
+
+# Iniciar servidor
+with socketserver.TCPServer(("", PORT), MyHTTPRequestHandler) as httpd:
+    httpd.serve_forever()

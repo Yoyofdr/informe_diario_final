@@ -408,23 +408,14 @@ def registro_prueba(request):
                 
                 def enviar_emails_background():
                     try:
-                        # Enviar informe de bienvenida
+                        # Enviar SOLO el correo HTML de bienvenida (el bonito)
                         nombre_completo = f"{nombre} {apellido}".strip()
                         enviar_informe_bienvenida(email, nombre_completo)
+                        print(f"✅ Correo de bienvenida enviado a {email}")
                     except Exception as e:
-                        print(f"Error enviando informe de bienvenida: {e}")
+                        print(f"Error enviando correo de bienvenida: {e}")
                     
-                    try:
-                        # Enviar email de confirmación
-                        send_mail(
-                            subject='Bienvenido a Informe Diario',
-                            message=f'Hola {nombre},\n\nTu cuenta ha sido creada exitosamente.\n\nEmail: {email}\n\nYa puedes iniciar sesión en la plataforma.\n\n¡Bienvenido!',
-                            from_email=settings.DEFAULT_FROM_EMAIL,
-                            recipient_list=[email],
-                            fail_silently=True,
-                        )
-                    except Exception as e:
-                        print(f"Error enviando email de confirmación: {e}")
+                    # NO enviar el email de texto plano duplicado
                 
                 # Ejecutar en thread separado
                 thread = threading.Thread(target=enviar_emails_background)

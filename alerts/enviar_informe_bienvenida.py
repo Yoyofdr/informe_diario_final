@@ -10,6 +10,7 @@ from email.mime.multipart import MIMEMultipart
 from django.conf import settings
 import pytz
 from dotenv import load_dotenv
+from alerts.utils.cache_informe import CacheInformeDiario
 
 
 # Cargar variables de entorno
@@ -20,7 +21,9 @@ if os.path.exists(env_path):
 
 def enviar_informe_bienvenida(email_destinatario, nombre_destinatario):
     """
-    Envía un correo de bienvenida a un nuevo usuario
+    Envía el informe del día actual a un nuevo usuario.
+    Si existe el informe del día en caché, lo envía.
+    Si no existe, envía un correo de bienvenida simple.
     
     Args:
         email_destinatario (str): Email del nuevo usuario
@@ -30,11 +33,23 @@ def enviar_informe_bienvenida(email_destinatario, nombre_destinatario):
         bool: True si se envió correctamente, False en caso contrario
     """
     
-    print(f"=== ENVIANDO CORREO DE BIENVENIDA A {email_destinatario} ===\n")
+    print(f"=== ENVIANDO INFORME DE BIENVENIDA A {email_destinatario} ===\n")
     
     try:
-        # Crear mensaje HTML de bienvenida minimalista con colores del informe
-        html_content = f"""
+        # Intentar obtener el informe del día del caché
+        cache = CacheInformeDiario()
+        html_content = cache.obtener_informe()
+        
+        if html_content:
+            # Si hay informe del día, enviarlo
+            print(f"✅ Informe del día encontrado en caché, enviando...")
+            subject = f"Informe Diario • {datetime.now(pytz.timezone('America/Santiago')).strftime('%d-%m-%Y')}"
+        else:
+            # Si no hay informe, enviar correo de bienvenida simple
+            print(f"⚠️ No hay informe del día en caché, enviando correo de bienvenida...")
+            subject = "Bienvenido a Informe Diario"
+            # Crear mensaje HTML de bienvenida minimalista con colores del informe
+            html_content = f"""
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -118,7 +133,7 @@ def enviar_informe_bienvenida(email_destinatario, nombre_destinatario):
         
         # Enviar email
         msg = MIMEMultipart('alternative')
-        msg['Subject'] = f"Cuenta creada exitosamente"
+        msg['Subject'] = subject  # Usar el subject que se determinó arriba
         msg['From'] = smtp_user
         msg['To'] = email_destinatario
         

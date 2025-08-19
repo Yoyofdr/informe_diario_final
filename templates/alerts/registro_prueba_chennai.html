@@ -269,35 +269,45 @@
             transition: opacity 0.3s ease;
         }
         
-        .form-check {
-            padding: 12px 16px;
-            background: #eff6ff;
-            border-radius: 8px;
-            border: 1px solid #dbeafe;
-            margin-bottom: 16px;
-            margin-top: 16px;
-            display: flex;
-            align-items: center;
+        .custom-check-container {
+            padding: 12px 16px !important;
+            background: #eff6ff !important;
+            border-radius: 8px !important;
+            border: 1px solid #dbeafe !important;
+            margin-bottom: 16px !important;
+            margin-top: 16px !important;
+            display: flex !important;
+            align-items: center !important;
         }
         
-        .form-check-input {
-            margin: 0;
-            margin-right: 8px;
-            flex-shrink: 0;
+        .custom-check-container .form-check {
+            padding: 0 !important;
+            background: transparent !important;
+            border: none !important;
+            margin: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            width: 100% !important;
         }
         
-        .form-check-input:checked {
-            background-color: #6366f1;
-            border-color: #6366f1;
+        .custom-check-container .form-check-input {
+            margin: 0 !important;
+            margin-right: 8px !important;
+            flex-shrink: 0 !important;
         }
         
-        .form-check-label {
-            color: #374151;
-            font-size: 15px;
-            margin: 0;
-            cursor: pointer;
-            user-select: none;
-            flex: 1;
+        .custom-check-container .form-check-input:checked {
+            background-color: #6366f1 !important;
+            border-color: #6366f1 !important;
+        }
+        
+        .custom-check-container .form-check-label {
+            color: #374151 !important;
+            font-size: 15px !important;
+            margin: 0 !important;
+            cursor: pointer !important;
+            user-select: none !important;
+            flex: 1 !important;
         }
         
         /* Remove extra Bootstrap spacing */
@@ -378,11 +388,13 @@
                     </div>
                 </div>
                 
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="no_empresa" name="no_empresa" value="true">
-                    <label class="form-check-label" for="no_empresa">
-                        <strong>No pertenezco a una empresa</strong>
-                    </label>
+                <div class="custom-check-container">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="no_empresa" name="no_empresa" value="true">
+                        <label class="form-check-label" for="no_empresa">
+                            <strong>No pertenezco a una empresa</strong>
+                        </label>
+                    </div>
                 </div>
             </div>
             

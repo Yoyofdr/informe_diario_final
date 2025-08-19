@@ -73,7 +73,7 @@ def register(request):
                     nombre_completo = user.username
                 
                 enviar_informe_bienvenida(user.email, nombre_completo)
-                messages.success(request, 'Te hemos enviado el informe del Diario Oficial de hoy por email.')
+                messages.success(request, 'Recibirás tu primer Informe Diario mañana a las 9:00 AM.')
             except Exception as e:
                 print(f"Error enviando informe de bienvenida: {e}")
                 # No mostrar error al usuario para no afectar la experiencia de registro
@@ -148,7 +148,7 @@ def landing(request):
                 # Enviar informe de bienvenida
                 try:
                     enviar_informe_bienvenida(destinatario.email, destinatario.nombre)
-                    mensaje = f"Registro exitoso. Te hemos agregado a la lista de destinatarios y enviado el informe de hoy por email."
+                    mensaje = f"Registro exitoso. Te hemos agregado a la lista de destinatarios. Recibirás el informe diario a las 9:00 AM."
                 except Exception as e:
                     print(f"Error enviando informe de bienvenida: {e}")
                     mensaje = f"Registro exitoso. Te hemos agregado a la lista de destinatarios."
@@ -194,7 +194,7 @@ def panel_organizacion(request):
                 # Enviar informe de bienvenida al nuevo destinatario
                 try:
                     enviar_informe_bienvenida(destinatario.email, destinatario.nombre)
-                    messages.success(request, f"Destinatario {form.cleaned_data['email']} agregado y se le envió el informe de hoy.")
+                    messages.success(request, f"Destinatario {form.cleaned_data['email']} agregado. Recibirá el informe diario a las 9:00 AM.")
                 except Exception as e:
                     print(f"Error enviando informe de bienvenida: {e}")
                     messages.success(request, f"Destinatario {form.cleaned_data['email']} agregado.")

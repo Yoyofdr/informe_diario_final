@@ -38,14 +38,14 @@ def crear_superusuario():
         user = User.objects.create_superuser(
             username=username,
             email=email,
-            password='Admin2025!',  # Contraseña temporal
+            password='golden98',  # Contraseña temporal
             first_name='Rodrigo',
             last_name='Fernández'
         )
         
         print(f"✅ Superusuario creado exitosamente")
         print(f"   Email: {email}")
-        print(f"   Contraseña: Admin2025!")
+        print(f"   Contraseña: golden98")
         print(f"   ⚠️ IMPORTANTE: Cambia esta contraseña después del primer login")
         
         # Opcional: Crear una organización para el admin
@@ -78,7 +78,7 @@ if __name__ == "__main__":
         print("\n" + "="*50)
         print("CREDENCIALES DE ACCESO:")
         print("="*50)
-        print(f"URL: https://informediariochile.cl/alerts/login/")
+        print(f"URL: https://informediariochile.cl/login/")
         print(f"Email: rfernandezdelrio@uc.cl")
-        print(f"Contraseña: Admin2025!")
+        print(f"Contraseña: golden98")
         print("="*50)

@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
+from .validators import validar_rut_estricto
 
 class PerfilUsuario(models.Model):
     """
@@ -129,11 +130,32 @@ class NotificacionEnviada(models.Model):
         return f"Notificación para {self.usuario.username} sobre {self.hecho_esencial.empresa.nombre} el {self.fecha_envio.strftime('%Y-%m-%d')}"
 
 class Organizacion(models.Model):
+    # Choices para tipo de organización
+    class Tipo(models.TextChoices):
+        EMPRESA = "empresa", "Empresa"
+        INDEPENDIENTE = "independiente", "Independiente"
+    
     nombre = models.CharField(max_length=200)
-    dominio = models.CharField(max_length=80, help_text="Ej: empresa.com")
+    dominio = models.CharField(max_length=80, null=True, blank=True, help_text="Campo legacy - no se usa para agrupar")
     fecha_pago = models.DateTimeField(null=True, blank=True)
     suscripcion_activa = models.BooleanField(default=False)
     admin = models.ForeignKey(User, on_delete=models.CASCADE, related_name='organizaciones')
+    
+    # Nuevos campos para sistema basado en RUT
+    rut = models.CharField(
+        max_length=11, 
+        unique=True, 
+        null=True, 
+        blank=True,
+        validators=[validar_rut_estricto],
+        help_text="RUT en formato NNNNNNNN-DV (sin puntos, DV mayúscula)"
+    )
+    tipo = models.CharField(
+        max_length=20, 
+        choices=Tipo.choices, 
+        default=Tipo.INDEPENDIENTE,
+        help_text="Tipo de organización: Empresa (con RUT) o Independiente"
+    )
     
     # Campos para futura integración bancaria - NO USAR AÚN
     # Estos campos están preparados para cuando se active la funcionalidad de cuentas bancarias

@@ -2,6 +2,7 @@ from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 from django.contrib.auth.models import User
 from django import forms
 from .models import Destinatario, Organizacion
+from .validators import validar_rut_estricto
 from django.contrib.auth import authenticate
 import json
 
@@ -98,7 +99,35 @@ class RegistroPruebaForm(forms.Form):
     apellido = forms.CharField(label="Apellido", max_length=100)
     email = forms.EmailField(label="Email")
     telefono = forms.CharField(label="Teléfono", max_length=30)
-    empresa = forms.CharField(label="Nombre de la empresa", max_length=200)
+    
+    # Nuevos campos para sistema RUT
+    rut_empresa = forms.CharField(
+        label="RUT de la empresa", 
+        max_length=11,
+        required=False,
+        validators=[validar_rut_estricto],
+        widget=forms.TextInput(attrs={
+            'pattern': '^[1-9]\\d{0,7}-[0-9K]$',
+            'title': 'Formato: NNNNNNNN-DV, sin puntos, DV mayúscula',
+            'placeholder': '12345678-9'
+        }),
+        help_text="Formato: NNNNNNNN-DV (sin puntos, DV en mayúscula)"
+    )
+    
+    no_empresa = forms.BooleanField(
+        label="No pertenezco a una empresa",
+        required=False,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input'
+        })
+    )
+    
+    empresa = forms.CharField(
+        label="Nombre de la empresa", 
+        max_length=200,
+        required=False
+    )
+    
     password1 = forms.CharField(label="Contraseña", widget=forms.PasswordInput, required=True)
     password2 = forms.CharField(label="Confirmar contraseña", widget=forms.PasswordInput, required=True)
 
@@ -106,10 +135,29 @@ class RegistroPruebaForm(forms.Form):
         cleaned_data = super().clean()
         password1 = cleaned_data.get('password1')
         password2 = cleaned_data.get('password2')
+        rut_empresa = cleaned_data.get('rut_empresa')
+        no_empresa = cleaned_data.get('no_empresa')
+        empresa = cleaned_data.get('empresa')
+        
+        # Validar contraseñas
         if not password1 or not password2:
             self.add_error('password1', "Debes ingresar y confirmar la contraseña.")
         elif password1 != password2:
             self.add_error('password2', "Las contraseñas no coinciden.")
+        
+        # Validar que se elija una opción: RUT o no_empresa
+        if not no_empresa and not rut_empresa:
+            raise forms.ValidationError("Debes ingresar un RUT o marcar 'No pertenezco a una empresa'.")
+        
+        # Si tiene RUT pero no nombre de empresa, usar un nombre por defecto
+        if rut_empresa and not empresa:
+            cleaned_data['empresa'] = f"Empresa {rut_empresa}"
+        
+        # Si es independiente, ignorar RUT y empresa
+        if no_empresa:
+            cleaned_data['rut_empresa'] = None
+            cleaned_data['empresa'] = None
+        
         return cleaned_data
 
 

@@ -257,6 +257,49 @@
             padding-top: 16px;
         }
         
+        /* Estilos para la sección de empresa */
+        .empresa-section-wrapper {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+        
+        #empresaFields {
+            transition: opacity 0.3s ease;
+        }
+        
+        .form-check {
+            padding: 12px 16px;
+            background: #eff6ff;
+            border-radius: 8px;
+            border: 1px solid #dbeafe;
+            margin-bottom: 16px;
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .form-check-input {
+            margin: 0;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        
+        .form-check-input:checked {
+            background-color: #6366f1;
+            border-color: #6366f1;
+        }
+        
+        .form-check-label {
+            color: #374151;
+            font-size: 15px;
+            margin: 0;
+            cursor: pointer;
+            user-select: none;
+            flex: 1;
+        }
+        
         /* Remove extra Bootstrap spacing */
         .row {
             --bs-gutter-x: 12px;
@@ -312,9 +355,35 @@
                 <input type="text" class="form-control" id="telefono" name="telefono" required>
             </div>
             
-            <div class="mb-2-custom">
-                <label for="empresa" class="form-label">Nombre de la empresa</label>
-                <input type="text" class="form-control" id="empresa" name="empresa" required>
+            <!-- Sección de empresa o independiente -->
+            <div class="section-divider">
+                <div id="empresaFields">
+                    <div class="empresa-section-wrapper">
+                        <div class="mb-2-custom">
+                            <label for="rut_empresa" class="form-label">RUT de la empresa</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="rut_empresa" 
+                                   name="rut_empresa" 
+                                   pattern="^[1-9]\d{0,7}-[0-9K]$"
+                                   title="Formato: NNNNNNNN-DV, sin puntos, DV mayúscula"
+                                   placeholder="12345678-9">
+                            <small class="form-text text-muted">Formato: NNNNNNNN-DV (sin puntos, DV en mayúscula)</small>
+                        </div>
+                        
+                        <div class="mb-2-custom">
+                            <label for="empresa" class="form-label">Nombre de la empresa</label>
+                            <input type="text" class="form-control" id="empresa" name="empresa" placeholder="Mi Empresa S.A.">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="no_empresa" name="no_empresa" value="true">
+                    <label class="form-check-label" for="no_empresa">
+                        <strong>No pertenezco a una empresa</strong>
+                    </label>
+                </div>
             </div>
             
             <div class="section-divider">
@@ -347,7 +416,7 @@
             <i class="bi bi-check-lg"></i>
         </div>
         <h3>¡Registro exitoso!</h3>
-        <p>Te hemos enviado el informe del Diario Oficial de hoy por email.</p>
+        <p>Te hemos enviado el Informe Diario de hoy por email.</p>
         <div style="background-color: #FFF8E1; border: 1px solid #FFE082; border-radius: 8px; padding: 14px 18px; margin: 16px 0;">
             <div style="display: flex; align-items: flex-start; gap: 10px;">
                 <span style="flex-shrink: 0; font-size: 18px; margin-top: 1px;">⚠️</span>
@@ -371,9 +440,40 @@
         // Prevent multiple submissions
         let isSubmitting = false;
         
+        // Handle checkbox for empresa/independiente
+        document.getElementById('no_empresa').addEventListener('change', function() {
+            const empresaFields = document.getElementById('empresaFields');
+            const rutField = document.getElementById('rut_empresa');
+            const empresaField = document.getElementById('empresa');
+            
+            if (this.checked) {
+                // Es independiente - ocultar y desactivar campos de empresa
+                empresaFields.style.opacity = '0.5';
+                empresaFields.style.pointerEvents = 'none';
+                rutField.removeAttribute('required');
+                empresaField.removeAttribute('required');
+                rutField.value = '';
+                empresaField.value = '';
+            } else {
+                // Es empresa - mostrar y activar campos
+                empresaFields.style.opacity = '1';
+                empresaFields.style.pointerEvents = 'auto';
+            }
+        });
+        
         // Handle form submission
         document.getElementById('registroForm').addEventListener('submit', function(e) {
             if (isSubmitting) {
+                e.preventDefault();
+                return;
+            }
+            
+            // Validate empresa or independiente
+            const noEmpresa = document.getElementById('no_empresa').checked;
+            const rutEmpresa = document.getElementById('rut_empresa').value;
+            
+            if (!noEmpresa && !rutEmpresa) {
+                alert('Debes ingresar un RUT o marcar "No pertenezco a una empresa"');
                 e.preventDefault();
                 return;
             }

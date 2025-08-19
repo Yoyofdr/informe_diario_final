@@ -17,6 +17,7 @@ from django.conf import settings
 from django.contrib import messages
 from alerts.utils.db_optimizations import optimize_empresa_queries, optimize_hecho_esencial_queries, optimize_metrics_queries, QueryOptimizer
 from .enviar_informe_bienvenida import enviar_informe_bienvenida
+from .services.registro_service import handle_signup
 from django.db import transaction
 
 @login_required
@@ -330,10 +331,9 @@ def registro_prueba(request):
             apellido = form.cleaned_data['apellido']
             email = form.cleaned_data['email']
             telefono = form.cleaned_data['telefono']
-            empresa_nombre = form.cleaned_data['empresa']
-            # Extraer dominio del email
-            dominio = email.split('@')[1].lower().strip()
-            # No hay destinatarios adicionales en este formulario - solo el admin
+            empresa_nombre = form.cleaned_data.get('empresa')
+            rut_empresa = form.cleaned_data.get('rut_empresa')
+            no_empresa = form.cleaned_data.get('no_empresa')
             
             # Verificar email duplicado
             if User.objects.filter(email=email).exists():
@@ -354,47 +354,27 @@ def registro_prueba(request):
                     )
                     print(f"[REGISTRO] Usuario creado con ID: {user.id}")
                     
-                    # Buscar si ya existe una organización para este dominio
-                    org = Organizacion.objects.filter(dominio=dominio).first()
-                    if not org:
-                        # Crear nueva organización si no existe
-                        print(f"[REGISTRO] Creando nueva organización para dominio: {dominio}")
-                        org = Organizacion.objects.create(
-                            nombre=empresa_nombre,
-                            dominio=dominio,
-                            admin=user
-                        )
-                        print(f"[REGISTRO] Organización creada: {org.nombre} (ID: {org.id})")
-                    else:
-                        # Si ya existe, verificar si el usuario debería ser admin
-                        print(f"[REGISTRO] Ya existe org para {dominio}: {org.nombre} (admin: {org.admin.email})")
-                        # IMPORTANTE: Si la org existente no tiene admin, asignar este usuario
-                        if not org.admin:
-                            org.admin = user
-                            org.save()
-                            print(f"[REGISTRO] Usuario asignado como admin de org existente")
-                    
-                    # Verificar que realmente se creó/obtuvo la organización
-                    if not org or not org.id:
-                        raise Exception(f"Error crítico: No se pudo crear/obtener organización para {dominio}")
-                    
-                    # IMPORTANTE: Agregar al admin como destinatario principal
-                    print(f"[REGISTRO] Creando destinatario para org: {org.id}")
-                    admin_destinatario = Destinatario.objects.create(
-                        nombre=f"{nombre} {apellido}",
+                    # Usar el nuevo servicio de registro basado en RUT
+                    org = handle_signup(
+                        user=user,
+                        rut=rut_empresa,
+                        no_empresa=no_empresa,
+                        nombre_empresa=empresa_nombre,
                         email=email,
-                        organizacion=org
+                        nombre=nombre,
+                        apellido=apellido
                     )
-                    print(f"[REGISTRO] Destinatario creado con ID: {admin_destinatario.id}")
                     
-                    # Verificar que se guardó correctamente antes de continuar
+                    print(f"[REGISTRO] Organización: {org.nombre} (ID: {org.id}, Tipo: {org.tipo})")
+                    
+                    # Verificar que se guardó correctamente
                     user_check = User.objects.filter(id=user.id).exists()
-                    dest_check = Destinatario.objects.filter(id=admin_destinatario.id).exists()
+                    org_check = Organizacion.objects.filter(id=org.id).exists()
                     
-                    if not user_check or not dest_check:
+                    if not user_check or not org_check:
                         raise Exception("Error: Los datos no se guardaron correctamente")
                     
-                    print(f"[REGISTRO] Verificación OK - Usuario: {user_check}, Destinatario: {dest_check}")
+                    print(f"[REGISTRO] Verificación OK - Usuario: {user_check}, Organización: {org_check}")
                     
                 # Fuera de la transacción - los datos ya deberían estar guardados
                 print(f"[REGISTRO] Transacción completada exitosamente")

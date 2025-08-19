@@ -26,7 +26,7 @@ urlpatterns = [
     # path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='alerts/password_reset_complete.html'), name='password_reset_complete'),
     path('password_change/', auth_views.PasswordChangeView.as_view(template_name='alerts/password_change_form_chennai.html', form_class=CustomPasswordChangeForm), name='password_change'),
     # path('password_change/done/', auth_views.PasswordChangeDoneView.as_view(template_name='alerts/password_change_done.html'), name='password_change_done'),
-    # path('admin-panel/', views.admin_panel, name='admin_panel'),  # Desactivado - template no existe
+    path('admin-panel/', views.admin_panel, name='admin_panel'),  # Panel de administración para superusuarios
     path('logout/', views.logout_view, name='logout'),
     
     # Fintoc integration URLs - DESACTIVADAS TEMPORALMENTE

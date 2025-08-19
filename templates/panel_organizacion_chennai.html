@@ -240,6 +240,11 @@
         <div class="container">
             <a class="navbar-brand" href="{% url 'alerts:landing_explicativa' %}"></a>
             <div class="ms-auto">
+                {% if user.is_superuser %}
+                <a href="{% url 'alerts:admin_panel' %}" class="btn btn-sm btn-outline-primary me-2">
+                    <i class="bi bi-shield-lock"></i> Panel Admin
+                </a>
+                {% endif %}
                 <a href="{% url 'alerts:logout' %}" class="btn-logout" onclick="return confirm('¿Estás seguro de que quieres cerrar sesión?')">
                     <i class="bi bi-box-arrow-right"></i> Cerrar sesión
                 </a>

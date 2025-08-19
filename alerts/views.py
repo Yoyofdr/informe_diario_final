@@ -15,6 +15,7 @@ import urllib.parse
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib import messages
+from django.db import models
 from alerts.utils.db_optimizations import optimize_empresa_queries, optimize_hecho_esencial_queries, optimize_metrics_queries, QueryOptimizer
 from .enviar_informe_bienvenida import enviar_informe_bienvenida
 from .services.registro_service import handle_signup
@@ -436,12 +437,62 @@ def historial_informes(request):
 @user_passes_test(lambda u: u.is_superuser)
 def admin_panel(request):
     from django.contrib.auth.models import User
+    
+    if request.method == 'POST':
+        if 'eliminar_usuario' in request.POST:
+            user_id = request.POST.get('user_id')
+            try:
+                user = User.objects.get(id=user_id)
+                # Obtener información antes de eliminar
+                email = user.email
+                
+                # Eliminar organizaciones asociadas (esto elimina en cascada destinatarios)
+                Organizacion.objects.filter(admin=user).delete()
+                
+                # Eliminar el usuario
+                user.delete()
+                
+                messages.success(request, f'Usuario {email} y todos sus datos asociados han sido eliminados.')
+            except User.DoesNotExist:
+                messages.error(request, 'Usuario no encontrado.')
+        
+        elif 'eliminar_organizacion' in request.POST:
+            org_id = request.POST.get('org_id')
+            try:
+                org = Organizacion.objects.get(id=org_id)
+                nombre = org.nombre
+                
+                # Eliminar organización (elimina en cascada los destinatarios)
+                org.delete()
+                
+                messages.success(request, f'Organización {nombre} y sus destinatarios han sido eliminados.')
+            except Organizacion.DoesNotExist:
+                messages.error(request, 'Organización no encontrada.')
+        
+        elif 'eliminar_destinatario' in request.POST:
+            dest_id = request.POST.get('dest_id')
+            try:
+                dest = Destinatario.objects.get(id=dest_id)
+                email = dest.email
+                dest.delete()
+                messages.success(request, f'Destinatario {email} ha sido eliminado.')
+            except Destinatario.DoesNotExist:
+                messages.error(request, 'Destinatario no encontrado.')
+        
+        return redirect('alerts:admin_panel')
+    
+    # Obtener datos para mostrar
     empresas = optimize_empresa_queries(Empresa.objects.all().order_by('nombre'))
-    usuarios = User.objects.all().order_by('email')
+    usuarios = User.objects.select_related('perfil').prefetch_related('organizaciones').all().order_by('email')
+    organizaciones = Organizacion.objects.select_related('admin').annotate(
+        num_destinatarios=models.Count('destinatarios')
+    ).order_by('nombre')
     destinatarios = Destinatario.objects.select_related('organizacion').all().order_by('email')
+    
     return render(request, 'alerts/admin_panel.html', {
         'empresas': empresas,
         'usuarios': usuarios,
+        'organizaciones': organizaciones,
         'destinatarios': destinatarios
     })
 

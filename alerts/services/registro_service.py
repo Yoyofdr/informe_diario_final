@@ -15,7 +15,8 @@ def handle_signup(
     nombre_empresa: str | None,
     email: str,
     nombre: str,
-    apellido: str
+    apellido: str,
+    telefono: str | None = None
 ) -> Organizacion:
     """
     Maneja el registro de un usuario con el nuevo sistema basado en RUT.
@@ -28,6 +29,7 @@ def handle_signup(
         email: Email del usuario
         nombre: Nombre del usuario
         apellido: Apellido del usuario
+        telefono: Teléfono del usuario (opcional)
     
     Returns:
         Organizacion: La organización creada o encontrada
@@ -51,6 +53,7 @@ def handle_signup(
             Destinatario.objects.create(
                 nombre=f"{nombre} {apellido}".strip(),
                 email=email,
+                telefono=telefono,
                 organizacion=org
             )
             
@@ -73,6 +76,7 @@ def handle_signup(
             Destinatario.objects.create(
                 nombre=f"{nombre} {apellido}".strip(),
                 email=email,
+                telefono=telefono,
                 organizacion=org
             )
             return org
@@ -90,6 +94,7 @@ def handle_signup(
         Destinatario.objects.create(
             nombre=f"{nombre} {apellido}".strip(),
             email=email,
+            telefono=telefono,
             organizacion=org
         )
         

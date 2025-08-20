@@ -373,7 +373,8 @@ def registro_prueba(request):
                         nombre_empresa=empresa_nombre,
                         email=email,
                         nombre=nombre,
-                        apellido=apellido
+                        apellido=apellido,
+                        telefono=telefono
                     )
                     
                     print(f"[REGISTRO] Organización: {org.nombre} (ID: {org.id}, Tipo: {org.tipo})")

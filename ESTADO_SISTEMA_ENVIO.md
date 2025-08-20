@@ -18,7 +18,7 @@
 
 4. **Variables de entorno en Heroku**: ✅
    - `OPENAI_API_KEY`: Configurada
-   - `HOSTINGER_EMAIL_PASSWORD`: Configurada (Rfdr1729!)
+   - `HOSTINGER_EMAIL_PASSWORD`: Configurada
    - `EMAIL_HOST_USER`: contacto@informediariochile.cl
    - Todas las credenciales SMTP configuradas
 

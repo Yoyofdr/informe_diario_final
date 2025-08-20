@@ -84,7 +84,10 @@ Para darse de baja: responder con BAJA en el asunto
     smtp_host = 'smtp.hostinger.com'
     smtp_port = 587
     smtp_user = 'contacto@informediariochile.cl'
-    smtp_password = os.getenv('HOSTINGER_EMAIL_PASSWORD', 'Rfdr1729!')
+    smtp_password = os.getenv('HOSTINGER_EMAIL_PASSWORD')
+    if not smtp_password:
+        print("❌ Error: HOSTINGER_EMAIL_PASSWORD no está configurado")
+        return
     
     print("=" * 60)
     print("REENVÍO DE INFORME A DESTINATARIOS AFECTADOS")

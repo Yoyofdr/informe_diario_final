@@ -92,6 +92,11 @@ def dashboard(request):
     Muestra nombre, estado de prueba/suscripción, acceso a gestión de destinatarios y resumen de destinatarios.
     """
     user = request.user
+    
+    # Si es superusuario, redirigir al panel de administración
+    if user.is_superuser:
+        return redirect('alerts:admin_panel')
+    
     # Primero buscar si el usuario es admin de alguna organización
     try:
         organizacion = Organizacion.objects.select_related('admin').get(admin=user)

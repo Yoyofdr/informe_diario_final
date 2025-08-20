@@ -68,20 +68,22 @@ def generar_resumen_cmf_openai(entidad, materia, texto_pdf=None):
 {contexto}
 
 GENERA UN RESUMEN QUE INCLUYA:
-1. La acción ESPECÍFICA tomada (con montos, fechas o porcentajes si están disponibles)
+1. La acción ESPECÍFICA tomada (con montos, fechas o porcentajes SOLO si están disponibles en el documento)
 2. El impacto CONCRETO para los accionistas/inversionistas
-3. Cualquier dato numérico relevante (montos en UF o pesos, porcentajes, plazos)
+3. Cualquier dato numérico relevante que aparezca en el documento
 
-IMPORTANTE:
-- Si hay montos, DEBES incluirlos
-- Si hay fechas específicas, DEBES mencionarlas
-- Si hay nombres de ejecutivos o cargos, DEBES incluirlos
-- Si hay porcentajes o tasas, DEBES especificarlos
+REGLAS CRÍTICAS - PROHIBIDO INVENTAR:
+- SOLO menciona información que aparezca EXPLÍCITAMENTE en el documento proporcionado
+- Si hay montos en el documento, inclúyelos
+- Si hay fechas específicas en el documento, menciónalas
+- Si hay nombres o porcentajes en el documento, especifícalos
+- Si NO hay datos específicos, describe la acción sin inventar números
+- NUNCA inventes montos, fechas, nombres o porcentajes que no estén en el texto
 - NO uses frases genéricas como "comunicó información" o "presentó documentos"
 - NO incluyas emojis ni caracteres especiales
 - Máximo 3 líneas
 
-Responde SOLO con el resumen, sin introducciones."""
+Responde SOLO con el resumen basado ÚNICAMENTE en la información proporcionada."""
 
         headers = {
             "Authorization": f"Bearer {api_key}",
@@ -140,20 +142,22 @@ def generar_resumen_cmf_groq(entidad, materia, texto_pdf=None):
 {contexto}
 
 GENERA UN RESUMEN QUE INCLUYA:
-1. La acción ESPECÍFICA tomada (con montos, fechas o porcentajes si están disponibles)
+1. La acción ESPECÍFICA tomada (con montos, fechas o porcentajes SOLO si están disponibles en el documento)
 2. El impacto CONCRETO para los accionistas/inversionistas
-3. Cualquier dato numérico relevante (montos en UF o pesos, porcentajes, plazos)
+3. Cualquier dato numérico relevante que aparezca en el documento
 
-IMPORTANTE:
-- Si hay montos, DEBES incluirlos
-- Si hay fechas específicas, DEBES mencionarlas
-- Si hay nombres de ejecutivos o cargos, DEBES incluirlos
-- Si hay porcentajes o tasas, DEBES especificarlos
+REGLAS CRÍTICAS - PROHIBIDO INVENTAR:
+- SOLO menciona información que aparezca EXPLÍCITAMENTE en el documento proporcionado
+- Si hay montos en el documento, inclúyelos
+- Si hay fechas específicas en el documento, menciónalas
+- Si hay nombres o porcentajes en el documento, especifícalos
+- Si NO hay datos específicos, describe la acción sin inventar números
+- NUNCA inventes montos, fechas, nombres o porcentajes que no estén en el texto
 - NO uses frases genéricas como "comunicó información" o "presentó documentos"
 - NO incluyas emojis ni caracteres especiales
 - Máximo 3 líneas
 
-Responde SOLO con el resumen, sin introducciones."""
+Responde SOLO con el resumen basado ÚNICAMENTE en la información proporcionada."""
 
         headers = {
             "Authorization": f"Bearer {api_key}",

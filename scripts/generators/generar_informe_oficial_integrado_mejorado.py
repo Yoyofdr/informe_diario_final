@@ -295,53 +295,93 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
     </noscript>
     <![endif]-->
     <style>
-        /* Forzar modo claro */
+        /* Forzar modo claro - Solución más agresiva para clientes de email móviles */
         :root {{
             color-scheme: light only !important;
             supported-color-schemes: light only !important;
         }}
         
-        /* Reset para modo oscuro */
-        [data-ogsc] * {{
-            background-color: transparent !important;
-            color: inherit !important;
+        /* Reset global para modo oscuro */
+        * {{
+            -webkit-text-size-adjust: none !important;
+            -ms-text-size-adjust: none !important;
         }}
         
-        /* Prevenir cambios automáticos de color en modo oscuro */
+        /* Prevenir inversión de colores en Gmail y otros clientes */
+        u + .body .wrapper {{
+            background-color: #ffffff !important;
+        }}
+        
+        /* Reset para modo oscuro en iOS Mail y Gmail */
         @media (prefers-color-scheme: dark) {{
-            body {{
-                background-color: #f8fafc !important;
-                color: #1e293b !important;
+            /* Forzar fondos y colores específicos con !important */
+            .wrapper,
+            .wrapper * {{
+                background-color: #ffffff !important;
+                background-image: none !important;
             }}
             
-            .wrapper {{
-                background-color: #ffffff !important;
+            body,
+            table,
+            td,
+            a {{
+                -webkit-text-size-adjust: none !important;
+                -ms-text-size-adjust: none !important;
+            }}
+            
+            body {{
+                background-color: #f8fafc !important;
             }}
             
             h1, h2, h3, h4, h5, h6 {{
                 color: #1e293b !important;
+                -webkit-text-fill-color: #1e293b !important;
             }}
             
-            p, td, div, span {{
+            p, td, div, span, li {{
                 color: #1e293b !important;
+                -webkit-text-fill-color: #1e293b !important;
             }}
             
             a {{
                 color: #2563eb !important;
+                -webkit-text-fill-color: #2563eb !important;
             }}
             
-            /* Forzar fondos blancos en tablas */
-            table {{
-                background-color: transparent !important;
-            }}
-            
-            /* Mantener colores del header oscuro */
-            .dark-header {{
+            /* Mantener el header oscuro */
+            .dark-header,
+            .dark-header td {{
                 background-color: #0f172a !important;
             }}
             
-            .dark-header * {{
+            .dark-header h1,
+            .dark-header p {{
                 color: #ffffff !important;
+                -webkit-text-fill-color: #ffffff !important;
+            }}
+            
+            /* Forzar colores en elementos específicos */
+            [style*="color: #1e293b"] {{
+                color: #1e293b !important;
+                -webkit-text-fill-color: #1e293b !important;
+            }}
+            
+            [style*="color: #64748b"] {{
+                color: #64748b !important;
+                -webkit-text-fill-color: #64748b !important;
+            }}
+            
+            [style*="color: #6b7280"] {{
+                color: #6b7280 !important;
+                -webkit-text-fill-color: #6b7280 !important;
+            }}
+            
+            [style*="background-color: #ffffff"] {{
+                background-color: #ffffff !important;
+            }}
+            
+            [style*="background-color: #f8fafc"] {{
+                background-color: #f8fafc !important;
             }}
         }}
         
@@ -361,7 +401,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
         }}
     </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc !important; color: #1e293b !important; line-height: 1.6;">
+<body class="body" style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc !important; color: #1e293b !important; line-height: 1.6; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
     
     <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc;">
         <tr>

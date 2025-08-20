@@ -279,9 +279,9 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Forzar modo claro para evitar problemas con modo oscuro -->
-    <meta name="color-scheme" content="light only">
-    <meta name="supported-color-schemes" content="light only">
+    <!-- Permitir modo oscuro pero con colores específicos preservados -->
+    <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
     <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
     <meta name="x-apple-disable-message-reformatting">
     <title>Informe Diario • {fecha}</title>
@@ -295,10 +295,10 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
     </noscript>
     <![endif]-->
     <style>
-        /* Forzar modo claro - Solución más agresiva para clientes de email móviles */
+        /* Permitir modo oscuro con colores específicos preservados */
         :root {{
-            color-scheme: light only !important;
-            supported-color-schemes: light only !important;
+            color-scheme: light dark;
+            supported-color-schemes: light dark;
         }}
         
         /* Reset global para modo oscuro */
@@ -312,46 +312,45 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
             background-color: #ffffff !important;
         }}
         
-        /* Reset para modo oscuro en iOS Mail y Gmail */
+        /* Adaptación inteligente para modo oscuro */
         @media (prefers-color-scheme: dark) {{
-            /* Forzar fondos y colores específicos con !important */
-            .wrapper,
-            .wrapper * {{
-                background-color: #ffffff !important;
-                background-image: none !important;
-            }}
-            
-            body,
-            table,
-            td,
-            a {{
-                -webkit-text-size-adjust: none !important;
-                -ms-text-size-adjust: none !important;
-            }}
-            
+            /* Fondos oscuros para mejor legibilidad */
             body {{
-                background-color: #f8fafc !important;
+                background-color: #1a1a1a !important;
+                color: #e5e5e5 !important;
+            }}
+            
+            .wrapper {{
+                background-color: #242424 !important;
+            }}
+            
+            table {{
+                background-color: #242424 !important;
+            }}
+            
+            td {{
+                color: #e5e5e5 !important;
             }}
             
             h1, h2, h3, h4, h5, h6 {{
-                color: #1e293b !important;
-                -webkit-text-fill-color: #1e293b !important;
+                color: #ffffff !important;
             }}
             
-            p, td, div, span, li {{
-                color: #1e293b !important;
-                -webkit-text-fill-color: #1e293b !important;
+            p, div, span, li {{
+                color: #e5e5e5 !important;
             }}
             
             a {{
-                color: #2563eb !important;
-                -webkit-text-fill-color: #2563eb !important;
+                color: #60a5fa !important;
             }}
             
-            /* Mantener el header oscuro */
+            /* PRESERVAR: Banner principal siempre negro */
             .dark-header,
-            .dark-header td {{
+            .dark-header td,
+            .header-table,
+            [style*="background-color: #0f172a"] {{
                 background-color: #0f172a !important;
+                background-image: none !important;
             }}
             
             .dark-header h1,
@@ -360,10 +359,59 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                 -webkit-text-fill-color: #ffffff !important;
             }}
             
-            /* Forzar colores en elementos específicos */
-            [style*="color: #1e293b"] {{
-                color: #1e293b !important;
-                -webkit-text-fill-color: #1e293b !important;
+            /* PRESERVAR: Colores morados de CMF */
+            .badge-cmf,
+            .cmf-card,
+            [style*="border-top: 3px solid #8b5cf6"],
+            [style*="background-color: #8b5cf6"],
+            [style*="background: linear-gradient(135deg, #8b5cf6"],
+            td[style*="#8b5cf6"] {{
+                border-top-color: #8b5cf6 !important;
+            }}
+            
+            /* Preservar color morado en subtítulos */
+            .cmf-subtitle,
+            [style*="color: #8b5cf6"] {{
+                color: #8b5cf6 !important;
+                -webkit-text-fill-color: #8b5cf6 !important;
+            }}
+            
+            /* Para elementos con fondo morado */
+            .badge-cmf,
+            [style*="background-color: #8b5cf6"] {{
+                background-color: #8b5cf6 !important;
+                background-image: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;
+                color: #ffffff !important;
+                -webkit-text-fill-color: #ffffff !important;
+            }}
+            
+            /* PRESERVAR: Otros colores de badges */
+            .badge-sii,
+            [style*="background-color: #ef4444"],
+            td[style*="#ef4444"] {{
+                background-color: #ef4444 !important;
+                color: #ffffff !important;
+                -webkit-text-fill-color: #ffffff !important;
+            }}
+            
+            .badge-diario,
+            [style*="background-color: #3b82f6"],
+            td[style*="#3b82f6"] {{
+                background-color: #3b82f6 !important;
+                color: #ffffff !important;
+                -webkit-text-fill-color: #ffffff !important;
+            }}
+            
+            /* Adaptar tarjetas de contenido para modo oscuro */
+            .content-card {{
+                background-color: #2a2a2a !important;
+                border-color: #404040 !important;
+            }}
+            
+            /* Bordes más visibles en modo oscuro */
+            table[style*="border"],
+            td[style*="border"] {{
+                border-color: #404040 !important;
             }}
             
             [style*="color: #64748b"] {{
@@ -742,7 +790,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     <h2 style="margin: 0 0 2px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
                                                         HECHOS ESENCIALES - CMF
                                                     </h2>
-                                                    <p style="margin: 0; font-size: 14px; color: #7c3aed;">
+                                                    <p class="cmf-subtitle" style="margin: 0; font-size: 14px; color: #8b5cf6;">
                                                         Información relevante del mercado de valores
                                                     </p>
                                                 </td>
@@ -760,9 +808,9 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
             html += f"""
                                 <tr>
                                     <td style="padding-bottom: 16px;">
-                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" class="content-card" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
                                             <tr>
-                                                <td class="section-padding" style="padding: 24px; border-top: 3px solid #7c3aed; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                                <td class="section-padding cmf-card" style="padding: 24px; border-top: 3px solid #8b5cf6; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
                                                     <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
                                                         {hecho.get('entidad', '')}
                                                     </h3>

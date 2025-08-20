@@ -482,8 +482,6 @@ def admin_panel(request):
         return redirect('alerts:admin_panel')
     
     # Obtener datos para mostrar
-    # Simplemente obtener las empresas sin optimización problemática
-    empresas = Empresa.objects.all().order_by('nombre')
     usuarios = User.objects.prefetch_related('organizaciones').all().order_by('email')
     organizaciones = Organizacion.objects.select_related('admin').annotate(
         num_destinatarios=models.Count('destinatarios')
@@ -491,7 +489,6 @@ def admin_panel(request):
     destinatarios = Destinatario.objects.select_related('organizacion').all().order_by('email')
     
     return render(request, 'alerts/admin_panel.html', {
-        'empresas': empresas,
         'usuarios': usuarios,
         'organizaciones': organizaciones,
         'destinatarios': destinatarios

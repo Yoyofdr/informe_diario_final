@@ -44,10 +44,21 @@ class DestinatarioForm(forms.ModelForm):
         if Destinatario.objects.filter(email=email).exists():
             raise forms.ValidationError("Ese destinatario ya está registrado.")
         if self.organizacion:
-            dominio_autorizado = self.organizacion.dominio.lower().strip()
+            # Si la organización tiene dominio configurado, validar
+            if self.organizacion.dominio:
+                dominio_autorizado = self.organizacion.dominio.lower().strip()
+            else:
+                # Si no tiene dominio, usar el dominio del email del admin
+                admin_email = self.organizacion.admin.email
+                if '@' in admin_email:
+                    dominio_autorizado = admin_email.split('@')[1].lower().strip()
+                else:
+                    # Si no podemos determinar el dominio, permitir cualquier email
+                    return email
+            
             if not email.endswith(f"@{dominio_autorizado}"):
                 raise forms.ValidationError(
-                    "Solo puedes agregar destinatarios que pertenezcan a tu organización"
+                    f"Solo puedes agregar destinatarios con email @{dominio_autorizado}"
                 )
         return email
 

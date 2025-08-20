@@ -178,7 +178,12 @@ def panel_organizacion(request):
         messages.error(request, 'No tienes una organización asociada.')
         return render(request, 'panel_organizacion_chennai.html')
     # Eliminar validación de pago/suscripción
-    dominio = organizacion.dominio.lower().strip()
+    # Manejar el caso donde dominio puede ser None
+    if organizacion.dominio:
+        dominio = organizacion.dominio.lower().strip()
+    else:
+        # Si no hay dominio, usar el dominio del email del admin
+        dominio = organizacion.admin.email.split('@')[1] if '@' in organizacion.admin.email else 'ejemplo.com'
     form = DestinatarioForm(organizacion=organizacion)
     if request.method == 'POST':
         if 'agregar' in request.POST:

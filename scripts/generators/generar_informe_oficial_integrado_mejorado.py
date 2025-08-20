@@ -235,7 +235,14 @@ def generar_informe_oficial(fecha=None):
     logger.info("Obteniendo documentos de la Dirección del Trabajo...")
     try:
         scraper_dt = ScraperDT()
-        documentos_dt = scraper_dt.obtener_documentos_dt()
+        # Pasar la fecha en formato DD-MM-YYYY
+        if isinstance(fecha, str):
+            fecha_dt = fecha
+        elif isinstance(fecha, datetime):
+            fecha_dt = fecha.strftime('%d-%m-%Y')
+        else:
+            fecha_dt = datetime.now().strftime('%d-%m-%Y')
+        documentos_dt = scraper_dt.obtener_documentos_dt(fecha_dt)
     except Exception as e:
         logger.error(f"Error obteniendo DT: {e}")
         documentos_dt = []

@@ -189,6 +189,11 @@ else:
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
+# Configuración de autenticación
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/dashboard/'
+LOGOUT_REDIRECT_URL = '/'
+
 # URL base del sitio para construir enlaces absolutos en correos, etc.
 SITE_URL = os.environ.get('SITE_URL', 'http://127.0.0.1:8000')
 

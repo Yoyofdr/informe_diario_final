@@ -41,6 +41,7 @@ from alerts.cmf_criterios_profesionales import filtrar_hechos_profesional, get_i
 from alerts.scraper_sii import obtener_circulares_sii, obtener_resoluciones_exentas_sii, obtener_jurisprudencia_administrativa_sii
 from alerts.cmf_resumenes_ai import generar_resumen_cmf
 from alerts.utils.cache_informe import CacheInformeDiario
+from scripts.scrapers.scraper_dt import ScraperDT
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -230,8 +231,17 @@ def generar_informe_oficial(fecha=None):
         logger.error(f"Error obteniendo SII: {e}")
         publicaciones_sii = []
     
-    # 4. Generar HTML del informe
-    html = generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii)
+    # 4. Obtener documentos de la Dirección del Trabajo
+    logger.info("Obteniendo documentos de la Dirección del Trabajo...")
+    try:
+        scraper_dt = ScraperDT()
+        documentos_dt = scraper_dt.obtener_documentos_dt()
+    except Exception as e:
+        logger.error(f"Error obteniendo DT: {e}")
+        documentos_dt = []
+    
+    # 5. Generar HTML del informe
+    html = generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii, documentos_dt)
     
     # 4.5 Guardar en caché de base de datos
     try:
@@ -253,7 +263,7 @@ def generar_informe_oficial(fecha=None):
     
     return True
 
-def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=None):
+def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=None, documentos_dt=None):
     """
     Genera el HTML del informe con el diseño aprobado
     """
@@ -369,11 +379,29 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                 border-top-color: #8b5cf6 !important;
             }}
             
-            /* Preservar color morado en subtítulos */
+            /* Preservar color morado en subtítulos CMF */
             .cmf-subtitle,
             [style*="color: #8b5cf6"] {{
                 color: #8b5cf6 !important;
                 -webkit-text-fill-color: #8b5cf6 !important;
+            }}
+            
+            /* PRESERVAR: Colores naranjas de DT */
+            .dt-card,
+            [style*="border-top: 3px solid #f97316"],
+            [style*="border-top: 3px solid #fb923c"] {{
+                border-top-color: #f97316 !important;
+            }}
+            
+            .dt-subtitle,
+            [style*="color: #f97316"] {{
+                color: #f97316 !important;
+                -webkit-text-fill-color: #f97316 !important;
+            }}
+            
+            /* Botones naranjas DT */
+            [bgcolor="#f97316"] {{
+                background-color: #f97316 !important;
             }}
             
             /* Para elementos con fondo morado */
@@ -494,6 +522,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                             <li style="margin-bottom: 8px;"><strong>Diario Oficial:</strong> Normativas y avisos relevantes</li>
                                             <li style="margin-bottom: 8px;"><strong>CMF:</strong> Hechos esenciales del mercado financiero</li>
                                             <li style="margin-bottom: 8px;"><strong>SII:</strong> Circulares y resoluciones tributarias</li>
+                                            <li style="margin-bottom: 8px;"><strong>DT:</strong> Dictámenes y ordinarios laborales</li>
                                         </ul>
                                         <p style="margin: 0; font-size: 14px; color: #047857;">
                                             A partir de mañana, recibirás este informe todos los días hábiles a las 9:00 AM.
@@ -761,6 +790,103 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                                         <td align="center" style="border-radius: 6px;" bgcolor="#2563eb">
                                                                             <a href="{url_documento}" target="_blank" style="font-size: 14px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 12px 24px; border: 1px solid #2563eb; display: inline-block; font-weight: 500;">
                                                                                 Ver documento SII
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>"""
+        
+        html += """
+                            </table>"""
+    
+    # Sección Dirección del Trabajo (con color naranja)
+    if True:  # Siempre mostrar la sección
+        html += """
+                            <!-- NORMATIVA LABORAL - DIRECCIÓN DEL TRABAJO -->
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 40px;">
+                                <tr>
+                                    <td>
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #fed7aa;">
+                                            <tr>
+                                                <td>
+                                                    <h2 style="margin: 0 0 2px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
+                                                        DIRECCIÓN DEL TRABAJO
+                                                    </h2>
+                                                    <p class="dt-subtitle" style="margin: 0; font-size: 14px; color: #f97316;">
+                                                        Dictámenes y ordinarios laborales
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>"""
+        
+        if not documentos_dt:
+            # Mensaje cuando no hay documentos
+            html += """
+                                <tr>
+                                    <td style="padding-bottom: 16px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px;">
+                                            <tr>
+                                                <td class="section-padding" style="padding: 24px; text-align: center;">
+                                                    <p style="margin: 0; font-size: 14px; color: #64748b; font-style: italic;">
+                                                        No se encontraron dictámenes ni ordinarios recientes
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>"""
+        else:
+            # Agrupar por tipo
+            dictamenes = [d for d in documentos_dt if d.get('tipo') == 'Dictamen']
+            ordinarios = [d for d in documentos_dt if d.get('tipo') == 'Ordinario']
+            
+            # Mostrar dictámenes primero
+            for doc in (dictamenes[:3] + ordinarios[:2])[:5]:  # Máximo 5 documentos total
+                # Formatear
+                tipo_doc = doc.get('tipo', 'Documento')
+                numero_doc = doc.get('numero', 'S/N')
+                descripcion = doc.get('descripcion', 'Sin descripción disponible')
+                fecha_doc = doc.get('fecha', '')
+                url_doc = doc.get('url', 'https://www.dt.gob.cl/legislacion/1624/w3-channel.html')
+                
+                # Color del borde según tipo
+                color_borde = "#f97316" if tipo_doc == "Dictamen" else "#fb923c"
+                
+                html += f"""
+                                <tr>
+                                    <td style="padding-bottom: 16px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" class="content-card" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
+                                            <tr>
+                                                <td class="section-padding dt-card" style="padding: 24px; border-top: 3px solid {color_borde}; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                                    <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
+                                                        {numero_doc}
+                                                    </h3>
+                                                    <div style="margin: 0 0 8px 0;">
+                                                        <span style="display: inline-block; padding: 2px 8px; background-color: #fff7ed; color: #c2410c; font-size: 11px; font-weight: 600; border-radius: 4px; text-transform: uppercase;">
+                                                            {tipo_doc}
+                                                        </span>
+                                                    </div>
+                                                    <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
+                                                        {descripcion}
+                                                    </p>
+                                                    <!-- Botón compatible con Outlook -->
+                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                        <tr>
+                                                            <td>
+                                                                <table border="0" cellspacing="0" cellpadding="0">
+                                                                    <tr>
+                                                                        <td align="center" style="border-radius: 6px;" bgcolor="#f97316">
+                                                                            <a href="{url_doc}" target="_blank" style="font-size: 14px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 12px 24px; border: 1px solid #f97316; display: inline-block; font-weight: 500;">
+                                                                                Ver documento
                                                                             </a>
                                                                         </td>
                                                                     </tr>

@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Permitir modo oscuro pero con colores específicos preservados -->
+    <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+    <meta name="x-apple-disable-message-reformatting">
+    <title>Informe Diario • 20-08-2025</title>
+    <!--[if mso]>
+    <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </noscript>
+    <![endif]-->
+    <style>
+        /* Permitir modo oscuro con colores específicos preservados */
+        :root {
+            color-scheme: light dark;
+            supported-color-schemes: light dark;
+        }
+        
+        /* Reset global para modo oscuro */
+        * {
+            -webkit-text-size-adjust: none !important;
+            -ms-text-size-adjust: none !important;
+        }
+        
+        /* Prevenir inversión de colores en Gmail y otros clientes */
+        u + .body .wrapper {
+            background-color: #ffffff !important;
+        }
+        
+        /* Adaptación inteligente para modo oscuro */
+        @media (prefers-color-scheme: dark) {
+            /* Fondos oscuros para mejor legibilidad */
+            body {
+                background-color: #1a1a1a !important;
+                color: #e5e5e5 !important;
+            }
+            
+            .wrapper {
+                background-color: #242424 !important;
+            }
+            
+            table {
+                background-color: #242424 !important;
+            }
+            
+            td {
+                color: #e5e5e5 !important;
+            }
+            
+            h1, h2, h3, h4, h5, h6 {
+                color: #ffffff !important;
+            }
+            
+            p, div, span, li {
+                color: #e5e5e5 !important;
+            }
+            
+            a {
+                color: #60a5fa !important;
+            }
+            
+            /* PRESERVAR: Banner principal siempre negro */
+            .dark-header,
+            .dark-header td,
+            .header-table,
+            [style*="background-color: #0f172a"] {
+                background-color: #0f172a !important;
+                background-image: none !important;
+            }
+            
+            .dark-header h1,
+            .dark-header p {
+                color: #ffffff !important;
+                -webkit-text-fill-color: #ffffff !important;
+            }
+            
+            /* PRESERVAR: Colores morados de CMF */
+            .badge-cmf,
+            .cmf-card,
+            [style*="border-top: 3px solid #8b5cf6"],
+            [style*="background-color: #8b5cf6"],
+            [style*="background: linear-gradient(135deg, #8b5cf6"],
+            td[style*="#8b5cf6"] {
+                border-top-color: #8b5cf6 !important;
+            }
+            
+            /* Preservar color morado en subtítulos CMF */
+            .cmf-subtitle,
+            [style*="color: #8b5cf6"] {
+                color: #8b5cf6 !important;
+                -webkit-text-fill-color: #8b5cf6 !important;
+            }
+            
+            /* PRESERVAR: Colores naranjas de DT */
+            .dt-card,
+            [style*="border-top: 3px solid #f97316"],
+            [style*="border-top: 3px solid #fb923c"] {
+                border-top-color: #f97316 !important;
+            }
+            
+            .dt-subtitle,
+            [style*="color: #f97316"] {
+                color: #f97316 !important;
+                -webkit-text-fill-color: #f97316 !important;
+            }
+            
+            /* Botones naranjas DT */
+            [bgcolor="#f97316"] {
+                background-color: #f97316 !important;
+            }
+            
+            /* Para elementos con fondo morado */
+            .badge-cmf,
+            [style*="background-color: #8b5cf6"] {
+                background-color: #8b5cf6 !important;
+                background-image: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;
+                color: #ffffff !important;
+                -webkit-text-fill-color: #ffffff !important;
+            }
+            
+            /* PRESERVAR: Otros colores de badges */
+            .badge-sii,
+            [style*="background-color: #ef4444"],
+            td[style*="#ef4444"] {
+                background-color: #ef4444 !important;
+                color: #ffffff !important;
+                -webkit-text-fill-color: #ffffff !important;
+            }
+            
+            .badge-diario,
+            [style*="background-color: #3b82f6"],
+            td[style*="#3b82f6"] {
+                background-color: #3b82f6 !important;
+                color: #ffffff !important;
+                -webkit-text-fill-color: #ffffff !important;
+            }
+            
+            /* Adaptar tarjetas de contenido para modo oscuro */
+            .content-card {
+                background-color: #2a2a2a !important;
+                border-color: #404040 !important;
+            }
+            
+            /* Bordes más visibles en modo oscuro */
+            table[style*="border"],
+            td[style*="border"] {
+                border-color: #404040 !important;
+            }
+            
+            [style*="color: #64748b"] {
+                color: #64748b !important;
+                -webkit-text-fill-color: #64748b !important;
+            }
+            
+            [style*="color: #6b7280"] {
+                color: #6b7280 !important;
+                -webkit-text-fill-color: #6b7280 !important;
+            }
+            
+            [style*="background-color: #ffffff"] {
+                background-color: #ffffff !important;
+            }
+            
+            [style*="background-color: #f8fafc"] {
+                background-color: #f8fafc !important;
+            }
+        }
+        
+        @media screen and (max-width: 600px) {
+            /* Ajustes para móviles */
+            .wrapper { width: 100% !important; }
+            .content-padding { padding: 16px !important; }
+            .header-padding { padding: 32px 16px !important; }
+            .section-padding { padding: 16px !important; }
+            h1 { font-size: 24px !important; }
+            h2 { font-size: 16px !important; }
+            h3 { font-size: 14px !important; }
+            p, a, li { font-size: 14px !important; }
+            .small-text { font-size: 12px !important; }
+            .button { padding: 12px 16px !important; }
+            .mobile-block { display: block !important; width: 100% !important; margin-bottom: 8px !important; }
+        }
+    </style>
+</head>
+<body class="body" style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc !important; color: #1e293b !important; line-height: 1.6; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
+    
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc;">
+        <tr>
+            <td align="center" style="padding: 20px 0;">
+                
+                <!-- Wrapper -->
+                <table class="wrapper" width="672" cellpadding="0" cellspacing="0" style="max-width: 672px; width: 100%; background-color: #ffffff !important; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden;">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td class="header-padding dark-header" style="background-color: #0f172a !important; padding: 48px 32px; text-align: center;">
+                            <h1 style="margin: 0 0 8px 0; font-size: 28px; font-weight: 700; color: #ffffff !important; letter-spacing: -0.025em;">
+                                Informe Diario
+                            </h1>
+                            <p style="margin: 0; font-size: 14px; font-weight: 500; color: #ffffff !important;">
+                                20 de agosto, 2025
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td class="content-padding" style="padding: 32px;">
+                            <!-- PUBLICACIONES SII -->
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 40px;">
+                                <tr>
+                                    <td>
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #eff6ff;">
+                                            <tr>
+                                                <td>
+                                                    <h2 style="margin: 0 0 2px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
+                                                        SERVICIO DE IMPUESTOS INTERNOS
+                                                    </h2>
+                                                    <p style="margin: 0; font-size: 14px; color: #2563eb;">
+                                                        Resoluciones, circulares y oficios
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding-bottom: 16px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px;">
+                                            <tr>
+                                                <td class="section-padding" style="padding: 24px; text-align: center;">
+                                                    <p style="margin: 0; font-size: 14px; color: #64748b; font-style: italic;">
+                                                        No se encontraron circulares, resoluciones ni jurisprudencia relevante
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            <!-- NORMATIVA LABORAL - DIRECCIÓN DEL TRABAJO -->
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 40px;">
+                                <tr>
+                                    <td>
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #fed7aa;">
+                                            <tr>
+                                                <td>
+                                                    <h2 style="margin: 0 0 2px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
+                                                        DIRECCIÓN DEL TRABAJO
+                                                    </h2>
+                                                    <p class="dt-subtitle" style="margin: 0; font-size: 14px; color: #f97316;">
+                                                        Dictámenes y ordinarios laborales
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding-bottom: 16px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" class="content-card" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
+                                            <tr>
+                                                <td class="section-padding dt-card" style="padding: 24px; border-top: 3px solid #f97316; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                                    <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
+                                                        ORD.N°541/24
+                                                    </h3>
+                                                    <div style="margin: 0 0 8px 0;">
+                                                        <span style="display: inline-block; padding: 2px 8px; background-color: #fff7ed; color: #c2410c; font-size: 11px; font-weight: 600; border-radius: 4px; text-transform: uppercase;">
+                                                            Dictamen
+                                                        </span>
+                                                    </div>
+                                                    <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
+                                                        Dictamen destacado Discriminación arbitraria; Protección de datos personales; Ofertas de empleo;  11/08/2025 1. La Constitución Política de la Repú...
+                                                    </p>
+                                                    <!-- Botón compatible con Outlook -->
+                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                        <tr>
+                                                            <td>
+                                                                <table border="0" cellspacing="0" cellpadding="0">
+                                                                    <tr>
+                                                                        <td align="center" style="border-radius: 6px;" bgcolor="#f97316">
+                                                                            <a href="https://www.dt.gob.clw3-article-128171.html" target="_blank" style="font-size: 14px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 12px 24px; border: 1px solid #f97316; display: inline-block; font-weight: 500;">
+                                                                                Ver documento
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding-bottom: 16px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" class="content-card" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
+                                            <tr>
+                                                <td class="section-padding dt-card" style="padding: 24px; border-top: 3px solid #f97316; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                                    <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
+                                                        ORD.N°527/23
+                                                    </h3>
+                                                    <div style="margin: 0 0 8px 0;">
+                                                        <span style="display: inline-block; padding: 2px 8px; background-color: #fff7ed; color: #c2410c; font-size: 11px; font-weight: 600; border-radius: 4px; text-transform: uppercase;">
+                                                            Dictamen
+                                                        </span>
+                                                    </div>
+                                                    <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
+                                                        Delegado de seguridad y salud en el trabajo; 06/08/2025
+                                                    </p>
+                                                    <!-- Botón compatible con Outlook -->
+                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                        <tr>
+                                                            <td>
+                                                                <table border="0" cellspacing="0" cellpadding="0">
+                                                                    <tr>
+                                                                        <td align="center" style="border-radius: 6px;" bgcolor="#f97316">
+                                                                            <a href="https://www.dt.gob.clw3-article-128121.html" target="_blank" style="font-size: 14px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 12px 24px; border: 1px solid #f97316; display: inline-block; font-weight: 500;">
+                                                                                Ver documento
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding-bottom: 16px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" class="content-card" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
+                                            <tr>
+                                                <td class="section-padding dt-card" style="padding: 24px; border-top: 3px solid #f97316; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                                    <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
+                                                        ORD.N°525/22
+                                                    </h3>
+                                                    <div style="margin: 0 0 8px 0;">
+                                                        <span style="display: inline-block; padding: 2px 8px; background-color: #fff7ed; color: #c2410c; font-size: 11px; font-weight: 600; border-radius: 4px; text-transform: uppercase;">
+                                                            Dictamen
+                                                        </span>
+                                                    </div>
+                                                    <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
+                                                        Jornada de trabajo; Experto en prevención de riesgos; Condición de Seguridad y Salud en el Trabajo; 06/08/2025
+                                                    </p>
+                                                    <!-- Botón compatible con Outlook -->
+                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                        <tr>
+                                                            <td>
+                                                                <table border="0" cellspacing="0" cellpadding="0">
+                                                                    <tr>
+                                                                        <td align="center" style="border-radius: 6px;" bgcolor="#f97316">
+                                                                            <a href="https://www.dt.gob.clw3-article-128110.html" target="_blank" style="font-size: 14px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 12px 24px; border: 1px solid #f97316; display: inline-block; font-weight: 500;">
+                                                                                Ver documento
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding-bottom: 16px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" class="content-card" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
+                                            <tr>
+                                                <td class="section-padding dt-card" style="padding: 24px; border-top: 3px solid #fb923c; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                                    <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
+                                                        ORD.N°510/20
+                                                    </h3>
+                                                    <div style="margin: 0 0 8px 0;">
+                                                        <span style="display: inline-block; padding: 2px 8px; background-color: #fff7ed; color: #c2410c; font-size: 11px; font-weight: 600; border-radius: 4px; text-transform: uppercase;">
+                                                            Ordinario
+                                                        </span>
+                                                    </div>
+                                                    <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
+                                                        Sistema de registro y control de asistencia digital; Determinación de horas de trabajo; Trabajadores embarcados; 30/07/2025
+                                                    </p>
+                                                    <!-- Botón compatible con Outlook -->
+                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                        <tr>
+                                                            <td>
+                                                                <table border="0" cellspacing="0" cellpadding="0">
+                                                                    <tr>
+                                                                        <td align="center" style="border-radius: 6px;" bgcolor="#f97316">
+                                                                            <a href="https://www.dt.gob.clw3-article-128092.html" target="_blank" style="font-size: 14px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 12px 24px; border: 1px solid #f97316; display: inline-block; font-weight: 500;">
+                                                                                Ver documento
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            <!-- HECHOS ESENCIALES CMF -->
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 40px;">
+                                <tr>
+                                    <td>
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #eff6ff;">
+                                            <tr>
+                                                <td>
+                                                    <h2 style="margin: 0 0 2px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
+                                                        HECHOS ESENCIALES - CMF
+                                                    </h2>
+                                                    <p class="cmf-subtitle" style="margin: 0; font-size: 14px; color: #8b5cf6;">
+                                                        Información relevante del mercado de valores
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding-bottom: 16px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" class="content-card" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
+                                            <tr>
+                                                <td class="section-padding cmf-card" style="padding: 24px; border-top: 3px solid #8b5cf6; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                                    <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
+                                                        ORION SEGUROS GENERALES S.A.
+                                                    </h3>
+                                                    <div style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #6b7280;">
+                                                        Cambios en la administración
+                                                    </div>
+                                                    <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
+                                                        ORION SEGUROS GENERALES S.A. - Cambios en la administración
+                                                    </p>
+                                                    <!-- Botón compatible con Outlook -->
+                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                        <tr>
+                                                            <td>
+                                                                <table border="0" cellspacing="0" cellpadding="0">
+                                                                    <tr>
+                                                                        <td align="center" style="border-radius: 6px;" bgcolor="#7c3aed">
+                                                                            <a href="https://www.cmfchile.cl/sitio/aplic/serdoc/ver_sgd.php?s567=2838d02c6e0b990afcbec17eea8a455aVFdwQmVVNVVRVFJOUkZVelRsUlZlVTVuUFQwPQ==&secuencia=-1&t=1755663181" target="_blank" style="font-size: 14px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 12px 24px; border: 1px solid #7c3aed; display: inline-block; font-weight: 500;">
+                                                                                Ver hecho esencial
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding-bottom: 16px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" class="content-card" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
+                                            <tr>
+                                                <td class="section-padding cmf-card" style="padding: 24px; border-top: 3px solid #8b5cf6; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                                    <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
+                                                        INVERSIONES CONFUTURO S.A.
+                                                    </h3>
+                                                    <div style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #6b7280;">
+                                                        Cambios en la administración
+                                                    </div>
+                                                    <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
+                                                        INVERSIONES CONFUTURO S.A. - Cambios en la administración
+                                                    </p>
+                                                    <!-- Botón compatible con Outlook -->
+                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                        <tr>
+                                                            <td>
+                                                                <table border="0" cellspacing="0" cellpadding="0">
+                                                                    <tr>
+                                                                        <td align="center" style="border-radius: 6px;" bgcolor="#7c3aed">
+                                                                            <a href="https://www.cmfchile.cl/sitio/aplic/serdoc/ver_sgd.php?s567=52c85a1fb168ae0affd3c78f974f0909VFdwQmVVNVVRVFJOUkZVelRsUk5NazVSUFQwPQ==&secuencia=-1&t=1755663181" target="_blank" style="font-size: 14px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 12px 24px; border: 1px solid #7c3aed; display: inline-block; font-weight: 500;">
+                                                                                Ver hecho esencial
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding-bottom: 16px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" class="content-card" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
+                                            <tr>
+                                                <td class="section-padding cmf-card" style="padding: 24px; border-top: 3px solid #8b5cf6; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                                    <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
+                                                        BANCO ITAÚ CHILE
+                                                    </h3>
+                                                    <div style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #6b7280;">
+                                                        Colocaciones relacionadas
+                                                    </div>
+                                                    <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
+                                                        BANCO ITAÚ CHILE - Colocaciones relacionadas
+                                                    </p>
+                                                    <!-- Botón compatible con Outlook -->
+                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                        <tr>
+                                                            <td>
+                                                                <table border="0" cellspacing="0" cellpadding="0">
+                                                                    <tr>
+                                                                        <td align="center" style="border-radius: 6px;" bgcolor="#7c3aed">
+                                                                            <a href="https://www.cmfchile.cl/sitio/aplic/serdoc/ver_sgd.php?s567=ad00090777112ae30a1873258e5acf18VFdwQmVVNVVRVFJOUkZVelRtcE5lRTlSUFQwPQ==&secuencia=-1&t=1755663181" target="_blank" style="font-size: 14px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 12px 24px; border: 1px solid #7c3aed; display: inline-block; font-weight: 500;">
+                                                                                Ver hecho esencial
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding-bottom: 16px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" class="content-card" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
+                                            <tr>
+                                                <td class="section-padding cmf-card" style="padding: 24px; border-top: 3px solid #8b5cf6; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                                    <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
+                                                        BANCO SECURITY
+                                                    </h3>
+                                                    <div style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #6b7280;">
+                                                        Otros
+                                                    </div>
+                                                    <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
+                                                        BANCO SECURITY - Otros
+                                                    </p>
+                                                    <!-- Botón compatible con Outlook -->
+                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                        <tr>
+                                                            <td>
+                                                                <table border="0" cellspacing="0" cellpadding="0">
+                                                                    <tr>
+                                                                        <td align="center" style="border-radius: 6px;" bgcolor="#7c3aed">
+                                                                            <a href="https://www.cmfchile.cl/sitio/aplic/serdoc/ver_sgd.php?s567=22f10b869393cffc1db23e6974fcd3e8VFdwQmVVNVVRVFJOUkZVelRtcEpNVTVCUFQwPQ==&secuencia=-1&t=1755663181" target="_blank" style="font-size: 14px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 12px 24px; border: 1px solid #7c3aed; display: inline-block; font-weight: 500;">
+                                                                                Ver hecho esencial
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding-bottom: 16px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" class="content-card" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
+                                            <tr>
+                                                <td class="section-padding cmf-card" style="padding: 24px; border-top: 3px solid #8b5cf6; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                                    <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
+                                                        FACTORING SECURITY S.A.
+                                                    </h3>
+                                                    <div style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #6b7280;">
+                                                        Otros
+                                                    </div>
+                                                    <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
+                                                        FACTORING SECURITY S.A. - Otros
+                                                    </p>
+                                                    <!-- Botón compatible con Outlook -->
+                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                        <tr>
+                                                            <td>
+                                                                <table border="0" cellspacing="0" cellpadding="0">
+                                                                    <tr>
+                                                                        <td align="center" style="border-radius: 6px;" bgcolor="#7c3aed">
+                                                                            <a href="https://www.cmfchile.cl/sitio/aplic/serdoc/ver_sgd.php?s567=889b05363f216374bfd4ef98a3880da1VFdwQmVVNVVRVFJOUkZVelRtcEJlRTUzUFQwPQ==&secuencia=-1&t=1755663181" target="_blank" style="font-size: 14px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 12px 24px; border: 1px solid #7c3aed; display: inline-block; font-weight: 500;">
+                                                                                Ver hecho esencial
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td class="content-padding" style="background-color: #f8fafc; padding: 24px 32px; text-align: center; border-top: 1px solid #e2e8f0;">
+                            <p class="small-text" style="margin: 0; font-size: 13px; color: #64748b; line-height: 1.5;">
+                                Información obtenida directamente de fuentes oficiales
+                            </p>
+                        </td>
+                    </tr>
+                    
+                </table>
+                
+            </td>
+        </tr>
+    </table>
+    
+</body>
+</html>

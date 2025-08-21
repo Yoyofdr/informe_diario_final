@@ -42,6 +42,8 @@ from alerts.scraper_sii import obtener_circulares_sii, obtener_resoluciones_exen
 from alerts.cmf_resumenes_ai import generar_resumen_cmf
 from alerts.utils.cache_informe import CacheInformeDiario
 from scripts.scrapers.scraper_dt import ScraperDT
+from alerts.services.pdf_extractor import pdf_extractor
+import requests
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -188,9 +190,38 @@ def obtener_hechos_cmf_dia(fecha):
         for hecho in hechos_filtrados:
             entidad = hecho.get('entidad', '')
             materia = hecho.get('materia', hecho.get('titulo', ''))
+            url_pdf = hecho.get('url_pdf', '')
             
-            # Generar resumen con IA
-            resumen_ai = generar_resumen_cmf(entidad, materia)
+            # Descargar y extraer texto del PDF
+            texto_pdf = ""
+            if url_pdf:
+                try:
+                    logger.info(f"Descargando PDF de {entidad}: {url_pdf}")
+                    # Crear sesión con headers apropiados (como el scraper CMF)
+                    session = requests.Session()
+                    session.headers.update({
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                        'Accept': 'application/pdf,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                        'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
+                        'Referer': 'https://www.cmfchile.cl/institucional/hechos/hechos_portada.php'
+                    })
+                    
+                    # Descargar el PDF con la sesión configurada
+                    response = session.get(url_pdf, timeout=30, verify=False)
+                    response.raise_for_status()
+                    
+                    # Extraer texto del PDF
+                    texto_extraido, metodo = pdf_extractor.extract_text(response.content, max_pages=3)
+                    if texto_extraido:
+                        texto_pdf = texto_extraido
+                        logger.info(f"✅ Texto extraído exitosamente con método {metodo} ({len(texto_pdf)} caracteres)")
+                    else:
+                        logger.warning(f"⚠️ No se pudo extraer texto del PDF de {entidad}")
+                except Exception as e:
+                    logger.error(f"Error descargando/procesando PDF de {entidad}: {str(e)}")
+            
+            # Generar resumen con IA (ahora con el texto del PDF)
+            resumen_ai = generar_resumen_cmf(entidad, materia, texto_pdf)
             if resumen_ai:
                 hecho['resumen'] = resumen_ai
                 logger.info(f"✅ Resumen generado para {entidad}")

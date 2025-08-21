@@ -53,14 +53,20 @@ def generar_resumen_cmf_openai(entidad, materia, texto_pdf=None):
     if not api_key:
         return None
     
+    # VALIDACIÓN CRÍTICA: Si no hay texto PDF, no generar resúmenes inventados
+    if not texto_pdf or len(texto_pdf.strip()) < 100:
+        return f"{entidad} comunicó {materia}. No se pudo acceder al contenido del documento para mayor detalle."
+    
     try:
         # Extraer información relevante del PDF
-        info_relevante = extraer_informacion_relevante_pdf(texto_pdf) if texto_pdf else ""
+        info_relevante = extraer_informacion_relevante_pdf(texto_pdf)
+        
+        # Validar que tenemos información relevante
+        if not info_relevante or len(info_relevante.strip()) < 50:
+            return f"{entidad} comunicó {materia}. Documento sin información detallada disponible."
         
         # Preparar el contexto con información más específica
-        contexto = f"Empresa: {entidad}\nTipo de hecho: {materia}"
-        if info_relevante:
-            contexto += f"\n\nInformación clave del documento:\n{info_relevante}"
+        contexto = f"Empresa: {entidad}\nTipo de hecho: {materia}\n\nInformación clave del documento:\n{info_relevante}"
         
         # Prompt mejorado para obtener información más específica
         prompt = f"""Eres un analista financiero senior especializado en el mercado chileno. Analiza este hecho esencial y genera un resumen ESPECÍFICO Y DETALLADO.
@@ -81,6 +87,9 @@ REGLAS CRÍTICAS - PROHIBIDO INVENTAR:
 - NUNCA inventes montos, fechas, nombres o porcentajes que no estén en el texto
 - NO uses frases genéricas como "comunicó información" o "presentó documentos"
 - NO incluyas emojis ni caracteres especiales
+- Si el documento no tiene información clara, indica que "no se especifican detalles en el documento"
+- NUNCA inventes nombres como "Juan Pérez" o "María González"
+- NUNCA digas "no tengo acceso" o "lamentablemente"
 - Máximo 3 líneas
 
 Responde SOLO con el resumen basado ÚNICAMENTE en la información proporcionada."""
@@ -110,6 +119,32 @@ Responde SOLO con el resumen basado ÚNICAMENTE en la información proporcionada
         if response.status_code == 200:
             result = response.json()
             resumen = result['choices'][0]['message']['content'].strip()
+            
+            # Validación final: detectar si el modelo está inventando
+            frases_prohibidas = [
+                "no tengo acceso",
+                "no puedo acceder",
+                "lamentablemente",
+                "juan pérez",
+                "maría gonzález",
+                "octubre de 2023",
+                "noviembre de 2023",
+                "15 de octubre",
+                "1 de octubre",
+                "20 de octubre"
+            ]
+            
+            resumen_lower = resumen.lower()
+            for frase in frases_prohibidas:
+                if frase in resumen_lower:
+                    return f"{entidad} comunicó {materia}. Información detallada no disponible en el documento."
+            
+            # Detectar patrones de invención
+            import re
+            # Si menciona fechas de 2023 que son inventadas
+            if re.search(r'\b2023\b', resumen) and materia != "2023":
+                return f"{entidad} comunicó {materia}. Información específica no disponible."
+            
             return resumen
         else:
             print(f"[OpenAI] Error {response.status_code}: {response.text}")
@@ -155,6 +190,9 @@ REGLAS CRÍTICAS - PROHIBIDO INVENTAR:
 - NUNCA inventes montos, fechas, nombres o porcentajes que no estén en el texto
 - NO uses frases genéricas como "comunicó información" o "presentó documentos"
 - NO incluyas emojis ni caracteres especiales
+- Si el documento no tiene información clara, indica que "no se especifican detalles en el documento"
+- NUNCA inventes nombres como "Juan Pérez" o "María González"
+- NUNCA digas "no tengo acceso" o "lamentablemente"
 - Máximo 3 líneas
 
 Responde SOLO con el resumen basado ÚNICAMENTE en la información proporcionada."""
@@ -184,6 +222,32 @@ Responde SOLO con el resumen basado ÚNICAMENTE en la información proporcionada
         if response.status_code == 200:
             result = response.json()
             resumen = result['choices'][0]['message']['content'].strip()
+            
+            # Validación final: detectar si el modelo está inventando
+            frases_prohibidas = [
+                "no tengo acceso",
+                "no puedo acceder",
+                "lamentablemente",
+                "juan pérez",
+                "maría gonzález",
+                "octubre de 2023",
+                "noviembre de 2023",
+                "15 de octubre",
+                "1 de octubre",
+                "20 de octubre"
+            ]
+            
+            resumen_lower = resumen.lower()
+            for frase in frases_prohibidas:
+                if frase in resumen_lower:
+                    return f"{entidad} comunicó {materia}. Información detallada no disponible en el documento."
+            
+            # Detectar patrones de invención
+            import re
+            # Si menciona fechas de 2023 que son inventadas
+            if re.search(r'\b2023\b', resumen) and materia != "2023":
+                return f"{entidad} comunicó {materia}. Información específica no disponible."
+            
             return resumen
         else:
             print(f"[Groq] Error {response.status_code}: {response.text}")

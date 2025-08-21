@@ -3,11 +3,10 @@ from .models import Destinatario, Organizacion
 
 @admin.register(Organizacion)
 class OrganizacionAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'rut', 'tipo', 'dominio', 'fecha_creacion')
-    list_filter = ('tipo', 'plan', 'fecha_creacion')
+    list_display = ('nombre', 'rut', 'tipo', 'dominio', 'plan')
+    list_filter = ('tipo', 'plan')
     search_fields = ('nombre', 'rut', 'dominio')
-    readonly_fields = ('fecha_creacion',)
-    ordering = ('-fecha_creacion',)
+    ordering = ('nombre',)
 
 @admin.register(Destinatario)
 class DestinatarioAdmin(admin.ModelAdmin):

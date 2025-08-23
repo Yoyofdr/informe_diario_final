@@ -207,8 +207,19 @@ def obtener_hechos_cmf_dia(fecha):
                     })
                     
                     # Descargar el PDF con la sesión configurada
-                    response = session.get(url_pdf, timeout=30, verify=False)
-                    response.raise_for_status()
+                    # Aumentar timeout para PDFs grandes e implementar reintentos
+                    max_reintentos = 3
+                    for intento in range(max_reintentos):
+                        try:
+                            response = session.get(url_pdf, timeout=60, verify=False)
+                            response.raise_for_status()
+                            break
+                        except (requests.Timeout, requests.ConnectionError) as e:
+                            if intento < max_reintentos - 1:
+                                logger.warning(f"Intento {intento + 1} falló para {entidad}, reintentando...")
+                                time.sleep(2)  # Esperar 2 segundos antes de reintentar
+                            else:
+                                raise
                     
                     # Extraer texto del PDF
                     texto_extraido, metodo = pdf_extractor.extract_text(response.content, max_pages=3)
@@ -217,8 +228,12 @@ def obtener_hechos_cmf_dia(fecha):
                         logger.info(f"✅ Texto extraído exitosamente con método {metodo} ({len(texto_pdf)} caracteres)")
                     else:
                         logger.warning(f"⚠️ No se pudo extraer texto del PDF de {entidad}")
+                except requests.Timeout:
+                    logger.error(f"⏱️ Timeout descargando PDF de {entidad} después de {max_reintentos} intentos")
+                except requests.HTTPError as e:
+                    logger.error(f"🌐 Error HTTP {e.response.status_code} para PDF de {entidad}")
                 except Exception as e:
-                    logger.error(f"Error descargando/procesando PDF de {entidad}: {str(e)}")
+                    logger.error(f"❌ Error procesando PDF de {entidad}: {str(e)[:100]}")
             
             # Generar resumen con IA (ahora con el texto del PDF)
             resumen_ai = generar_resumen_cmf(entidad, materia, texto_pdf)

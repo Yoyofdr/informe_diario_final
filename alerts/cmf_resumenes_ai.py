@@ -55,7 +55,17 @@ def generar_resumen_cmf_openai(entidad, materia, texto_pdf=None):
     
     # VALIDACIÓN CRÍTICA: Si no hay texto PDF, no generar resúmenes inventados
     if not texto_pdf or len(texto_pdf.strip()) < 100:
-        return f"{entidad} comunicó {materia}. No se pudo acceder al contenido del documento para mayor detalle."
+        # Generar un resumen más informativo basado en la materia
+        if "dividendo" in materia.lower():
+            return f"{entidad} anunció {materia}. Los detalles específicos del dividendo no pudieron ser extraídos del documento."
+        elif "cambios en la administración" in materia.lower():
+            return f"{entidad} informó {materia}. Los nombres y cargos específicos no pudieron ser extraídos del documento."
+        elif "junta" in materia.lower():
+            return f"{entidad} convocó a {materia}. La fecha y agenda específica no pudieron ser extraídas del documento."
+        elif "crédito" in materia.lower():
+            return f"{entidad} informó sobre {materia}. Los montos y condiciones específicas no pudieron ser extraídos del documento."
+        else:
+            return f"{entidad} comunicó {materia}. No se pudo acceder al contenido del documento para mayor detalle."
     
     try:
         # Extraer información relevante del PDF
@@ -161,6 +171,20 @@ def generar_resumen_cmf_groq(entidad, materia, texto_pdf=None):
     api_key = os.environ.get('GROQ_API_KEY')
     if not api_key:
         return None
+    
+    # VALIDACIÓN CRÍTICA: Si no hay texto PDF, no generar resúmenes inventados
+    if not texto_pdf or len(texto_pdf.strip()) < 100:
+        # Usar los mismos mensajes informativos que OpenAI
+        if "dividendo" in materia.lower():
+            return f"{entidad} anunció {materia}. Los detalles específicos del dividendo no pudieron ser extraídos del documento."
+        elif "cambios en la administración" in materia.lower():
+            return f"{entidad} informó {materia}. Los nombres y cargos específicos no pudieron ser extraídos del documento."
+        elif "junta" in materia.lower():
+            return f"{entidad} convocó a {materia}. La fecha y agenda específica no pudieron ser extraídas del documento."
+        elif "crédito" in materia.lower():
+            return f"{entidad} informó sobre {materia}. Los montos y condiciones específicas no pudieron ser extraídos del documento."
+        else:
+            return f"{entidad} comunicó {materia}. No se pudo acceder al contenido del documento para mayor detalle."
     
     try:
         # Extraer información relevante del PDF  

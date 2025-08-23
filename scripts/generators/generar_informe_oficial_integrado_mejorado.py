@@ -43,7 +43,11 @@ from alerts.cmf_resumenes_ai import generar_resumen_cmf
 from alerts.utils.cache_informe import CacheInformeDiario
 from scripts.scrapers.scraper_dt import ScraperDT
 from alerts.services.pdf_extractor import pdf_extractor
+from alerts.services.pdf_cache import pdf_cache
+from alerts.services.pdf_downloader_selenium import selenium_downloader
 import requests
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import time
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -185,64 +189,106 @@ def obtener_hechos_cmf_dia(fecha):
         
         logger.info(f"Hechos después del filtrado profesional: {len(hechos_filtrados)}")
         
-        # Generar resúmenes con IA para cada hecho
-        logger.info("Generando resúmenes con IA para hechos CMF...")
-        for hecho in hechos_filtrados:
+        # Función para procesar un solo hecho (para usar en paralelo)
+        def procesar_hecho_cmf(hecho):
+            """Procesa un hecho CMF: descarga PDF y genera resumen"""
             entidad = hecho.get('entidad', '')
             materia = hecho.get('materia', hecho.get('titulo', ''))
             url_pdf = hecho.get('url_pdf', '')
             
-            # Descargar y extraer texto del PDF
-            texto_pdf = ""
+            # Primero verificar caché
+            pdf_content = None
             if url_pdf:
+                pdf_content = pdf_cache.get(url_pdf)
+                if pdf_content:
+                    logger.info(f"📦 Usando PDF cacheado para {entidad}")
+            
+            # Si no está en caché, descargar
+            if url_pdf and not pdf_content:
                 try:
-                    logger.info(f"Descargando PDF de {entidad}: {url_pdf}")
-                    # Crear sesión con headers apropiados (como el scraper CMF)
+                    logger.info(f"📥 Descargando PDF de {entidad}")
                     session = requests.Session()
                     session.headers.update({
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
                         'Accept': 'application/pdf,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                         'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
                         'Referer': 'https://www.cmfchile.cl/institucional/hechos/hechos_portada.php'
                     })
                     
-                    # Descargar el PDF con la sesión configurada
-                    # Aumentar timeout para PDFs grandes e implementar reintentos
-                    max_reintentos = 3
-                    for intento in range(max_reintentos):
+                    # Reintentos con timeouts progresivos
+                    timeouts = [30, 60, 90]  # Aumentar timeout en cada intento
+                    for intento, timeout in enumerate(timeouts):
                         try:
-                            response = session.get(url_pdf, timeout=60, verify=False)
+                            response = session.get(url_pdf, timeout=timeout, verify=False)
                             response.raise_for_status()
+                            pdf_content = response.content
+                            # Guardar en caché para futuro uso
+                            pdf_cache.put(url_pdf, pdf_content)
                             break
                         except (requests.Timeout, requests.ConnectionError) as e:
-                            if intento < max_reintentos - 1:
-                                logger.warning(f"Intento {intento + 1} falló para {entidad}, reintentando...")
-                                time.sleep(2)  # Esperar 2 segundos antes de reintentar
+                            if intento < len(timeouts) - 1:
+                                logger.warning(f"Intento {intento + 1} falló para {entidad}, reintentando con timeout {timeouts[intento + 1]}s...")
+                                time.sleep(3)
                             else:
                                 raise
+                except Exception as e:
+                    logger.error(f"❌ Error descargando PDF de {entidad}: {str(e)[:100]}")
                     
-                    # Extraer texto del PDF
-                    texto_extraido, metodo = pdf_extractor.extract_text(response.content, max_pages=3)
+                    # FALLBACK: Intentar con Selenium si falla descarga directa
+                    if not pdf_content:
+                        logger.info(f"🔄 Intentando con Selenium para {entidad}")
+                        try:
+                            pdf_content = selenium_downloader.download_pdf_with_selenium(url_pdf)
+                            if pdf_content:
+                                # Guardar en caché el PDF obtenido con Selenium
+                                pdf_cache.put(url_pdf, pdf_content)
+                                logger.info(f"✅ PDF obtenido con Selenium para {entidad}")
+                        except Exception as se:
+                            logger.error(f"❌ Selenium también falló para {entidad}: {str(se)[:100]}")
+            
+            # Extraer texto del PDF
+            texto_pdf = ""
+            if pdf_content:
+                try:
+                    texto_extraido, metodo = pdf_extractor.extract_text(pdf_content, max_pages=5)  # Más páginas
                     if texto_extraido:
                         texto_pdf = texto_extraido
-                        logger.info(f"✅ Texto extraído exitosamente con método {metodo} ({len(texto_pdf)} caracteres)")
+                        logger.info(f"✅ Texto extraído de {entidad} con {metodo} ({len(texto_pdf)} caracteres)")
                     else:
                         logger.warning(f"⚠️ No se pudo extraer texto del PDF de {entidad}")
-                except requests.Timeout:
-                    logger.error(f"⏱️ Timeout descargando PDF de {entidad} después de {max_reintentos} intentos")
-                except requests.HTTPError as e:
-                    logger.error(f"🌐 Error HTTP {e.response.status_code} para PDF de {entidad}")
                 except Exception as e:
-                    logger.error(f"❌ Error procesando PDF de {entidad}: {str(e)[:100]}")
+                    logger.error(f"❌ Error extrayendo texto de {entidad}: {str(e)[:100]}")
             
-            # Generar resumen con IA (ahora con el texto del PDF)
+            # Generar resumen con IA
             resumen_ai = generar_resumen_cmf(entidad, materia, texto_pdf)
             if resumen_ai:
                 hecho['resumen'] = resumen_ai
                 logger.info(f"✅ Resumen generado para {entidad}")
             else:
-                # Mantener el resumen existente si falla la IA
                 logger.warning(f"⚠️ No se pudo generar resumen AI para {entidad}")
+            
+            return hecho
+        
+        # Limpiar caché viejo antes de empezar
+        pdf_cache.clear_old()
+        
+        # Procesar hechos en paralelo para mayor velocidad
+        logger.info(f"Procesando {len(hechos_filtrados)} hechos CMF en paralelo...")
+        
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            # Enviar todos los trabajos al pool
+            futures = {executor.submit(procesar_hecho_cmf, hecho): hecho 
+                      for hecho in hechos_filtrados}
+            
+            # Recoger resultados conforme se completan
+            for future in as_completed(futures):
+                try:
+                    resultado = future.result(timeout=120)  # Timeout global de 2 minutos por hecho
+                except Exception as e:
+                    hecho_original = futures[future]
+                    logger.error(f"Error procesando {hecho_original.get('entidad', 'desconocido')}: {e}")
+        
+        logger.info(f"✅ Procesamiento de hechos CMF completado")
         
         return hechos_filtrados
         

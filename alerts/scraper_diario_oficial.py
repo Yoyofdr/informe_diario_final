@@ -104,14 +104,16 @@ def resumen_con_gemini(texto, titulo=None):
         model = genai.GenerativeModel('gemini-1.5-flash')
         prompt = (
             "Resume este documento oficial chileno de forma muy concisa.\n\n"
-            "INSTRUCCIONES:\n"
+            "INSTRUCCIONES CRÍTICAS:\n"
             "1. MÁXIMO 2 ORACIONES (60-80 palabras total).\n"
-            "2. Incluye SOLO lo esencial:\n"
-            "   - De qué trata el documento\n"
-            "   - Quién lo emite y a quién afecta\n"
+            "2. NO REPITAS información del título (no digas 'El Decreto N° X' o 'La Resolución N° Y').\n"
+            "3. Comienza directamente con la acción o efecto principal.\n"
+            "4. Incluye SOLO:\n"
+            "   - Qué establece o modifica (sin repetir el número)\n"
+            "   - A quién afecta específicamente\n"
             "   - Fecha/plazo clave si existe\n"
-            "3. Sé extremadamente conciso y directo.\n\n"
-            f"Título: {titulo}\n"
+            "5. Usa lenguaje directo, sin introducciones.\n\n"
+            f"Título del documento: {titulo}\n"
             f"Texto: {primer_parrafo}"
         )
         # print('\n[Gemini] Texto enviado a Gemini:\n', primer_parrafo[:1000], '\n---')
@@ -155,21 +157,23 @@ def resumen_con_openai(texto, titulo=None):
         
         prompt = (
             "Resume este documento oficial chileno de forma muy concisa.\n\n"
-            "INSTRUCCIONES:\n"
+            "INSTRUCCIONES CRÍTICAS:\n"
             "1. MÁXIMO 2 ORACIONES (60-80 palabras total).\n"
-            "2. Incluye SOLO lo esencial:\n"
-            "   - De qué trata el documento\n"
-            "   - Quién lo emite y a quién afecta\n"
+            "2. NO REPITAS información del título (no digas 'El Decreto N° X' o 'La Resolución N° Y').\n"
+            "3. Comienza directamente con la acción o efecto principal.\n"
+            "4. Incluye SOLO:\n"
+            "   - Qué establece o modifica (sin repetir el número)\n"
+            "   - A quién afecta específicamente\n"
             "   - Fecha/plazo clave si existe\n"
-            "3. Sé extremadamente conciso y directo.\n\n"
-            f"Título: {titulo}\n"
+            "5. Usa lenguaje directo, sin introducciones.\n\n"
+            f"Título del documento: {titulo}\n"
             f"Texto: {primer_parrafo}"
         )
         
         data = {
             "model": "gpt-4o-mini",  # Modelo más económico y rápido
             "messages": [
-                {"role": "system", "content": "Eres un experto en resumir documentos oficiales chilenos de forma extremadamente concisa."},
+                {"role": "system", "content": "Eres un experto en resumir documentos oficiales chilenos de forma extremadamente concisa. NUNCA repites el número del decreto/resolución que ya está en el título. Comienzas directamente con la acción principal."},
                 {"role": "user", "content": prompt}
             ],
             "temperature": 0.3,

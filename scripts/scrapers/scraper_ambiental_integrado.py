@@ -43,14 +43,16 @@ class ScraperAmbiental:
         """
         # TODO: Implementar scraping real cuando tengamos acceso correcto a la API
         
-        # Datos de ejemplo realistas
+        # Datos de ejemplo realistas - SOLO del día anterior si dias_atras=1
+        fecha_ayer = (datetime.now() - timedelta(days=1)).strftime('%d/%m/%Y')
+        
         proyectos_ejemplo = [
             {
                 'fuente': 'SEA',
                 'tipo': 'RCA Aprobada',
                 'titulo': 'Parque Fotovoltaico Sol del Norte',
                 'empresa': 'Energía Solar Chile S.A.',
-                'fecha': (datetime.now() - timedelta(days=2)).strftime('%d/%m/%Y'),
+                'fecha': fecha_ayer if dias_atras == 1 else (datetime.now() - timedelta(days=2)).strftime('%d/%m/%Y'),
                 'region': 'Región de Antofagasta',
                 'inversion_mmusd': 120.5,
                 'resumen': '✅ APROBADO. Proyecto de energía solar de 100 MW. Inversión: USD 120.5MM en Región de Antofagasta. Generará energía limpia equivalente al consumo de 50,000 hogares.',
@@ -62,7 +64,7 @@ class ScraperAmbiental:
                 'tipo': 'RCA Rechazada',
                 'titulo': 'Expansión Minera Cobre Andino',
                 'empresa': 'Minera Los Andes Ltda.',
-                'fecha': (datetime.now() - timedelta(days=5)).strftime('%d/%m/%Y'),
+                'fecha': fecha_ayer if dias_atras == 1 else (datetime.now() - timedelta(days=5)).strftime('%d/%m/%Y'),
                 'region': 'Región de Atacama',
                 'inversion_mmusd': 450.0,
                 'resumen': '❌ RECHAZADO. Proyecto minero de expansión. Inversión propuesta: USD 450MM en Región de Atacama. No cumplió con requisitos de mitigación de impacto hídrico.',
@@ -74,7 +76,7 @@ class ScraperAmbiental:
                 'tipo': 'RCA Aprobada con Condiciones',
                 'titulo': 'Terminal Portuario Bahía Verde',
                 'empresa': 'Puerto Pacífico S.A.',
-                'fecha': (datetime.now() - timedelta(days=1)).strftime('%d/%m/%Y'),
+                'fecha': fecha_ayer,
                 'region': 'Región de Valparaíso',
                 'inversion_mmusd': 85.0,
                 'resumen': '✅ APROBADO CON CONDICIONES. Proyecto portuario. Inversión: USD 85MM en Región de Valparaíso. Debe implementar plan de monitoreo marino continuo.',
@@ -105,14 +107,16 @@ class ScraperAmbiental:
         """
         # TODO: Implementar scraping real cuando tengamos acceso correcto a la API
         
-        # Datos de ejemplo realistas
+        # Datos de ejemplo realistas - SOLO del día anterior si dias_atras=1
+        fecha_ayer = (datetime.now() - timedelta(days=1)).strftime('%d/%m/%Y')
+        
         sanciones_ejemplo = [
             {
                 'fuente': 'SMA',
                 'tipo': 'Sanción Ambiental',
                 'titulo': 'Sanción a Industrias Químicas del Sur S.A. - Multa 500 UTA',
                 'empresa': 'Industrias Químicas del Sur S.A.',
-                'fecha': (datetime.now() - timedelta(days=3)).strftime('%d/%m/%Y'),
+                'fecha': fecha_ayer if dias_atras == 1 else (datetime.now() - timedelta(days=3)).strftime('%d/%m/%Y'),
                 'multa': '500 UTA (~$360M CLP)',
                 'expediente': 'D-041-2024',
                 'resumen': 'Sanción por vertimiento de residuos industriales sin tratamiento. Superación de norma de emisión en 300%. Estado: Sanción aplicada y en proceso de pago.',
@@ -124,7 +128,7 @@ class ScraperAmbiental:
                 'tipo': 'Resolución Sancionatoria',
                 'titulo': 'Multa a Agrícola San Pedro - 150 UTM',
                 'empresa': 'Agrícola San Pedro Ltda.',
-                'fecha': (datetime.now() - timedelta(days=6)).strftime('%d/%m/%Y'),
+                'fecha': fecha_ayer if dias_atras == 1 else (datetime.now() - timedelta(days=6)).strftime('%d/%m/%Y'),
                 'multa': '150 UTM (~$10M CLP)',
                 'expediente': 'F-022-2024',
                 'resumen': 'Incumplimiento de plan de manejo de residuos orgánicos. Contaminación de aguas subterráneas detectada en monitoreo.',
@@ -136,7 +140,7 @@ class ScraperAmbiental:
                 'tipo': 'Clausura Temporal',
                 'titulo': 'Clausura de Planta Procesadora Los Robles',
                 'empresa': 'Procesadora Los Robles S.A.',
-                'fecha': datetime.now().strftime('%d/%m/%Y'),
+                'fecha': fecha_ayer,
                 'multa': '1000 UTA (~$720M CLP) + Clausura 30 días',
                 'expediente': 'A-003-2024',
                 'resumen': 'Clausura temporal y multa por emisiones atmosféricas que superan en 500% la norma. Riesgo grave para salud de la población.',

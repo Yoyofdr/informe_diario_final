@@ -344,7 +344,8 @@ def generar_informe_oficial(fecha=None):
     logger.info("Obteniendo datos ambientales (SEA y SMA)...")
     try:
         scraper_ambiental = ScraperAmbiental()
-        datos_ambientales = scraper_ambiental.obtener_datos_ambientales(dias_atras=7)
+        # Solo obtener datos del día anterior (1 día atrás)
+        datos_ambientales = scraper_ambiental.obtener_datos_ambientales(dias_atras=1)
         datos_ambientales_formateados = scraper_ambiental.formatear_para_informe(datos_ambientales)
     except Exception as e:
         logger.error(f"Error obteniendo datos ambientales: {e}")
@@ -945,13 +946,8 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
             
             # Mostrar proyectos SEA primero
             for proyecto in proyectos_sea[:3]:  # Máximo 3 proyectos
-                # Determinar color del borde según estado
-                if 'APROBADO' in proyecto.get('resumen', ''):
-                    color_borde = '#16a34a'  # Verde para aprobados
-                elif 'RECHAZADO' in proyecto.get('resumen', ''):
-                    color_borde = '#dc2626'  # Rojo para rechazados
-                else:
-                    color_borde = '#f59e0b'  # Amarillo para otros
+                # Usar siempre color verde
+                color_borde = '#16a34a'  # Verde para todos
                 
                 html += f"""
                                 <tr>
@@ -1001,9 +997,9 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                     <td style="padding-bottom: 16px;">
                                         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
                                             <tr>
-                                                <td style="padding: 24px; border-top: 3px solid #dc2626; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                                <td style="padding: 24px; border-top: 3px solid #16a34a; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
                                                     <div style="margin: 0 0 8px 0;">
-                                                        <span style="background-color: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">SMA</span>
+                                                        <span style="background-color: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">SMA</span>
                                                     </div>
                                                     <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
                                                         {sancion.get('titulo', '')}
@@ -1021,8 +1017,8 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                             <td>
                                                                 <table border="0" cellspacing="0" cellpadding="0">
                                                                     <tr>
-                                                                        <td align="center" style="border-radius: 6px;" bgcolor="#dc2626">
-                                                                            <a href="{sancion.get('url', '#')}" target="_blank" style="font-size: 14px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 12px 24px; border: 1px solid #dc2626; display: inline-block; font-weight: 500;">
+                                                                        <td align="center" style="border-radius: 6px;" bgcolor="#16a34a">
+                                                                            <a href="{sancion.get('url', '#')}" target="_blank" style="font-size: 14px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 12px 24px; border: 1px solid #16a34a; display: inline-block; font-weight: 500;">
                                                                                 Ver sanción SMA
                                                                             </a>
                                                                         </td>

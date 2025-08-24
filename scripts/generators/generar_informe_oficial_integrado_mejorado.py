@@ -45,6 +45,7 @@ from scripts.scrapers.scraper_dt import ScraperDT
 from alerts.services.pdf_extractor import pdf_extractor
 from alerts.services.pdf_cache import pdf_cache
 from alerts.services.pdf_downloader_selenium import selenium_downloader
+from scripts.scrapers.scraper_ambiental_integrado import ScraperAmbiental
 import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
@@ -339,8 +340,18 @@ def generar_informe_oficial(fecha=None):
         logger.error(f"Error obteniendo DT: {e}")
         documentos_dt = []
     
-    # 5. Generar HTML del informe
-    html = generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii, documentos_dt)
+    # 5. Obtener datos ambientales (SEA y SMA)
+    logger.info("Obteniendo datos ambientales (SEA y SMA)...")
+    try:
+        scraper_ambiental = ScraperAmbiental()
+        datos_ambientales = scraper_ambiental.obtener_datos_ambientales(dias_atras=7)
+        datos_ambientales_formateados = scraper_ambiental.formatear_para_informe(datos_ambientales)
+    except Exception as e:
+        logger.error(f"Error obteniendo datos ambientales: {e}")
+        datos_ambientales_formateados = {'proyectos_sea': [], 'sanciones_sma': []}
+    
+    # 6. Generar HTML del informe
+    html = generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii, documentos_dt, datos_ambientales_formateados)
     
     # 4.5 Guardar en caché de base de datos
     try:
@@ -362,7 +373,7 @@ def generar_informe_oficial(fecha=None):
     
     return True
 
-def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=None, documentos_dt=None):
+def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=None, documentos_dt=None, datos_ambientales=None):
     """
     Genera el HTML del informe con el diseño aprobado
     """
@@ -621,6 +632,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                             <li style="margin-bottom: 8px;"><strong>Diario Oficial:</strong> Normativas y avisos relevantes</li>
                                             <li style="margin-bottom: 8px;"><strong>CMF:</strong> Hechos esenciales del mercado financiero</li>
                                             <li style="margin-bottom: 8px;"><strong>SII:</strong> Circulares y resoluciones tributarias</li>
+                                            <li style="margin-bottom: 8px;"><strong>SEA/SMA:</strong> Evaluación ambiental y sanciones</li>
                                             <li style="margin-bottom: 8px;"><strong>DT:</strong> Dictámenes y ordinarios laborales</li>
                                         </ul>
                                         <p style="margin: 0; font-size: 14px; color: #047857;">
@@ -903,6 +915,129 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                 </tr>"""
         
         html += """
+                            </table>"""
+    
+    # Sección Medio Ambiente (SEA y SMA)
+    if datos_ambientales:
+        proyectos_sea = datos_ambientales.get('proyectos_sea', [])
+        sanciones_sma = datos_ambientales.get('sanciones_sma', [])
+        
+        if proyectos_sea or sanciones_sma:
+            html += """
+                            <!-- NORMATIVA AMBIENTAL (SEA Y SMA) -->
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 40px;">
+                                <tr>
+                                    <td>
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #d4f4dd;">
+                                            <tr>
+                                                <td>
+                                                    <h2 style="margin: 0 0 2px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
+                                                        NORMATIVA AMBIENTAL
+                                                    </h2>
+                                                    <p style="margin: 0; font-size: 14px; color: #16a34a;">
+                                                        Evaluación ambiental (SEA) y sanciones (SMA)
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>"""
+            
+            # Mostrar proyectos SEA primero
+            for proyecto in proyectos_sea[:3]:  # Máximo 3 proyectos
+                # Determinar color del borde según estado
+                if 'APROBADO' in proyecto.get('resumen', ''):
+                    color_borde = '#16a34a'  # Verde para aprobados
+                elif 'RECHAZADO' in proyecto.get('resumen', ''):
+                    color_borde = '#dc2626'  # Rojo para rechazados
+                else:
+                    color_borde = '#f59e0b'  # Amarillo para otros
+                
+                html += f"""
+                                <tr>
+                                    <td style="padding-bottom: 16px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
+                                            <tr>
+                                                <td style="padding: 24px; border-top: 3px solid {color_borde}; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                                    <div style="margin: 0 0 8px 0;">
+                                                        <span style="background-color: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">SEA</span>
+                                                    </div>
+                                                    <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
+                                                        {proyecto.get('titulo', '')}
+                                                    </h3>
+                                                    <div style="margin: 0 0 12px 0; font-size: 13px; color: #6b7280;">
+                                                        <span style="font-weight: 500;">Empresa:</span> {proyecto.get('empresa', 'N/A')} | 
+                                                        <span style="font-weight: 500;">Fecha:</span> {proyecto.get('fecha', 'N/A')}
+                                                    </div>
+                                                    <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
+                                                        {proyecto.get('resumen', '')}
+                                                    </p>
+                                                    <!-- Botón compatible con Outlook -->
+                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                        <tr>
+                                                            <td>
+                                                                <table border="0" cellspacing="0" cellpadding="0">
+                                                                    <tr>
+                                                                        <td align="center" style="border-radius: 6px;" bgcolor="#16a34a">
+                                                                            <a href="{proyecto.get('url', '#')}" target="_blank" style="font-size: 14px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 12px 24px; border: 1px solid #16a34a; display: inline-block; font-weight: 500;">
+                                                                                Ver proyecto SEA
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>"""
+            
+            # Mostrar sanciones SMA
+            for sancion in sanciones_sma[:2]:  # Máximo 2 sanciones
+                html += f"""
+                                <tr>
+                                    <td style="padding-bottom: 16px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
+                                            <tr>
+                                                <td style="padding: 24px; border-top: 3px solid #dc2626; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                                    <div style="margin: 0 0 8px 0;">
+                                                        <span style="background-color: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">SMA</span>
+                                                    </div>
+                                                    <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
+                                                        {sancion.get('titulo', '')}
+                                                    </h3>
+                                                    <div style="margin: 0 0 12px 0; font-size: 13px; color: #6b7280;">
+                                                        <span style="font-weight: 500;">Empresa:</span> {sancion.get('empresa', 'N/A')} | 
+                                                        <span style="font-weight: 500;">Multa:</span> {sancion.get('multa', 'N/A')}
+                                                    </div>
+                                                    <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
+                                                        {sancion.get('resumen', '')}
+                                                    </p>
+                                                    <!-- Botón compatible con Outlook -->
+                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                        <tr>
+                                                            <td>
+                                                                <table border="0" cellspacing="0" cellpadding="0">
+                                                                    <tr>
+                                                                        <td align="center" style="border-radius: 6px;" bgcolor="#dc2626">
+                                                                            <a href="{sancion.get('url', '#')}" target="_blank" style="font-size: 14px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 12px 24px; border: 1px solid #dc2626; display: inline-block; font-weight: 500;">
+                                                                                Ver sanción SMA
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>"""
+            
+            html += """
                             </table>"""
     
     # Sección Dirección del Trabajo (con color naranja)

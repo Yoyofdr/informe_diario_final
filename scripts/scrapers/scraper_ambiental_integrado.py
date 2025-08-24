@@ -1,6 +1,7 @@
 """
 Scraper integrado para datos ambientales (SEA y SMA)
 Con telemetría y manejo robusto de errores
+Actualizado para usar scrapers web más confiables
 """
 
 import requests
@@ -13,6 +14,16 @@ import random
 import time
 from scripts.scrapers.telemetria_ambiental import telemetria
 
+# Importar nuevos scrapers más confiables
+try:
+    from scripts.scrapers.scraper_sea_portal import ScraperSEAPortal
+    from scripts.scrapers.scraper_snifa_web import ScraperSNIFAWeb
+    USE_NEW_SCRAPERS = True
+except ImportError:
+    USE_NEW_SCRAPERS = False
+    logger = logging.getLogger(__name__)
+    logger.warning("No se pudieron importar los nuevos scrapers, usando versión legacy")
+
 logger = logging.getLogger(__name__)
 
 class ScraperAmbiental:
@@ -23,6 +34,16 @@ class ScraperAmbiental:
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language': 'es-ES,es;q=0.9'
         })
+        
+        # Inicializar nuevos scrapers si están disponibles
+        if USE_NEW_SCRAPERS:
+            self.scraper_sea = ScraperSEAPortal()
+            self.scraper_sma = ScraperSNIFAWeb()
+            logger.info("✅ Usando nuevos scrapers web para SEA y SMA")
+        else:
+            self.scraper_sea = None
+            self.scraper_sma = None
+            logger.info("⚠️ Usando scrapers legacy para SEA y SMA")
     
     def obtener_datos_ambientales(self, dias_atras: int = 7) -> Dict[str, List[Dict]]:
         """
@@ -108,9 +129,18 @@ class ScraperAmbiental:
     def _obtener_proyectos_sea(self, dias_atras: int) -> List[Dict]:
         """
         Obtiene proyectos con RCA del SEA
-        Por ahora usa datos de ejemplo para desarrollo
+        Usa el nuevo scraper web si está disponible, sino datos de ejemplo
         """
-        # TODO: Implementar scraping real cuando tengamos acceso correcto a la API
+        # Usar nuevo scraper si está disponible
+        if USE_NEW_SCRAPERS and self.scraper_sea:
+            try:
+                logger.info("🔄 Obteniendo proyectos SEA con scraper web...")
+                proyectos = self.scraper_sea.obtener_datos_sea(dias_atras=dias_atras)
+                if proyectos:
+                    logger.info(f"✅ Obtenidos {len(proyectos)} proyectos SEA reales")
+                    return proyectos
+            except Exception as e:
+                logger.warning(f"⚠️ Error con scraper SEA web: {str(e)}, usando datos de ejemplo")
         
         # Datos de ejemplo realistas - SOLO del día anterior si dias_atras=1
         fecha_ayer = (datetime.now() - timedelta(days=1)).strftime('%d/%m/%Y')
@@ -172,9 +202,18 @@ class ScraperAmbiental:
     def _obtener_sanciones_sma(self, dias_atras: int) -> List[Dict]:
         """
         Obtiene sanciones de la SMA
-        Por ahora usa datos de ejemplo para desarrollo
+        Usa el nuevo scraper web si está disponible, sino datos de ejemplo
         """
-        # TODO: Implementar scraping real cuando tengamos acceso correcto a la API
+        # Usar nuevo scraper si está disponible
+        if USE_NEW_SCRAPERS and self.scraper_sma:
+            try:
+                logger.info("🔄 Obteniendo sanciones SMA con scraper web...")
+                sanciones = self.scraper_sma.obtener_datos_sma(dias_atras=dias_atras)
+                if sanciones:
+                    logger.info(f"✅ Obtenidas {len(sanciones)} sanciones SMA reales")
+                    return sanciones
+            except Exception as e:
+                logger.warning(f"⚠️ Error con scraper SMA web: {str(e)}, usando datos de ejemplo")
         
         # Datos de ejemplo realistas - SOLO del día anterior si dias_atras=1
         fecha_ayer = (datetime.now() - timedelta(days=1)).strftime('%d/%m/%Y')

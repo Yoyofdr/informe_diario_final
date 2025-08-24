@@ -1,6 +1,6 @@
 """
 Scraper integrado para datos ambientales (SEA y SMA)
-Versión simplificada con datos de ejemplo para desarrollo
+Con telemetría y manejo robusto de errores
 """
 
 import requests
@@ -10,6 +10,8 @@ import logging
 import json
 from typing import List, Dict
 import random
+import time
+from scripts.scrapers.telemetria_ambiental import telemetria
 
 logger = logging.getLogger(__name__)
 
@@ -24,15 +26,82 @@ class ScraperAmbiental:
     
     def obtener_datos_ambientales(self, dias_atras: int = 7) -> Dict[str, List[Dict]]:
         """
-        Obtiene datos ambientales de SEA y SMA
+        Obtiene datos ambientales de SEA y SMA con telemetría
         
         Returns:
             Diccionario con proyectos SEA y sanciones SMA
         """
+        inicio = time.time()
+        errores_totales = []
+        
+        # Obtener proyectos SEA
+        try:
+            inicio_sea = time.time()
+            proyectos_sea = self._obtener_proyectos_sea(dias_atras)
+            tiempo_sea = (time.time() - inicio_sea) * 1000
+            
+            # Registrar telemetría SEA
+            telemetria.registrar_extraccion('SEA', {
+                'total_items': len(proyectos_sea),
+                'tiempo_ms': tiempo_sea,
+                'exitoso': len(proyectos_sea) > 0,
+                'tipo_datos': ['proyectos', 'rca']
+            })
+        except Exception as e:
+            logger.error(f"Error obteniendo datos SEA: {str(e)}")
+            proyectos_sea = []
+            errores_totales.append(f"SEA: {str(e)}")
+            
+            telemetria.registrar_extraccion('SEA', {
+                'total_items': 0,
+                'tiempo_ms': 0,
+                'exitoso': False,
+                'errores': [str(e)]
+            })
+        
+        # Obtener sanciones SMA
+        try:
+            inicio_sma = time.time()
+            sanciones_sma = self._obtener_sanciones_sma(dias_atras)
+            tiempo_sma = (time.time() - inicio_sma) * 1000
+            
+            # Registrar telemetría SMA
+            telemetria.registrar_extraccion('SMA', {
+                'total_items': len(sanciones_sma),
+                'tiempo_ms': tiempo_sma,
+                'exitoso': len(sanciones_sma) > 0,
+                'tipo_datos': ['sanciones', 'multas']
+            })
+        except Exception as e:
+            logger.error(f"Error obteniendo datos SMA: {str(e)}")
+            sanciones_sma = []
+            errores_totales.append(f"SMA: {str(e)}")
+            
+            telemetria.registrar_extraccion('SMA', {
+                'total_items': 0,
+                'tiempo_ms': 0,
+                'exitoso': False,
+                'errores': [str(e)]
+            })
+        
+        tiempo_total = (time.time() - inicio) * 1000
+        
         datos = {
-            'proyectos_sea': self._obtener_proyectos_sea(dias_atras),
-            'sanciones_sma': self._obtener_sanciones_sma(dias_atras)
+            'proyectos_sea': proyectos_sea,
+            'sanciones_sma': sanciones_sma,
+            'metadata': {
+                'timestamp': datetime.now().isoformat(),
+                'tiempo_total_ms': tiempo_total,
+                'errores': errores_totales,
+                'telemetria': {
+                    'sea_items': len(proyectos_sea),
+                    'sma_items': len(sanciones_sma),
+                    'total_items': len(proyectos_sea) + len(sanciones_sma)
+                }
+            }
         }
+        
+        logger.info(f"✅ Datos ambientales obtenidos en {tiempo_total:.0f}ms - SEA: {len(proyectos_sea)}, SMA: {len(sanciones_sma)}")
         
         return datos
     

@@ -936,7 +936,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                         NORMATIVA AMBIENTAL
                                                     </h2>
                                                     <p style="margin: 0; font-size: 14px; color: #16a34a;">
-                                                        Evaluación ambiental (SEA) y sanciones (SMA)
+                                                        Proyectos ambientales (SEA) y sanciones regulatorias (SMA)
                                                     </p>
                                                 </td>
                                             </tr>

@@ -116,7 +116,7 @@ class ScraperSNIFAWeb:
                                         resumen = f"Sanción aplicada a {empresa} ({categoria}) en {region}. "
                                         resumen += f"Unidad fiscalizada: {unidad_fiscalizable}. "
                                         if multa_valor > 0:
-                                            resumen += f"Multa de {multa_formateada}. Estado: {estado_pago}."
+                                            resumen += f"Multa de {multa_formateada}."
                                         else:
                                             resumen += "Sanción sin multa económica (posible amonestación o medidas correctivas)."
                                         

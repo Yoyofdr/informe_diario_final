@@ -16,13 +16,21 @@ from scripts.scrapers.telemetria_ambiental import telemetria
 
 # Importar nuevos scrapers más confiables
 try:
-    from scripts.scrapers.scraper_sea_portal import ScraperSEAPortal
+    from scripts.scrapers.scraper_seia_busqueda import ScraperSEIABusqueda
     from scripts.scrapers.scraper_snifa_web import ScraperSNIFAWeb
     USE_NEW_SCRAPERS = True
+    USE_SEIA_BUSQUEDA = True
 except ImportError:
-    USE_NEW_SCRAPERS = False
-    logger = logging.getLogger(__name__)
-    logger.warning("No se pudieron importar los nuevos scrapers, usando versión legacy")
+    try:
+        from scripts.scrapers.scraper_sea_simple import ScraperSEASimple
+        from scripts.scrapers.scraper_snifa_web import ScraperSNIFAWeb
+        USE_NEW_SCRAPERS = True
+        USE_SEIA_BUSQUEDA = False
+    except ImportError:
+        USE_NEW_SCRAPERS = False
+        USE_SEIA_BUSQUEDA = False
+        logger = logging.getLogger(__name__)
+        logger.warning("No se pudieron importar los nuevos scrapers")
 
 logger = logging.getLogger(__name__)
 
@@ -37,13 +45,18 @@ class ScraperAmbiental:
         
         # Inicializar nuevos scrapers si están disponibles
         if USE_NEW_SCRAPERS:
-            self.scraper_sea = ScraperSEAPortal()
+            if USE_SEIA_BUSQUEDA:
+                self.scraper_sea = ScraperSEIABusqueda()
+                logger.info("✅ Usando scraper SEIA búsqueda para SEA")
+            else:
+                self.scraper_sea = ScraperSEASimple()
+                logger.info("✅ Usando scraper simple para SEA")
             self.scraper_sma = ScraperSNIFAWeb()
-            logger.info("✅ Usando nuevos scrapers web para SEA y SMA")
+            logger.info("✅ Usando scraper web para SMA")
         else:
             self.scraper_sea = None
             self.scraper_sma = None
-            logger.info("⚠️ Usando scrapers legacy para SEA y SMA")
+            logger.info("⚠️ Scrapers no disponibles")
     
     def obtener_datos_ambientales(self, dias_atras: int = 7) -> Dict[str, List[Dict]]:
         """
@@ -129,80 +142,30 @@ class ScraperAmbiental:
     def _obtener_proyectos_sea(self, dias_atras: int) -> List[Dict]:
         """
         Obtiene proyectos con RCA del SEA
-        Usa el nuevo scraper web si está disponible, sino datos de ejemplo
+        Usa el nuevo scraper con Selenium para datos reales
         """
         # Usar nuevo scraper si está disponible
         if USE_NEW_SCRAPERS and self.scraper_sea:
             try:
-                logger.info("🔄 Obteniendo proyectos SEA con scraper web...")
+                logger.info("🔄 Obteniendo proyectos SEA con scraper...")
                 proyectos = self.scraper_sea.obtener_datos_sea(dias_atras=dias_atras)
                 if proyectos:
                     logger.info(f"✅ Obtenidos {len(proyectos)} proyectos SEA reales")
                     return proyectos
+                else:
+                    logger.warning("⚠️ No se encontraron proyectos SEA")
+                    return []
             except Exception as e:
-                logger.warning(f"⚠️ Error con scraper SEA web: {str(e)}, usando datos de ejemplo")
+                logger.error(f"❌ Error con scraper SEA: {str(e)}")
+                return []
         
-        # Datos de ejemplo realistas - SOLO del día anterior si dias_atras=1
-        fecha_ayer = (datetime.now() - timedelta(days=1)).strftime('%d/%m/%Y')
-        
-        proyectos_ejemplo = [
-            {
-                'fuente': 'SEA',
-                'tipo': 'RCA Aprobada',
-                'titulo': 'Parque Fotovoltaico Sol del Norte',
-                'empresa': 'Energía Solar Chile S.A.',
-                'fecha': fecha_ayer if dias_atras == 1 else (datetime.now() - timedelta(days=2)).strftime('%d/%m/%Y'),
-                'region': 'Región de Antofagasta',
-                'inversion_mmusd': 120.5,
-                'resumen': '✅ APROBADO. Proyecto de energía solar de 100 MW. Inversión: USD 120.5MM en Región de Antofagasta. Generará energía limpia equivalente al consumo de 50,000 hogares.',
-                'relevancia': 8.5,
-                'url': 'https://seia.sea.gob.cl/expediente/ficha.php?id_expediente=2024123456'
-            },
-            {
-                'fuente': 'SEA',
-                'tipo': 'RCA Rechazada',
-                'titulo': 'Expansión Minera Cobre Andino',
-                'empresa': 'Minera Los Andes Ltda.',
-                'fecha': fecha_ayer if dias_atras == 1 else (datetime.now() - timedelta(days=5)).strftime('%d/%m/%Y'),
-                'region': 'Región de Atacama',
-                'inversion_mmusd': 450.0,
-                'resumen': '❌ RECHAZADO. Proyecto minero de expansión. Inversión propuesta: USD 450MM en Región de Atacama. No cumplió con requisitos de mitigación de impacto hídrico.',
-                'relevancia': 9.0,
-                'url': 'https://seia.sea.gob.cl/expediente/ficha.php?id_expediente=2024123457'
-            },
-            {
-                'fuente': 'SEA',
-                'tipo': 'RCA Aprobada con Condiciones',
-                'titulo': 'Terminal Portuario Bahía Verde',
-                'empresa': 'Puerto Pacífico S.A.',
-                'fecha': fecha_ayer,
-                'region': 'Región de Valparaíso',
-                'inversion_mmusd': 85.0,
-                'resumen': '✅ APROBADO CON CONDICIONES. Proyecto portuario. Inversión: USD 85MM en Región de Valparaíso. Debe implementar plan de monitoreo marino continuo.',
-                'relevancia': 7.0,
-                'url': 'https://seia.sea.gob.cl/expediente/ficha.php?id_expediente=2024123458'
-            }
-        ]
-        
-        # Filtrar por fecha si es necesario
-        fecha_limite = datetime.now() - timedelta(days=dias_atras)
-        proyectos_filtrados = []
-        
-        for proyecto in proyectos_ejemplo:
-            try:
-                fecha = datetime.strptime(proyecto['fecha'], '%d/%m/%Y')
-                if fecha >= fecha_limite:
-                    proyectos_filtrados.append(proyecto)
-            except:
-                proyectos_filtrados.append(proyecto)
-        
-        logger.info(f"✅ Obtenidos {len(proyectos_filtrados)} proyectos SEA (datos de ejemplo)")
-        return proyectos_filtrados
+        logger.warning("⚠️ Scraper SEA no disponible")
+        return []
     
     def _obtener_sanciones_sma(self, dias_atras: int) -> List[Dict]:
         """
         Obtiene sanciones de la SMA
-        Usa el nuevo scraper web si está disponible, sino datos de ejemplo
+        Usa el nuevo scraper web para datos reales
         """
         # Usar nuevo scraper si está disponible
         if USE_NEW_SCRAPERS and self.scraper_sma:
@@ -212,65 +175,15 @@ class ScraperAmbiental:
                 if sanciones:
                     logger.info(f"✅ Obtenidas {len(sanciones)} sanciones SMA reales")
                     return sanciones
+                else:
+                    logger.warning("⚠️ No se encontraron sanciones SMA")
+                    return []
             except Exception as e:
-                logger.warning(f"⚠️ Error con scraper SMA web: {str(e)}, usando datos de ejemplo")
+                logger.error(f"❌ Error con scraper SMA: {str(e)}")
+                return []
         
-        # Datos de ejemplo realistas - SOLO del día anterior si dias_atras=1
-        fecha_ayer = (datetime.now() - timedelta(days=1)).strftime('%d/%m/%Y')
-        
-        sanciones_ejemplo = [
-            {
-                'fuente': 'SMA',
-                'tipo': 'Sanción Ambiental',
-                'titulo': 'Sanción a Industrias Químicas del Sur S.A. - Multa 500 UTA',
-                'empresa': 'Industrias Químicas del Sur S.A.',
-                'fecha': fecha_ayer if dias_atras == 1 else (datetime.now() - timedelta(days=3)).strftime('%d/%m/%Y'),
-                'multa': '500 UTA (~$360M CLP)',
-                'expediente': 'D-041-2024',
-                'resumen': 'Sanción por vertimiento de residuos industriales sin tratamiento. Superación de norma de emisión en 300%. Estado: Sanción aplicada y en proceso de pago.',
-                'relevancia': 8.0,
-                'url': 'https://snifa.sma.gob.cl/Sancionatorio/Ficha/2024/D-041-2024'
-            },
-            {
-                'fuente': 'SMA',
-                'tipo': 'Resolución Sancionatoria',
-                'titulo': 'Multa a Agrícola San Pedro - 150 UTM',
-                'empresa': 'Agrícola San Pedro Ltda.',
-                'fecha': fecha_ayer if dias_atras == 1 else (datetime.now() - timedelta(days=6)).strftime('%d/%m/%Y'),
-                'multa': '150 UTM (~$10M CLP)',
-                'expediente': 'F-022-2024',
-                'resumen': 'Incumplimiento de plan de manejo de residuos orgánicos. Contaminación de aguas subterráneas detectada en monitoreo.',
-                'relevancia': 5.0,
-                'url': 'https://snifa.sma.gob.cl/Sancionatorio/Ficha/2024/F-022-2024'
-            },
-            {
-                'fuente': 'SMA',
-                'tipo': 'Clausura Temporal',
-                'titulo': 'Clausura de Planta Procesadora Los Robles',
-                'empresa': 'Procesadora Los Robles S.A.',
-                'fecha': fecha_ayer,
-                'multa': '1000 UTA (~$720M CLP) + Clausura 30 días',
-                'expediente': 'A-003-2024',
-                'resumen': 'Clausura temporal y multa por emisiones atmosféricas que superan en 500% la norma. Riesgo grave para salud de la población.',
-                'relevancia': 10.0,
-                'url': 'https://snifa.sma.gob.cl/Sancionatorio/Ficha/2024/A-003-2024'
-            }
-        ]
-        
-        # Filtrar por fecha si es necesario
-        fecha_limite = datetime.now() - timedelta(days=dias_atras)
-        sanciones_filtradas = []
-        
-        for sancion in sanciones_ejemplo:
-            try:
-                fecha = datetime.strptime(sancion['fecha'], '%d/%m/%Y')
-                if fecha >= fecha_limite:
-                    sanciones_filtradas.append(sancion)
-            except:
-                sanciones_filtradas.append(sancion)
-        
-        logger.info(f"✅ Obtenidas {len(sanciones_filtradas)} sanciones SMA (datos de ejemplo)")
-        return sanciones_filtradas
+        logger.warning("⚠️ Scraper SMA no disponible")
+        return []
     
     def formatear_para_informe(self, datos: Dict[str, List[Dict]]) -> Dict[str, List[Dict]]:
         """

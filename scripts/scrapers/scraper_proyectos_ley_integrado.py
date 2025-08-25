@@ -56,25 +56,115 @@ class ScraperProyectosLeyIntegrado:
         
         proyectos = []
         
-        # Buscar en Cámara de Diputados
-        proyectos_camara = self._buscar_proyectos_camara(ayer)
-        proyectos.extend(proyectos_camara)
+        # Buscar en Cámara de Diputados (últimos 7 días para luego filtrar)
+        proyectos_recientes = self._buscar_proyectos_camara_recientes(dias_atras=7)
         
-        # Buscar en Senado (si es necesario)
-        proyectos_senado = self._buscar_proyectos_senado(ayer)
-        proyectos.extend(proyectos_senado)
+        # Filtrar solo los que realmente son del día anterior
+        proyectos_filtrados = []
+        for proyecto in proyectos_recientes:
+            # Primero obtener detalles para tener la fecha real
+            proyecto_con_detalle = self.obtener_detalle_proyecto(proyecto)
+            
+            # Verificar si la fecha de ingreso coincide con ayer
+            fecha_ingreso = proyecto_con_detalle.get('fecha_ingreso', '')
+            if fecha_ingreso == fecha_busqueda:
+                proyectos_filtrados.append(proyecto_con_detalle)
+                logger.info(f"Proyecto {proyecto_con_detalle.get('boletin')} ingresado el {fecha_ingreso}")
         
-        # Eliminar duplicados por boletín
-        proyectos_unicos = {}
-        for p in proyectos:
-            if p.get('boletin'):
-                proyectos_unicos[p['boletin']] = p
-        
-        proyectos_filtrados = list(proyectos_unicos.values())
-        
-        logger.info(f"Total proyectos del {fecha_busqueda}: {len(proyectos_filtrados)}")
+        logger.info(f"Total proyectos realmente ingresados el {fecha_busqueda}: {len(proyectos_filtrados)}")
         
         return proyectos_filtrados
+    
+    def _buscar_proyectos_camara_recientes(self, dias_atras: int = 7) -> List[Dict]:
+        """
+        Busca proyectos recientes de los últimos días
+        """
+        fecha_hasta = datetime.now()
+        fecha_desde = fecha_hasta - timedelta(days=dias_atras)
+        
+        try:
+            response = self.session.get(self.search_url)
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # Extraer valores del formulario
+            viewstate = soup.find('input', {'name': '__VIEWSTATE'})
+            viewstate_value = viewstate['value'] if viewstate else ''
+            
+            viewstate_generator = soup.find('input', {'name': '__VIEWSTATEGENERATOR'})
+            viewstate_generator_value = viewstate_generator['value'] if viewstate_generator else ''
+            
+            event_validation = soup.find('input', {'name': '__EVENTVALIDATION'})
+            event_validation_value = event_validation['value'] if event_validation else ''
+            
+            # Buscar proyectos de los últimos días
+            form_data = {
+                '__EVENTTARGET': '',
+                '__EVENTARGUMENT': '',
+                '__VIEWSTATE': viewstate_value,
+                '__VIEWSTATEGENERATOR': viewstate_generator_value,
+                '__EVENTVALIDATION': event_validation_value,
+                'ctl00$mainPlaceHolder$txtFechaDesde': fecha_desde.strftime('%d/%m/%Y'),
+                'ctl00$mainPlaceHolder$txtFechaHasta': fecha_hasta.strftime('%d/%m/%Y'),
+                'ctl00$mainPlaceHolder$btnBuscar': 'Buscar'
+            }
+            
+            response = self.session.post(self.search_url, data=form_data)
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            proyectos = []
+            
+            # Buscar tabla de resultados
+            tabla = soup.find('table', {'id': 'mainPlaceHolder_grvResultado'})
+            
+            if tabla:
+                filas = tabla.find_all('tr')[1:]  # Saltar header
+                for fila in filas:
+                    celdas = fila.find_all('td')
+                    if len(celdas) >= 3:
+                        proyecto = {}
+                        
+                        # Boletín y URL
+                        if celdas[0].find('a'):
+                            link = celdas[0].find('a')
+                            texto = link.get_text(strip=True)
+                            match = re.search(r'(\d{4,5}-\d{2})', texto)
+                            if match:
+                                proyecto['boletin'] = match.group(1)
+                                proyecto['url_detalle'] = self.base_url + link.get('href', '')
+                        
+                        # Título
+                        if len(celdas) > 2:
+                            proyecto['titulo'] = celdas[2].get_text(strip=True)
+                        
+                        if proyecto.get('boletin'):
+                            proyectos.append(proyecto)
+            else:
+                # Buscar enlaces alternativos
+                enlaces = soup.find_all('a', href=re.compile('tramitacion\\.aspx\\?prmID=\\d+'))
+                for enlace in enlaces[:20]:  # Limitar a 20 proyectos
+                    href = enlace.get('href', '')
+                    match = re.search(r'prmBOLETIN=(\d{4,5}-\d{2})', href)
+                    if match:
+                        # Construir URL correcta
+                        if href.startswith('http'):
+                            url_completa = href
+                        elif href.startswith('/'):
+                            url_completa = self.base_url + href
+                        else:
+                            url_completa = self.base_url + '/legislacion/ProyectosDeLey/' + href
+                        
+                        proyecto = {
+                            'boletin': match.group(1),
+                            'url_detalle': url_completa,
+                            'titulo': enlace.get_text(strip=True)
+                        }
+                        proyectos.append(proyecto)
+            
+            return proyectos
+            
+        except Exception as e:
+            logger.error(f"Error buscando proyectos recientes: {e}")
+            return []
     
     def _buscar_proyectos_camara(self, fecha: datetime) -> List[Dict]:
         """

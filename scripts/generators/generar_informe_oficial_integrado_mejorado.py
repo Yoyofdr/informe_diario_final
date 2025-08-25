@@ -886,12 +886,10 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
             if not url_proyecto or url_proyecto == '#':
                 url_proyecto = f"https://www.camara.cl/legislacion/ProyectosDeLey/tramitacion.aspx?prmBOLETIN={boletin}"
             
-            # Construir metadata (sin autores)
+            # Construir metadata (sin autores y sin urgencia)
             metadata_parts = []
             if comision:
                 metadata_parts.append(f"<span style='font-weight: 500;'>Comisión:</span> {comision}")
-            if urgencia:
-                metadata_parts.append("<span style='color: #dc2626; font-weight: 600;'>Con urgencia</span>")
             
             metadata_html = " | ".join(metadata_parts) if metadata_parts else ""
             

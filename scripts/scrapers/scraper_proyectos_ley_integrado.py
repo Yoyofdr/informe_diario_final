@@ -253,19 +253,42 @@ class ScraperProyectosLeyIntegrado:
                             mes = meses.get(mes_nombre, '01')
                             proyecto['fecha_ingreso'] = f"{dia}/{mes}/{año}"
             
-            # Buscar enlace al documento PDF (botón "Ver")
-            enlace_doc = soup.find('a', href=re.compile('verDoc\\.aspx'))
-            if enlace_doc:
-                href = enlace_doc.get('href', '')
-                if href.startswith('/'):
-                    href = self.base_url + href
-                elif not href.startswith('http'):
-                    href = self.base_url + '/' + href
+            # Buscar enlace al documento PDF - buscar específicamente el documento de INICIATIVA
+            enlaces_doc = soup.find_all('a', href=re.compile('verDoc\\.aspx'))
+            url_documento_encontrada = None
+            
+            for enlace in enlaces_doc:
+                href = enlace.get('href', '')
+                # Buscar específicamente el documento de iniciativa o que tenga prmID válido
+                if 'INICIATIVA' in href.upper() or (
+                    'prmID=' in href and 
+                    not 'prmId=0' in href and 
+                    'TABLASEMANAL' not in href.upper()
+                ):
+                    url_documento_encontrada = href
+                    break
+            
+            # Si no encontramos un enlace específico, buscar en el texto "Ver" que esté cerca de "Documento"
+            if not url_documento_encontrada:
+                for enlace in enlaces_doc:
+                    texto_cercano = enlace.get_text(strip=True)
+                    if texto_cercano.lower() == 'ver':
+                        # Verificar si está cerca de la palabra "documento" o "mensaje"
+                        parent = enlace.parent
+                        if parent and ('documento' in parent.get_text().lower() or 'mensaje' in parent.get_text().lower()):
+                            url_documento_encontrada = enlace.get('href', '')
+                            break
+            
+            if url_documento_encontrada:
+                if url_documento_encontrada.startswith('/'):
+                    url_documento_encontrada = self.base_url + url_documento_encontrada
+                elif not url_documento_encontrada.startswith('http'):
+                    url_documento_encontrada = self.base_url + '/' + url_documento_encontrada
                 
-                proyecto['url_documento'] = href
+                proyecto['url_documento'] = url_documento_encontrada
                 
                 # Descargar y extraer contenido del PDF
-                contenido = self._extraer_contenido_pdf(href)
+                contenido = self._extraer_contenido_pdf(url_documento_encontrada)
                 if contenido:
                     proyecto['contenido_documento'] = contenido
                     # Generar resumen del contenido
@@ -297,33 +320,39 @@ class ScraperProyectosLeyIntegrado:
             response = self.session.get(url, timeout=10)
             
             if response.status_code == 200:
-                # Usar pdf_extractor si está disponible
-                if pdf_extractor:
-                    texto, metodo = pdf_extractor.extract_text(response.content, max_pages=3)
-                    if texto:
-                        # Limitar a los primeros 3000 caracteres para el resumen
-                        return texto[:3000] if len(texto) > 3000 else texto
-                else:
-                    # Fallback: intentar extraer con pypdf
-                    try:
-                        import io
-                        from pypdf import PdfReader
-                        
-                        pdf_file = io.BytesIO(response.content)
-                        reader = PdfReader(pdf_file)
-                        
-                        texto = ""
-                        # Extraer las primeras 3 páginas
-                        for i in range(min(3, len(reader.pages))):
-                            texto += reader.pages[i].extract_text()
-                        
+                # Siempre usar pypdf primero porque funciona mejor con estos PDFs
+                try:
+                    import io
+                    from pypdf import PdfReader
+                    
+                    pdf_file = io.BytesIO(response.content)
+                    reader = PdfReader(pdf_file)
+                    
+                    texto = ""
+                    # Extraer las primeras 2 páginas (generalmente suficiente para el resumen)
+                    for i in range(min(2, len(reader.pages))):
+                        pagina_texto = reader.pages[i].extract_text()
+                        if pagina_texto:
+                            texto += pagina_texto + "\n"
+                    
+                    if texto and len(texto) > 50:  # Verificar que hay contenido útil
                         # Limitar a 3000 caracteres
                         return texto[:3000] if len(texto) > 3000 else texto
+                        
+                except Exception as e:
+                    logger.debug(f"Error con pypdf, intentando con pdf_extractor: {e}")
+                    
+                # Fallback: usar pdf_extractor si pypdf falla
+                if pdf_extractor and not texto:
+                    try:
+                        texto, metodo = pdf_extractor.extract_text(response.content, max_pages=2)
+                        if texto and len(texto) > 50:
+                            return texto[:3000] if len(texto) > 3000 else texto
                     except Exception as e:
-                        logger.error(f"Error extrayendo PDF con pypdf: {e}")
-                        return None
+                        logger.error(f"Error con pdf_extractor: {e}")
+                        
         except Exception as e:
-            logger.error(f"Error descargando PDF: {e}")
+            logger.error(f"Error descargando PDF de {url}: {e}")
         
         return None
     
@@ -332,53 +361,84 @@ class ScraperProyectosLeyIntegrado:
         Genera un resumen del proyecto basado en su contenido
         """
         if not contenido:
-            return titulo
+            return titulo[:300] if len(titulo) <= 300 else titulo[:297] + '...'
         
         try:
-            # Buscar secciones clave en el documento
-            resumen_parts = []
+            # Limpiar el contenido
+            contenido_limpio = contenido.replace('\n', ' ').replace('  ', ' ')
             
-            # Buscar el objetivo principal
-            if "modifica" in contenido.lower():
-                match = re.search(r'modifica[^\.,]{0,200}', contenido, re.IGNORECASE)
-                if match:
-                    resumen_parts.append(match.group(0).strip())
-            
-            # Buscar artículos específicos
-            if "artículo" in contenido.lower():
-                match = re.search(r'artículo\s+\d+[^\.,]{0,150}', contenido, re.IGNORECASE)
-                if match:
-                    resumen_parts.append(match.group(0).strip())
-            
-            # Buscar propósito o finalidad
-            if "con el objeto" in contenido.lower() or "con el fin" in contenido.lower():
-                match = re.search(r'con el (objeto|fin) de[^\.,]{0,200}', contenido, re.IGNORECASE)
-                if match:
-                    resumen_parts.append(match.group(0).strip())
-            
-            # Si encontramos partes relevantes, combinarlas
-            if resumen_parts:
-                resumen = '. '.join(resumen_parts[:2])  # Máximo 2 partes
+            # Buscar la sección de FUNDAMENTOS o el primer párrafo sustancial
+            fundamentos_match = re.search(r'FUNDAMENTO[S]?\s*([^.]+\.(?:[^.]+\.)?)', contenido_limpio, re.IGNORECASE)
+            if fundamentos_match:
+                resumen = fundamentos_match.group(1).strip()
                 if len(resumen) > 300:
                     resumen = resumen[:297] + '...'
                 return resumen
             
-            # Si no encontramos secciones específicas, tomar el primer párrafo relevante
-            # Buscar el primer párrafo después de "PROYECTO DE LEY" o similar
-            parrafos = contenido.split('\n\n')
-            for parrafo in parrafos:
-                if len(parrafo) > 50 and not parrafo.isupper():
-                    resumen = parrafo.strip()[:300]
-                    if len(parrafo) > 300:
-                        resumen += '...'
+            # Buscar "que" seguido de la descripción del proyecto
+            que_match = re.search(r'que\s+([^.]{50,300})', contenido_limpio, re.IGNORECASE)
+            if que_match:
+                resumen = que_match.group(1).strip()
+                if not resumen.endswith('.'):
+                    resumen += '.'
+                return resumen
+            
+            # Buscar palabras clave importantes
+            palabras_clave = [
+                (r'modifica[^\.,]{20,250}', 'Modifica'),
+                (r'establece[^\.,]{20,250}', 'Establece'),
+                (r'crea[^\.,]{20,250}', 'Crea'),
+                (r'regula[^\.,]{20,250}', 'Regula'),
+                (r'prohíbe[^\.,]{20,250}', 'Prohíbe'),
+                (r'autoriza[^\.,]{20,250}', 'Autoriza'),
+                (r'concede[^\.,]{20,250}', 'Concede'),
+                (r'declara[^\.,]{20,250}', 'Declara')
+            ]
+            
+            for patron, inicio in palabras_clave:
+                match = re.search(patron, contenido_limpio, re.IGNORECASE)
+                if match:
+                    texto_encontrado = match.group(0).strip()
+                    # Capitalizar primera letra
+                    resumen = texto_encontrado[0].upper() + texto_encontrado[1:] if texto_encontrado else texto_encontrado
+                    if len(resumen) > 300:
+                        resumen = resumen[:297] + '...'
+                    if not resumen.endswith('.'):
+                        resumen += '.'
                     return resumen
             
-            # Fallback: usar el título
-            return titulo
+            # Si no encontramos patrones específicos, buscar el primer párrafo después del título
+            # Dividir por líneas y buscar contenido sustancial
+            lineas = contenido.split('\n')
+            contenido_sustancial = []
+            empezar = False
+            
+            for linea in lineas:
+                linea_limpia = linea.strip()
+                # Saltar líneas vacías, boletines y títulos
+                if not linea_limpia or 'Boletín' in linea_limpia or linea_limpia.isupper():
+                    continue
+                # Empezar a capturar después de FUNDAMENTOS o similar
+                if any(word in linea_limpia.upper() for word in ['FUNDAMENTO', 'PROYECTO DE LEY', 'MOCIÓN']):
+                    empezar = True
+                    continue
+                if empezar and len(linea_limpia) > 30:
+                    contenido_sustancial.append(linea_limpia)
+                    if len(' '.join(contenido_sustancial)) > 250:
+                        break
+            
+            if contenido_sustancial:
+                resumen = ' '.join(contenido_sustancial)[:300]
+                if len(resumen) == 300:
+                    resumen = resumen[:297] + '...'
+                return resumen
+            
+            # Fallback final: usar el título limpio
+            return titulo[:300] if len(titulo) <= 300 else titulo[:297] + '...'
             
         except Exception as e:
             logger.error(f"Error generando resumen: {e}")
-            return titulo
+            return titulo[:300] if len(titulo) <= 300 else titulo[:297] + '...'
     
     def generar_resumen(self, proyecto: Dict) -> str:
         """

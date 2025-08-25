@@ -46,6 +46,7 @@ from alerts.services.pdf_extractor import pdf_extractor
 from alerts.services.pdf_cache import pdf_cache
 from alerts.services.pdf_downloader_selenium import selenium_downloader
 from scripts.scrapers.scraper_ambiental_integrado import ScraperAmbiental
+from scripts.scrapers.scraper_proyectos_ley_integrado import ScraperProyectosLeyIntegrado
 import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
@@ -340,7 +341,19 @@ def generar_informe_oficial(fecha=None):
         logger.error(f"Error obteniendo DT: {e}")
         documentos_dt = []
     
-    # 5. Obtener datos ambientales (SEA y SMA)
+    # 5. Obtener proyectos de ley del día anterior
+    logger.info("Obteniendo proyectos de ley del día anterior...")
+    try:
+        scraper_proyectos = ScraperProyectosLeyIntegrado()
+        proyectos_ley = scraper_proyectos.obtener_proyectos_dia_anterior()
+        # Enriquecer con detalles
+        for proyecto in proyectos_ley[:5]:  # Limitar a 5 proyectos
+            scraper_proyectos.obtener_detalle_proyecto(proyecto)
+    except Exception as e:
+        logger.error(f"Error obteniendo proyectos de ley: {e}")
+        proyectos_ley = []
+    
+    # 6. Obtener datos ambientales (SEA y SMA)
     logger.info("Obteniendo datos ambientales (SEA y SMA)...")
     try:
         scraper_ambiental = ScraperAmbiental()
@@ -351,8 +364,8 @@ def generar_informe_oficial(fecha=None):
         logger.error(f"Error obteniendo datos ambientales: {e}")
         datos_ambientales_formateados = {'proyectos_sea': [], 'sanciones_sma': []}
     
-    # 6. Generar HTML del informe
-    html = generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii, documentos_dt, datos_ambientales_formateados)
+    # 7. Generar HTML del informe
+    html = generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii, documentos_dt, datos_ambientales_formateados, proyectos_ley)
     
     # 4.5 Guardar en caché de base de datos
     try:
@@ -374,7 +387,7 @@ def generar_informe_oficial(fecha=None):
     
     return True
 
-def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=None, documentos_dt=None, datos_ambientales=None):
+def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=None, documentos_dt=None, datos_ambientales=None, proyectos_ley=None):
     """
     Genera el HTML del informe con el diseño aprobado
     """
@@ -807,6 +820,104 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                                         <td align="center" style="border-radius: 6px;" bgcolor="#64748b">
                                                                             <a href="{pub.get('url_pdf', '#')}" target="_blank" style="font-size: 14px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 12px 24px; border: 1px solid #64748b; display: inline-block; font-weight: 500;">
                                                                                 Ver documento oficial
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>"""
+        
+        html += """
+                            </table>"""
+    
+    # Sección Proyectos de Ley (después del Diario Oficial)
+    if proyectos_ley:
+        html += """
+                            <!-- PROYECTOS DE LEY -->
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 40px;">
+                                <tr>
+                                    <td>
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #e0f2fe;">
+                                            <tr>
+                                                <td>
+                                                    <h2 style="margin: 0 0 2px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
+                                                        PROYECTOS DE LEY
+                                                    </h2>
+                                                    <p style="margin: 0; font-size: 14px; color: #0ea5e9;">
+                                                        Proyectos ingresados en el Congreso Nacional
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>"""
+        
+        for proyecto in proyectos_ley[:5]:  # Máximo 5 proyectos
+            # Preparar información del proyecto
+            boletin = proyecto.get('boletin', 'S/N')
+            titulo = proyecto.get('titulo', 'Sin título')
+            if len(titulo) > 150:
+                titulo = titulo[:147] + '...'
+            
+            fecha_ingreso = proyecto.get('fecha_ingreso', fecha)
+            origen = proyecto.get('origen', 'Congreso Nacional')
+            autores = proyecto.get('autores', '')
+            comision = proyecto.get('comision', '')
+            urgencia = proyecto.get('urgencia', False)
+            
+            # URL del proyecto
+            url_proyecto = proyecto.get('url_detalle', '#')
+            if not url_proyecto or url_proyecto == '#':
+                url_proyecto = f"https://www.camara.cl/legislacion/ProyectosDeLey/tramitacion.aspx?prmBOLETIN={boletin}"
+            
+            # Construir metadata
+            metadata_parts = []
+            if origen:
+                metadata_parts.append(f"<span style='font-weight: 500;'>Origen:</span> {origen}")
+            if autores:
+                metadata_parts.append(f"<span style='font-weight: 500;'>Autores:</span> {autores}")
+            if comision:
+                metadata_parts.append(f"<span style='font-weight: 500;'>Comisión:</span> {comision}")
+            if urgencia:
+                metadata_parts.append("<span style='color: #dc2626; font-weight: 600;'>Con urgencia</span>")
+            
+            metadata_html = " | ".join(metadata_parts) if metadata_parts else ""
+            
+            html += f"""
+                                <tr>
+                                    <td style="padding-bottom: 16px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
+                                            <tr>
+                                                <td class="section-padding" style="padding: 24px; border-top: 3px solid #0ea5e9; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                                    <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
+                                                        Boletín {boletin}: {titulo}
+                                                    </h3>
+                                                    <div style="margin: 0 0 12px 0; font-size: 13px; color: #6b7280;">
+                                                        <span style="font-weight: 500;">Fecha ingreso:</span> {fecha_ingreso}
+                                                    </div>"""
+            
+            if metadata_html:
+                html += f"""
+                                                    <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
+                                                        {metadata_html}
+                                                    </p>"""
+            
+            html += f"""
+                                                    <!-- Botón compatible con Outlook -->
+                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                        <tr>
+                                                            <td>
+                                                                <table border="0" cellspacing="0" cellpadding="0">
+                                                                    <tr>
+                                                                        <td align="center" style="border-radius: 6px;" bgcolor="#0ea5e9">
+                                                                            <a href="{url_proyecto}" target="_blank" style="font-size: 14px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 12px 24px; border: 1px solid #0ea5e9; display: inline-block; font-weight: 500;">
+                                                                                Ver proyecto completo
                                                                             </a>
                                                                         </td>
                                                                     </tr>

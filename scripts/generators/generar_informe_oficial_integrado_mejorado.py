@@ -343,12 +343,17 @@ def generar_informe_oficial(fecha=None):
     
     # 5. Obtener proyectos de ley del día anterior
     logger.info("Obteniendo proyectos de ley del día anterior...")
+    scraper_proyectos = None
     try:
         scraper_proyectos = ScraperProyectosLeyIntegrado()
         proyectos_ley = scraper_proyectos.obtener_proyectos_dia_anterior()
-        # Enriquecer con detalles
-        for proyecto in proyectos_ley[:5]:  # Limitar a 5 proyectos
-            scraper_proyectos.obtener_detalle_proyecto(proyecto)
+        # Enriquecer con detalles y resúmenes
+        logger.info(f"Enriqueciendo {len(proyectos_ley[:5])} proyectos con detalles...")
+        for i, proyecto in enumerate(proyectos_ley[:5], 1):  # Limitar a 5 proyectos
+            logger.info(f"Procesando proyecto {i}/{min(5, len(proyectos_ley))}: {proyecto.get('titulo', 'Sin título')[:50]}...")
+            proyecto_enriquecido = scraper_proyectos.obtener_detalle_proyecto(proyecto)
+            # Actualizar el proyecto en la lista
+            proyectos_ley[proyectos_ley.index(proyecto)] = proyecto_enriquecido
     except Exception as e:
         logger.error(f"Error obteniendo proyectos de ley: {e}")
         proyectos_ley = []
@@ -365,7 +370,7 @@ def generar_informe_oficial(fecha=None):
         datos_ambientales_formateados = {'proyectos_sea': [], 'sanciones_sma': []}
     
     # 7. Generar HTML del informe
-    html = generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii, documentos_dt, datos_ambientales_formateados, proyectos_ley)
+    html = generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii, documentos_dt, datos_ambientales_formateados, proyectos_ley, scraper_proyectos)
     
     # 4.5 Guardar en caché de base de datos
     try:
@@ -387,7 +392,7 @@ def generar_informe_oficial(fecha=None):
     
     return True
 
-def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=None, documentos_dt=None, datos_ambientales=None, proyectos_ley=None):
+def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=None, documentos_dt=None, datos_ambientales=None, proyectos_ley=None, scraper_proyectos=None):
     """
     Genera el HTML del informe con el diseño aprobado
     """
@@ -862,12 +867,17 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
             # Preparar información del proyecto
             boletin = proyecto.get('boletin', 'S/N')
             titulo = proyecto.get('titulo', 'Sin título')
-            if len(titulo) > 150:
-                titulo = titulo[:147] + '...'
+            if len(titulo) > 200:
+                titulo = titulo[:197] + '...'
+            
+            # Obtener resumen del proyecto
+            resumen = proyecto.get('resumen', '')
+            if not resumen:
+                # Si no hay resumen, usar el generador
+                resumen = scraper_proyectos.generar_resumen(proyecto) if scraper_proyectos else titulo
             
             fecha_ingreso = proyecto.get('fecha_ingreso', fecha)
             origen = proyecto.get('origen', 'Congreso Nacional')
-            autores = proyecto.get('autores', '')
             comision = proyecto.get('comision', '')
             urgencia = proyecto.get('urgencia', False)
             
@@ -876,12 +886,8 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
             if not url_proyecto or url_proyecto == '#':
                 url_proyecto = f"https://www.camara.cl/legislacion/ProyectosDeLey/tramitacion.aspx?prmBOLETIN={boletin}"
             
-            # Construir metadata
+            # Construir metadata (sin autores)
             metadata_parts = []
-            if origen:
-                metadata_parts.append(f"<span style='font-weight: 500;'>Origen:</span> {origen}")
-            if autores:
-                metadata_parts.append(f"<span style='font-weight: 500;'>Autores:</span> {autores}")
             if comision:
                 metadata_parts.append(f"<span style='font-weight: 500;'>Comisión:</span> {comision}")
             if urgencia:
@@ -896,15 +902,18 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                             <tr>
                                                 <td class="section-padding" style="padding: 24px; border-top: 3px solid #0ea5e9; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
                                                     <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
-                                                        Boletín {boletin}: {titulo}
+                                                        {titulo}
                                                     </h3>
                                                     <div style="margin: 0 0 12px 0; font-size: 13px; color: #6b7280;">
-                                                        <span style="font-weight: 500;">Fecha ingreso:</span> {fecha_ingreso}
-                                                    </div>"""
+                                                        <span style="font-weight: 500;">Fecha ingreso:</span> {fecha_ingreso} | <span style="font-weight: 500;">Origen:</span> {origen}
+                                                    </div>
+                                                    <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
+                                                        {resumen}
+                                                    </p>"""
             
             if metadata_html:
                 html += f"""
-                                                    <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
+                                                    <p style="margin: 0 0 16px 0; font-size: 13px; color: #6b7280;">
                                                         {metadata_html}
                                                     </p>"""
             

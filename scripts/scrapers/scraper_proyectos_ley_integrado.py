@@ -7,8 +7,24 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import logging
-from typing import List, Dict
+from typing import List, Dict, Optional
 import re
+import os
+import sys
+from pathlib import Path
+
+# Agregar el directorio base al path
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(BASE_DIR))
+
+# Importar servicios de extracción de PDF
+try:
+    from alerts.services.pdf_extractor import pdf_extractor
+    from alerts.cmf_resumenes_ai import generar_resumen_cmf
+except ImportError:
+    logger.warning("No se pudieron importar servicios de PDF")
+    pdf_extractor = None
+    generar_resumen_cmf = None
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -203,7 +219,7 @@ class ScraperProyectosLeyIntegrado:
     
     def obtener_detalle_proyecto(self, proyecto: Dict) -> Dict:
         """
-        Enriquece el proyecto con información adicional
+        Enriquece el proyecto con información adicional y extrae contenido del documento
         """
         if not proyecto.get('url_detalle'):
             return proyecto
@@ -212,27 +228,55 @@ class ScraperProyectosLeyIntegrado:
             response = self.session.get(proyecto['url_detalle'])
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Buscar autores
-            autores = []
-            for texto in soup.find_all(string=re.compile('Autor')):
-                parent = texto.parent
+            # Buscar fecha de ingreso correcta
+            fecha_elem = soup.find(string=re.compile('Fecha de ingreso'))
+            if fecha_elem:
+                parent = fecha_elem.parent
                 if parent:
-                    siguiente = parent.find_next_sibling()
+                    # Buscar el texto siguiente que contenga la fecha
+                    siguiente = parent.find_next_sibling() or parent.find_next()
                     if siguiente:
-                        autores_texto = siguiente.get_text(strip=True)
-                        if autores_texto:
-                            autores = [a.strip() for a in autores_texto.split(',')][:3]
-                            break
+                        fecha_texto = siguiente.get_text(strip=True)
+                        # Extraer fecha en formato día mes año
+                        match_fecha = re.search(r'(\d{1,2})\s+de\s+(\w+)\s+de\s+(\d{4})', fecha_texto)
+                        if match_fecha:
+                            dia = match_fecha.group(1).zfill(2)
+                            mes_nombre = match_fecha.group(2).lower()
+                            año = match_fecha.group(3)
+                            
+                            # Convertir mes a número
+                            meses = {
+                                'enero': '01', 'febrero': '02', 'marzo': '03', 'abril': '04',
+                                'mayo': '05', 'junio': '06', 'julio': '07', 'agosto': '08',
+                                'septiembre': '09', 'octubre': '10', 'noviembre': '11', 'diciembre': '12'
+                            }
+                            mes = meses.get(mes_nombre, '01')
+                            proyecto['fecha_ingreso'] = f"{dia}/{mes}/{año}"
             
-            if autores:
-                proyecto['autores'] = ', '.join(autores) + ('...' if len(autores) > 3 else '')
+            # Buscar enlace al documento PDF (botón "Ver")
+            enlace_doc = soup.find('a', href=re.compile('verDoc\\.aspx'))
+            if enlace_doc:
+                href = enlace_doc.get('href', '')
+                if href.startswith('/'):
+                    href = self.base_url + href
+                elif not href.startswith('http'):
+                    href = self.base_url + '/' + href
+                
+                proyecto['url_documento'] = href
+                
+                # Descargar y extraer contenido del PDF
+                contenido = self._extraer_contenido_pdf(href)
+                if contenido:
+                    proyecto['contenido_documento'] = contenido
+                    # Generar resumen del contenido
+                    proyecto['resumen'] = self._generar_resumen_proyecto(contenido, proyecto.get('titulo', ''))
             
             # Buscar urgencia
             urgencia = soup.find(string=re.compile('Urgencia'))
             if urgencia:
                 proyecto['urgencia'] = True
             
-            # Buscar materia/comisión
+            # Buscar comisión
             comision = soup.find(string=re.compile('Comisión'))
             if comision:
                 siguiente = comision.find_next()
@@ -240,35 +284,116 @@ class ScraperProyectosLeyIntegrado:
                     proyecto['comision'] = siguiente.get_text(strip=True)[:50]
             
         except Exception as e:
-            logger.debug(f"No se pudo obtener detalle adicional: {e}")
+            logger.error(f"Error obteniendo detalle del proyecto: {e}")
         
         return proyecto
+    
+    def _extraer_contenido_pdf(self, url: str) -> Optional[str]:
+        """
+        Descarga y extrae el contenido de un PDF
+        """
+        try:
+            # Descargar el PDF
+            response = self.session.get(url, timeout=10)
+            
+            if response.status_code == 200:
+                # Usar pdf_extractor si está disponible
+                if pdf_extractor:
+                    texto, metodo = pdf_extractor.extract_text(response.content, max_pages=3)
+                    if texto:
+                        # Limitar a los primeros 3000 caracteres para el resumen
+                        return texto[:3000] if len(texto) > 3000 else texto
+                else:
+                    # Fallback: intentar extraer con pypdf
+                    try:
+                        import io
+                        from pypdf import PdfReader
+                        
+                        pdf_file = io.BytesIO(response.content)
+                        reader = PdfReader(pdf_file)
+                        
+                        texto = ""
+                        # Extraer las primeras 3 páginas
+                        for i in range(min(3, len(reader.pages))):
+                            texto += reader.pages[i].extract_text()
+                        
+                        # Limitar a 3000 caracteres
+                        return texto[:3000] if len(texto) > 3000 else texto
+                    except Exception as e:
+                        logger.error(f"Error extrayendo PDF con pypdf: {e}")
+                        return None
+        except Exception as e:
+            logger.error(f"Error descargando PDF: {e}")
+        
+        return None
+    
+    def _generar_resumen_proyecto(self, contenido: str, titulo: str) -> str:
+        """
+        Genera un resumen del proyecto basado en su contenido
+        """
+        if not contenido:
+            return titulo
+        
+        try:
+            # Buscar secciones clave en el documento
+            resumen_parts = []
+            
+            # Buscar el objetivo principal
+            if "modifica" in contenido.lower():
+                match = re.search(r'modifica[^\.,]{0,200}', contenido, re.IGNORECASE)
+                if match:
+                    resumen_parts.append(match.group(0).strip())
+            
+            # Buscar artículos específicos
+            if "artículo" in contenido.lower():
+                match = re.search(r'artículo\s+\d+[^\.,]{0,150}', contenido, re.IGNORECASE)
+                if match:
+                    resumen_parts.append(match.group(0).strip())
+            
+            # Buscar propósito o finalidad
+            if "con el objeto" in contenido.lower() or "con el fin" in contenido.lower():
+                match = re.search(r'con el (objeto|fin) de[^\.,]{0,200}', contenido, re.IGNORECASE)
+                if match:
+                    resumen_parts.append(match.group(0).strip())
+            
+            # Si encontramos partes relevantes, combinarlas
+            if resumen_parts:
+                resumen = '. '.join(resumen_parts[:2])  # Máximo 2 partes
+                if len(resumen) > 300:
+                    resumen = resumen[:297] + '...'
+                return resumen
+            
+            # Si no encontramos secciones específicas, tomar el primer párrafo relevante
+            # Buscar el primer párrafo después de "PROYECTO DE LEY" o similar
+            parrafos = contenido.split('\n\n')
+            for parrafo in parrafos:
+                if len(parrafo) > 50 and not parrafo.isupper():
+                    resumen = parrafo.strip()[:300]
+                    if len(parrafo) > 300:
+                        resumen += '...'
+                    return resumen
+            
+            # Fallback: usar el título
+            return titulo
+            
+        except Exception as e:
+            logger.error(f"Error generando resumen: {e}")
+            return titulo
     
     def generar_resumen(self, proyecto: Dict) -> str:
         """
         Genera un resumen conciso del proyecto
         """
-        partes = []
+        # Si tenemos un resumen extraído del documento, usarlo
+        if proyecto.get('resumen'):
+            return proyecto['resumen']
         
-        # Título principal
+        # Fallback: usar el título
         titulo = proyecto.get('titulo', 'Sin título')
-        if len(titulo) > 150:
-            titulo = titulo[:147] + '...'
-        partes.append(f"Boletín {proyecto.get('boletin', 'S/N')}: {titulo}")
+        if len(titulo) > 300:
+            titulo = titulo[:297] + '...'
         
-        # Autores si existen
-        if proyecto.get('autores'):
-            partes.append(f"Autores: {proyecto['autores']}")
-        
-        # Urgencia si existe
-        if proyecto.get('urgencia'):
-            partes.append("Con urgencia")
-        
-        # Comisión si existe
-        if proyecto.get('comision'):
-            partes.append(f"Comisión: {proyecto['comision']}")
-        
-        return ' | '.join(partes)
+        return titulo
 
 
 def test_scraper():

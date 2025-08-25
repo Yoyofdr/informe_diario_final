@@ -47,6 +47,7 @@ from alerts.services.pdf_cache import pdf_cache
 from alerts.services.pdf_downloader_selenium import selenium_downloader
 from scripts.scrapers.scraper_ambiental_integrado import ScraperAmbiental
 from scripts.scrapers.scraper_proyectos_ley_integrado import ScraperProyectosLeyIntegrado
+from scripts.scrapers.scraper_contraloria_reglamentos import ScraperContraloriaReglamentos
 import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
@@ -358,7 +359,17 @@ def generar_informe_oficial(fecha=None):
         logger.error(f"Error obteniendo proyectos de ley: {e}")
         proyectos_ley = []
     
-    # 6. Obtener datos ambientales (SEA y SMA)
+    # 6. Obtener reglamentos de Contraloría del día anterior
+    logger.info("Obteniendo reglamentos de Contraloría del día anterior...")
+    try:
+        scraper_contraloria = ScraperContraloriaReglamentos()
+        reglamentos_contraloria = scraper_contraloria.obtener_reglamentos_dia_anterior()
+        logger.info(f"Reglamentos de Contraloría encontrados: {len(reglamentos_contraloria)}")
+    except Exception as e:
+        logger.error(f"Error obteniendo reglamentos de Contraloría: {e}")
+        reglamentos_contraloria = []
+    
+    # 7. Obtener datos ambientales (SEA y SMA)
     logger.info("Obteniendo datos ambientales (SEA y SMA)...")
     try:
         scraper_ambiental = ScraperAmbiental()
@@ -369,8 +380,8 @@ def generar_informe_oficial(fecha=None):
         logger.error(f"Error obteniendo datos ambientales: {e}")
         datos_ambientales_formateados = {'proyectos_sea': [], 'sanciones_sma': []}
     
-    # 7. Generar HTML del informe
-    html = generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii, documentos_dt, datos_ambientales_formateados, proyectos_ley, scraper_proyectos)
+    # 8. Generar HTML del informe
+    html = generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii, documentos_dt, datos_ambientales_formateados, proyectos_ley, scraper_proyectos, reglamentos_contraloria)
     
     # 4.5 Guardar en caché de base de datos
     try:
@@ -392,7 +403,7 @@ def generar_informe_oficial(fecha=None):
     
     return True
 
-def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=None, documentos_dt=None, datos_ambientales=None, proyectos_ley=None, scraper_proyectos=None):
+def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=None, documentos_dt=None, datos_ambientales=None, proyectos_ley=None, scraper_proyectos=None, reglamentos_contraloria=None):
     """
     Genera el HTML del informe con el diseño aprobado
     """
@@ -841,28 +852,28 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
         html += """
                             </table>"""
     
-    # Sección Proyectos de Ley (después del Diario Oficial)
+    # Sección Proyectos de Ley (después del Diario Oficial) - Siempre mostrar
+    html += """
+                        <!-- PROYECTOS DE LEY -->
+                        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 40px;">
+                            <tr>
+                                <td>
+                                    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #e0f2fe;">
+                                        <tr>
+                                            <td>
+                                                <h2 style="margin: 0 0 2px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
+                                                    PROYECTOS DE LEY
+                                                </h2>
+                                                <p style="margin: 0; font-size: 14px; color: #0ea5e9;">
+                                                    Proyectos ingresados en el Congreso Nacional
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>"""
+    
     if proyectos_ley:
-        html += """
-                            <!-- PROYECTOS DE LEY -->
-                            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 40px;">
-                                <tr>
-                                    <td>
-                                        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #e0f2fe;">
-                                            <tr>
-                                                <td>
-                                                    <h2 style="margin: 0 0 2px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
-                                                        PROYECTOS DE LEY
-                                                    </h2>
-                                                    <p style="margin: 0; font-size: 14px; color: #0ea5e9;">
-                                                        Proyectos ingresados en el Congreso Nacional
-                                                    </p>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>"""
-        
         for proyecto in proyectos_ley[:5]:  # Máximo 5 proyectos
             # Preparar información del proyecto
             boletin = proyecto.get('boletin', 'S/N')
@@ -937,9 +948,124 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                         </table>
                                     </td>
                                 </tr>"""
-        
+    else:
+        # Mensaje cuando no hay proyectos del día
         html += """
-                            </table>"""
+                            <tr>
+                                <td style="padding-bottom: 16px;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px;">
+                                        <tr>
+                                            <td class="section-padding" style="padding: 24px; text-align: center;">
+                                                <p style="margin: 0; font-size: 14px; color: #64748b; font-style: italic;">
+                                                    No se han presentado nuevos proyectos de Ley
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>"""
+    
+    html += """
+                        </table>"""
+    
+    # Sección Reglamentos (después de Proyectos de Ley) - Siempre mostrar
+    html += """
+                        <!-- REGLAMENTOS EN TRAMITACIÓN -->
+                        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 40px;">
+                            <tr>
+                                <td>
+                                    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #e0f2fe;">
+                                        <tr>
+                                            <td>
+                                                <h2 style="margin: 0 0 2px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
+                                                    REGLAMENTOS EN TRAMITACIÓN
+                                                </h2>
+                                                <p style="margin: 0; font-size: 14px; color: #0ea5e9;">
+                                                    Reglamentos en proceso de aprobación por la CGR
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>"""
+    
+    if reglamentos_contraloria:
+        for reglamento in reglamentos_contraloria[:5]:  # Máximo 5 reglamentos
+            # Preparar información del reglamento
+            numero = reglamento.get('numero', 'S/N')
+            titulo = reglamento.get('titulo', 'Sin título')
+            # Usar el resumen completo sin cortes
+            resumen = reglamento.get('resumen', '') or titulo
+            
+            ministerio = reglamento.get('ministerio', 'Sin especificar')
+            año = reglamento.get('año', '')
+            url_descarga = reglamento.get('url_descarga', '#')
+            
+            # Crear título con metadatos
+            titulo_parts = []
+            if numero and numero != 'S/N':
+                titulo_parts.append(numero)
+            if año:
+                titulo_parts.append(año)
+            if ministerio and ministerio != 'Sin especificar':
+                titulo_parts.append(ministerio)
+            
+            titulo_metadatos = " | ".join(titulo_parts) if titulo_parts else "Reglamento"
+            
+            html += f"""
+                            <tr>
+                                <td style="padding-bottom: 16px;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
+                                        <tr>
+                                            <td class="section-padding" style="padding: 24px; border-top: 3px solid #0ea5e9; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
+                                                <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
+                                                    {titulo_metadatos}
+                                                </h3>
+                                                <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
+                                                    {titulo}
+                                                </p>"""
+            
+            html += f"""
+                                                <!-- Botón compatible con Outlook -->
+                                                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                    <tr>
+                                                        <td>
+                                                            <table border="0" cellspacing="0" cellpadding="0">
+                                                                <tr>
+                                                                    <td align="center" style="border-radius: 6px;" bgcolor="#0ea5e9">
+                                                                        <a href="{url_descarga}" target="_blank" style="font-size: 14px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 12px 24px; border: 1px solid #0ea5e9; display: inline-block; font-weight: 500;">
+                                                                            Ver reglamento completo
+                                                                        </a>
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>"""
+    else:
+        # Mensaje cuando no hay reglamentos del día
+        html += """
+                            <tr>
+                                <td style="padding-bottom: 16px;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px;">
+                                        <tr>
+                                            <td class="section-padding" style="padding: 24px; text-align: center;">
+                                                <p style="margin: 0; font-size: 14px; color: #64748b; font-style: italic;">
+                                                    No se han publicado nuevos reglamentos en tramitación
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>"""
+    
+    html += """
+                        </table>"""
     
     # Sección SII (siempre mostrar)
     if True:  # Siempre mostrar la sección

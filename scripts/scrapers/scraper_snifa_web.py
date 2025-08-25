@@ -42,34 +42,132 @@ class ScraperSNIFAWeb:
         try:
             logger.info("📋 Obteniendo sanciones firmes recientes...")
             
-            # URL del registro público de sanciones
-            url = f"{self.base_url}/RegistroPublico"
+            # URL del registro público de sanciones - Probar año actual y anterior
+            año_actual = datetime.now().year
+            urls_probar = [
+                f"{self.base_url}/RegistroPublico/Resultado/{año_actual}",
+                f"{self.base_url}/RegistroPublico/Resultado/{año_actual-1}",
+                f"{self.base_url}/RegistroPublico"
+            ]
             
-            response = self.session.get(url, timeout=30)
-            response.raise_for_status()
-            
-            soup = BeautifulSoup(response.text, 'html.parser')
-            
-            # Buscar tabla de sanciones o lista
-            tabla = soup.find('table', {'class': ['tabla-sanciones', 'registro-publico']})
-            if not tabla:
-                # Buscar divs con información de sanciones
-                items = soup.find_all('div', {'class': ['sancion-item', 'registro-item']})
-            else:
-                items = tabla.find_all('tr')[1:]  # Saltar header
-            
-            fecha_limite = datetime.now() - timedelta(days=dias_atras)
-            
-            for item in items:
+            for url in urls_probar:
                 try:
-                    sancion = self._parsear_sancion(item)
-                    if sancion:
-                        # Verificar fecha
-                        fecha_sancion = datetime.strptime(sancion['fecha'], '%d/%m/%Y')
-                        if fecha_sancion >= fecha_limite:
-                            sanciones.append(sancion)
+                    response = self.session.get(url, timeout=30)
+                    if response.status_code == 200:
+                        soup = BeautifulSoup(response.text, 'html.parser')
+                        
+                        # Buscar tabla principal
+                        tabla = soup.find('table')
+                        if tabla:
+                            filas = tabla.find_all('tr')
+                            logger.info(f"📊 Encontrada tabla con {len(filas)} filas en {url}")
+                            
+                            # Procesar filas (saltar header)
+                            for fila in filas[1:min(len(filas), 100)]:  # Limitar a 100 para pruebas
+                                celdas = fila.find_all('td')
+                                if len(celdas) >= 8:  # La tabla tiene 9 columnas
+                                    try:
+                                        # Extraer enlace del expediente
+                                        enlace_exp = celdas[1].find('a')
+                                        expediente = celdas[1].get_text(strip=True)
+                                        url_detalle = f"{self.base_url}{enlace_exp.get('href')}" if enlace_exp else f"{self.base_url}/Sancionatorio/Ficha/{expediente}"
+                                        
+                                        # Extraer todos los datos disponibles
+                                        unidad_fiscalizable = celdas[2].get_text(strip=True)
+                                        empresa = celdas[3].get_text(strip=True)
+                                        categoria = celdas[4].get_text(strip=True)
+                                        region = celdas[5].get_text(strip=True)
+                                        multa_texto = celdas[6].get_text(strip=True) if len(celdas) > 6 else "$ 0,00"
+                                        estado_pago = celdas[7].get_text(strip=True) if len(celdas) > 7 else "No especificado"
+                                        
+                                        # Procesar multa
+                                        multa_valor = 0
+                                        multa_formateada = "Sin multa"
+                                        if multa_texto and multa_texto != "$ 0,00":
+                                            # Extraer valor numérico
+                                            match = re.search(r'[\d,]+\.?\d*', multa_texto.replace('$', ''))
+                                            if match:
+                                                try:
+                                                    multa_valor = float(match.group().replace(',', '.'))
+                                                    if multa_valor > 0:
+                                                        # Formatear multa
+                                                        if multa_valor >= 1000:
+                                                            multa_formateada = f"{multa_valor:,.0f} UTA (~${multa_valor * self.valores_conversion['UTA'] / 1_000_000:.0f}M CLP)"
+                                                        else:
+                                                            multa_formateada = f"{multa_valor:.1f} UTA (~${multa_valor * self.valores_conversion['UTA'] / 1_000_000:.1f}M CLP)"
+                                                except:
+                                                    multa_formateada = multa_texto
+                                        
+                                        # Calcular relevancia basada en multa
+                                        relevancia = 5.0
+                                        if multa_valor > 0:
+                                            if multa_valor >= 1000:
+                                                relevancia = 10.0
+                                            elif multa_valor >= 500:
+                                                relevancia = 9.0
+                                            elif multa_valor >= 100:
+                                                relevancia = 8.0
+                                            elif multa_valor >= 50:
+                                                relevancia = 7.0
+                                            else:
+                                                relevancia = 6.0
+                                        
+                                        # Crear resumen enriquecido
+                                        resumen = f"Sanción aplicada a {empresa} ({categoria}) en {region}. "
+                                        resumen += f"Unidad fiscalizada: {unidad_fiscalizable}. "
+                                        if multa_valor > 0:
+                                            resumen += f"Multa de {multa_formateada}. Estado: {estado_pago}."
+                                        else:
+                                            resumen += "Sanción sin multa económica (posible amonestación o medidas correctivas)."
+                                        
+                                        # Parsear datos de las celdas
+                                        sancion = {
+                                            'fuente': 'SMA',
+                                            'tipo': 'Sanción Firme',
+                                            'expediente': expediente,
+                                            'empresa': empresa,
+                                            'unidad_fiscalizable': unidad_fiscalizable,
+                                            'categoria': categoria,
+                                            'region': region,
+                                            'fecha': 'N/A',  # No está en la tabla principal
+                                            'multa': multa_formateada,
+                                            'estado_pago': estado_pago,
+                                            'resumen': resumen,
+                                            'relevancia': relevancia,
+                                            'url': url_detalle
+                                        }
+                                        
+                                        # Actualizar título
+                                        if multa_valor > 0:
+                                            sancion['titulo'] = f"🚨 Multa de {multa_formateada} a {empresa}"
+                                        else:
+                                            sancion['titulo'] = f"⚠️ Sanción a {empresa} - {categoria}"
+                                        
+                                        # Solo agregar si cumple con el período
+                                        if dias_atras >= 365:  # Si buscamos todo el año
+                                            sanciones.append(sancion)
+                                        else:
+                                            # Verificar fecha si la tenemos
+                                            if sancion['fecha'] != 'N/A':
+                                                try:
+                                                    fecha_sancion = datetime.strptime(sancion['fecha'], '%d/%m/%Y')
+                                                    fecha_limite = datetime.now() - timedelta(days=dias_atras)
+                                                    if fecha_sancion >= fecha_limite:
+                                                        sanciones.append(sancion)
+                                                except:
+                                                    sanciones.append(sancion)  # Agregar si no podemos parsear fecha
+                                            else:
+                                                sanciones.append(sancion)  # Agregar si no hay fecha
+                                                
+                                    except Exception as e:
+                                        logger.debug(f"Error parseando fila: {str(e)}")
+                                        continue
+                            
+                            if sanciones:
+                                break  # Si encontramos datos, no probar más URLs
+                                
                 except Exception as e:
-                    logger.debug(f"Error parseando sanción: {str(e)}")
+                    logger.debug(f"Error con URL {url}: {str(e)}")
                     continue
             
             logger.info(f"✅ Obtenidas {len(sanciones)} sanciones firmes")
@@ -77,7 +175,7 @@ class ScraperSNIFAWeb:
         except Exception as e:
             logger.error(f"❌ Error obteniendo sanciones: {str(e)}")
         
-        return sanciones
+        return sanciones[:10]  # Limitar a 10 para el informe
     
     def obtener_procedimientos_sancionatorios(self, dias_atras: int = 1) -> List[Dict]:
         """
@@ -88,43 +186,116 @@ class ScraperSNIFAWeb:
         try:
             logger.info("📋 Obteniendo procedimientos sancionatorios...")
             
-            # URL de búsqueda de procedimientos
-            url = f"{self.base_url}/v2/Sancionatorio"
+            # URLs de procedimientos - Probar diferentes endpoints
+            año_actual = datetime.now().year
+            urls_probar = [
+                f"{self.base_url}/Sancionatorio/Resultado/{año_actual}",
+                f"{self.base_url}/Sancionatorio/Resultado/{año_actual-1}",
+                f"{self.base_url}/v2/Sancionatorio"
+            ]
             
-            response = self.session.get(url, timeout=30)
-            response.raise_for_status()
-            
-            soup = BeautifulSoup(response.text, 'html.parser')
-            
-            # Buscar lista de procedimientos
-            lista = soup.find('div', {'class': 'lista-procedimientos'})
-            if not lista:
-                # Buscar tabla alternativa
-                lista = soup.find('table', {'class': 'tabla-procedimientos'})
-            
-            if lista:
-                items = lista.find_all(['tr', 'div', 'article'])[1:]  # Saltar header si existe
-                
-                fecha_limite = datetime.now() - timedelta(days=dias_atras)
-                
-                for item in items:
-                    try:
-                        procedimiento = self._parsear_procedimiento(item)
-                        if procedimiento:
-                            # Verificar fecha
-                            fecha_proc = datetime.strptime(procedimiento['fecha'], '%d/%m/%Y')
-                            if fecha_proc >= fecha_limite:
-                                procedimientos.append(procedimiento)
-                    except Exception as e:
-                        logger.debug(f"Error parseando procedimiento: {str(e)}")
-                        continue
+            for url in urls_probar:
+                try:
+                    response = self.session.get(url, timeout=30, allow_redirects=True)
+                    if response.status_code == 200:
+                        soup = BeautifulSoup(response.text, 'html.parser')
+                        
+                        # Buscar tabla principal
+                        tabla = soup.find('table')
+                        if tabla:
+                            filas = tabla.find_all('tr')
+                            logger.info(f"📊 Encontrada tabla con {len(filas)} filas en {url}")
+                            
+                            # Procesar filas (saltar header)
+                            for fila in filas[1:min(len(filas), 50)]:  # Limitar a 50 para pruebas
+                                celdas = fila.find_all('td')
+                                if len(celdas) >= 7:  # La tabla tiene 8 columnas
+                                    try:
+                                        # Extraer enlace del expediente
+                                        enlace_exp = celdas[1].find('a')
+                                        expediente = celdas[1].get_text(strip=True)
+                                        url_detalle = f"{self.base_url}{enlace_exp.get('href')}" if enlace_exp else f"{self.base_url}/Sancionatorio/Ficha/{expediente}"
+                                        
+                                        # Extraer todos los datos disponibles
+                                        unidad_fiscalizable = celdas[2].get_text(strip=True)
+                                        empresas_texto = celdas[3].get_text(strip=True)
+                                        # Puede haber múltiples empresas, tomar la primera
+                                        empresa = empresas_texto.split('SPA')[0] + 'SPA' if 'SPA' in empresas_texto else empresas_texto.split('S.A')[0] + 'S.A' if 'S.A' in empresas_texto else empresas_texto[:50]
+                                        categoria = celdas[4].get_text(strip=True)
+                                        region = celdas[5].get_text(strip=True)
+                                        estado = celdas[6].get_text(strip=True) if len(celdas) > 6 else "En curso"
+                                        
+                                        # Calcular relevancia basada en categoría y estado
+                                        relevancia = 6.0
+                                        if estado.lower() == "en curso":
+                                            relevancia += 1.0
+                                        
+                                        # Categorías más relevantes
+                                        categorias_relevantes = ['Minería', 'Energía', 'Pesca y Acuicultura', 'Instalación fabril']
+                                        if any(cat in categoria for cat in categorias_relevantes):
+                                            relevancia += 2.0
+                                        
+                                        # Crear resumen enriquecido
+                                        resumen = f"Procedimiento sancionatorio iniciado contra {empresa} "
+                                        resumen += f"por actividades en {unidad_fiscalizable} ({categoria}). "
+                                        resumen += f"Ubicación: {region}. Estado actual: {estado}. "
+                                        resumen += f"El procedimiento está en evaluación por posibles infracciones ambientales."
+                                        
+                                        # Parsear datos de las celdas
+                                        procedimiento = {
+                                            'fuente': 'SMA',
+                                            'tipo': 'Procedimiento Sancionatorio',
+                                            'expediente': expediente,
+                                            'empresa': empresa,
+                                            'unidad_fiscalizable': unidad_fiscalizable,
+                                            'categoria': categoria,
+                                            'region': region,
+                                            'fecha': 'N/A',  # No está en la tabla principal
+                                            'estado': estado,
+                                            'resumen': resumen,
+                                            'relevancia': min(relevancia, 10.0),
+                                            'url': url_detalle
+                                        }
+                                        
+                                        # Actualizar título con emoji según estado
+                                        if estado.lower() == "en curso":
+                                            procedimiento['titulo'] = f"⚖️ Procedimiento en curso contra {empresa} - {categoria}"
+                                        else:
+                                            procedimiento['titulo'] = f"📋 Procedimiento {estado} - {empresa}"
+                                        
+                                        # Filtrar por expedientes D- (procedimientos)
+                                        if procedimiento['expediente'].startswith('D-'):
+                                            # Solo agregar si cumple con el período
+                                            if dias_atras >= 365:
+                                                procedimientos.append(procedimiento)
+                                            elif procedimiento['fecha'] != 'N/A':
+                                                try:
+                                                    fecha_proc = datetime.strptime(procedimiento['fecha'], '%d/%m/%Y')
+                                                    fecha_limite = datetime.now() - timedelta(days=dias_atras)
+                                                    if fecha_proc >= fecha_limite:
+                                                        procedimientos.append(procedimiento)
+                                                except:
+                                                    procedimientos.append(procedimiento)
+                                            else:
+                                                procedimientos.append(procedimiento)
+                                                
+                                    except Exception as e:
+                                        logger.debug(f"Error parseando fila: {str(e)}")
+                                        continue
+                            
+                            if procedimientos:
+                                break  # Si encontramos datos, no probar más URLs
+                                
+                except Exception as e:
+                    logger.debug(f"Error con URL {url}: {str(e)}")
+                    continue
             
             logger.info(f"✅ Obtenidos {len(procedimientos)} procedimientos")
             
         except Exception as e:
             logger.error(f"❌ Error obteniendo procedimientos: {str(e)}")
         
-        return procedimientos
+        return procedimientos[:10]  # Limitar a 10 para el informe
     
     def buscar_por_expediente(self, expediente: str) -> Optional[Dict]:
         """

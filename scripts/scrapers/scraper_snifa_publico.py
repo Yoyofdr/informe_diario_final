@@ -23,23 +23,31 @@ class ScraperSNIFAPublico:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         })
         
-        # URLs públicas de Google Drive - SNIFA Datos Abiertos
-        # Estos IDs son de los archivos públicos compartidos por SNIFA
+        # URLs públicas de Google Drive - SNIFA Datos Abiertos (Actualizadas 2024)
+        # Carpetas de Google Drive con archivos públicos
+        self.carpetas_drive = {
+            'sanciones_firmes': 'https://drive.google.com/drive/folders/1q6MG4sfGxLisRuusnYKpUxmi9jgkSU4F?usp=share_link',
+            'sancionatorios': 'https://drive.google.com/drive/u/2/folders/1O7o60LzQ-qH8xiK_-Ofqw_mZzti_gbEr',
+            'fiscalizaciones': 'https://drive.google.com/drive/u/2/folders/1WAw7SSPMug3oZimgHYkEIi7_5JqLvzpb',
+            'unidades_fiscalizables': 'https://drive.google.com/drive/u/2/folders/1Pos3xmMDj0OoRiqmR1W9Q2K0hsnMaEL4'
+        }
+        
+        # Por ahora usaremos scraping directo de SNIFA hasta obtener los IDs exactos de los archivos
         self.fuentes_datos = {
-            'sanciones_firmes': {
-                'nombre': 'Sanciones Firmes',
-                'url_directa': 'https://docs.google.com/spreadsheets/d/1vN_JI_IqYgPqE2m8TlPOZK5a2_GQDcXB/export?format=xlsx',
-                'formato': 'excel'
+            'registro_sanciones': {
+                'nombre': 'Registro Público de Sanciones',
+                'url': 'https://snifa.sma.gob.cl/RegistroPublico/Resultado/2024',
+                'formato': 'web'
             },
             'procedimientos_sancionatorios': {
                 'nombre': 'Procedimientos Sancionatorios',
-                'url_directa': 'https://snifa.sma.gob.cl/DatosAbiertos/Docs/ProcedimientosSancionatorios.csv',
-                'formato': 'csv'
+                'url': 'https://snifa.sma.gob.cl/Sancionatorio/Resultado/2024',
+                'formato': 'web'
             },
-            'medidas_provisionales': {
-                'nombre': 'Medidas Provisionales',
-                'url_directa': 'https://snifa.sma.gob.cl/DatosAbiertos/Docs/MedidasProvisionales.csv',
-                'formato': 'csv'
+            'fiscalizaciones': {
+                'nombre': 'Fiscalizaciones',
+                'url': 'https://snifa.sma.gob.cl/Fiscalizacion/Resultado/2024',
+                'formato': 'web'
             }
         }
         
@@ -50,37 +58,103 @@ class ScraperSNIFAPublico:
             'USD': 970     # Aproximado
         }
     
+    def obtener_datos_web_snifa(self, tipo: str = 'sanciones', año: int = 2024) -> List[Dict]:
+        """
+        Obtiene datos directamente del sitio web de SNIFA
+        """
+        from bs4 import BeautifulSoup
+        import re
+        
+        datos = []
+        
+        # URLs según tipo de datos
+        urls = {
+            'sanciones': f'https://snifa.sma.gob.cl/RegistroPublico/Resultado/{año}',
+            'procedimientos': f'https://snifa.sma.gob.cl/Sancionatorio/Resultado/{año}',
+            'fiscalizaciones': f'https://snifa.sma.gob.cl/Fiscalizacion/Resultado/{año}'
+        }
+        
+        if tipo not in urls:
+            logger.error(f"Tipo desconocido: {tipo}")
+            return datos
+        
+        try:
+            logger.info(f"🔍 Obteniendo {tipo} del año {año}...")
+            response = self.session.get(urls[tipo], timeout=30)
+            response.raise_for_status()
+            
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # Buscar tabla de resultados o divs con información
+            tabla = soup.find('table', {'class': ['table', 'tabla-datos']})
+            
+            if tabla:
+                filas = tabla.find_all('tr')[1:]  # Saltar header
+                for fila in filas:
+                    celdas = fila.find_all('td')
+                    if len(celdas) >= 3:
+                        item = self._parsear_fila_snifa(celdas, tipo)
+                        if item:
+                            datos.append(item)
+            else:
+                # Buscar divs con resultados
+                items = soup.find_all('div', {'class': ['resultado-item', 'card', 'panel']})
+                for item_div in items:
+                    item = self._parsear_div_snifa(item_div, tipo)
+                    if item:
+                        datos.append(item)
+            
+            logger.info(f"✅ Obtenidos {len(datos)} registros de {tipo}")
+            
+        except Exception as e:
+            logger.error(f"❌ Error obteniendo {tipo}: {str(e)}")
+        
+        return datos
+    
+    def _parsear_fila_snifa(self, celdas, tipo: str) -> Optional[Dict]:
+        """Parsea una fila de tabla de SNIFA"""
+        try:
+            if tipo == 'sanciones':
+                return {
+                    'fuente': 'SMA',
+                    'tipo': 'Sanción',
+                    'empresa': celdas[0].get_text(strip=True) if len(celdas) > 0 else 'N/A',
+                    'expediente': celdas[1].get_text(strip=True) if len(celdas) > 1 else 'N/A',
+                    'fecha': celdas[2].get_text(strip=True) if len(celdas) > 2 else 'N/A',
+                    'multa': celdas[3].get_text(strip=True) if len(celdas) > 3 else 'N/A',
+                    'resumen': celdas[4].get_text(strip=True) if len(celdas) > 4 else 'N/A',
+                    'relevancia': 7.0
+                }
+            return None
+        except:
+            return None
+    
+    def _parsear_div_snifa(self, div, tipo: str) -> Optional[Dict]:
+        """Parsea un div con información de SNIFA"""
+        try:
+            texto = div.get_text(separator=' ', strip=True)
+            # Implementar parsing según estructura real
+            return None
+        except:
+            return None
+    
     def descargar_datos_publicos(self, fuente: str) -> Optional[pd.DataFrame]:
         """
         Descarga datos públicos desde las fuentes oficiales
         """
-        if fuente not in self.fuentes_datos:
-            logger.error(f"Fuente desconocida: {fuente}")
-            return None
+        # Por ahora usar el método web
+        if fuente == 'registro_sanciones':
+            datos = self.obtener_datos_web_snifa('sanciones', 2024)
+        elif fuente == 'procedimientos_sancionatorios':
+            datos = self.obtener_datos_web_snifa('procedimientos', 2024)
+        elif fuente == 'fiscalizaciones':
+            datos = self.obtener_datos_web_snifa('fiscalizaciones', 2024)
+        else:
+            datos = []
         
-        info = self.fuentes_datos[fuente]
-        logger.info(f"📥 Descargando {info['nombre']} desde fuente pública...")
-        
-        try:
-            response = self.session.get(info['url_directa'], timeout=30)
-            response.raise_for_status()
-            
-            # Parsear según formato
-            if info['formato'] == 'csv':
-                df = pd.read_csv(io.StringIO(response.text), encoding='utf-8')
-            elif info['formato'] == 'excel':
-                df = pd.read_excel(io.BytesIO(response.content))
-            else:
-                logger.error(f"Formato no soportado: {info['formato']}")
-                return None
-            
-            logger.info(f"✅ Descargados {len(df)} registros de {info['nombre']}")
-            return df
-            
-        except Exception as e:
-            logger.error(f"❌ Error descargando {info['nombre']}: {str(e)}")
-            # Intentar fuente alternativa desde SNIFA directo
-            return self._intentar_fuente_alternativa(fuente)
+        if datos:
+            return pd.DataFrame(datos)
+        return None
     
     def _intentar_fuente_alternativa(self, fuente: str) -> Optional[pd.DataFrame]:
         """

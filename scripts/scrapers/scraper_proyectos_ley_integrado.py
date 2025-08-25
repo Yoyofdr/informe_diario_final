@@ -12,6 +12,11 @@ import re
 import os
 import sys
 from pathlib import Path
+import openai
+from dotenv import load_dotenv
+
+# Cargar variables de entorno
+load_dotenv()
 
 # Agregar el directorio base al path
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -20,11 +25,11 @@ sys.path.insert(0, str(BASE_DIR))
 # Importar servicios de extracción de PDF
 try:
     from alerts.services.pdf_extractor import pdf_extractor
-    from alerts.cmf_resumenes_ai import generar_resumen_cmf
 except ImportError:
-    logger.warning("No se pudieron importar servicios de PDF")
     pdf_extractor = None
-    generar_resumen_cmf = None
+
+# Configurar OpenAI
+openai.api_key = os.getenv('OPENAI_API_KEY')
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -313,11 +318,12 @@ class ScraperProyectosLeyIntegrado:
     
     def _extraer_contenido_pdf(self, url: str) -> Optional[str]:
         """
-        Descarga y extrae el contenido de un PDF
+        Descarga y extrae el contenido completo de un PDF
         """
         try:
             # Descargar el PDF
-            response = self.session.get(url, timeout=10)
+            logger.info(f"Descargando PDF de: {url}")
+            response = self.session.get(url, timeout=15)
             
             if response.status_code == 200:
                 # Siempre usar pypdf primero porque funciona mejor con estos PDFs
@@ -329,27 +335,34 @@ class ScraperProyectosLeyIntegrado:
                     reader = PdfReader(pdf_file)
                     
                     texto = ""
-                    # Extraer las primeras 2 páginas (generalmente suficiente para el resumen)
-                    for i in range(min(2, len(reader.pages))):
+                    # Extraer hasta 5 páginas para tener contenido suficiente
+                    max_paginas = min(5, len(reader.pages))
+                    logger.info(f"Extrayendo {max_paginas} páginas del PDF")
+                    
+                    for i in range(max_paginas):
                         pagina_texto = reader.pages[i].extract_text()
                         if pagina_texto:
-                            texto += pagina_texto + "\n"
+                            texto += pagina_texto + "\n\n"
                     
                     if texto and len(texto) > 50:  # Verificar que hay contenido útil
-                        # Limitar a 3000 caracteres
-                        return texto[:3000] if len(texto) > 3000 else texto
+                        logger.info(f"Extraídos {len(texto)} caracteres del PDF")
+                        # Retornar hasta 5000 caracteres para tener suficiente contexto
+                        return texto[:5000] if len(texto) > 5000 else texto
                         
                 except Exception as e:
-                    logger.debug(f"Error con pypdf, intentando con pdf_extractor: {e}")
+                    logger.error(f"Error con pypdf: {e}")
                     
                 # Fallback: usar pdf_extractor si pypdf falla
-                if pdf_extractor and not texto:
+                if pdf_extractor:
                     try:
-                        texto, metodo = pdf_extractor.extract_text(response.content, max_pages=2)
+                        texto, metodo = pdf_extractor.extract_text(response.content, max_pages=5)
                         if texto and len(texto) > 50:
-                            return texto[:3000] if len(texto) > 3000 else texto
+                            logger.info(f"Extraídos {len(texto)} caracteres con pdf_extractor")
+                            return texto[:5000] if len(texto) > 5000 else texto
                     except Exception as e:
                         logger.error(f"Error con pdf_extractor: {e}")
+            else:
+                logger.error(f"Error descargando PDF: Status {response.status_code}")
                         
         except Exception as e:
             logger.error(f"Error descargando PDF de {url}: {e}")
@@ -358,87 +371,93 @@ class ScraperProyectosLeyIntegrado:
     
     def _generar_resumen_proyecto(self, contenido: str, titulo: str) -> str:
         """
-        Genera un resumen del proyecto basado en su contenido
+        Genera un resumen inteligente del proyecto usando IA
         """
         if not contenido:
             return titulo[:300] if len(titulo) <= 300 else titulo[:297] + '...'
         
         try:
-            # Limpiar el contenido
-            contenido_limpio = contenido.replace('\n', ' ').replace('  ', ' ')
+            # Si el contenido es muy largo, usar solo las primeras 4000 caracteres
+            contenido_para_resumen = contenido[:4000] if len(contenido) > 4000 else contenido
             
-            # Buscar la sección de FUNDAMENTOS o el primer párrafo sustancial
-            fundamentos_match = re.search(r'FUNDAMENTO[S]?\s*([^.]+\.(?:[^.]+\.)?)', contenido_limpio, re.IGNORECASE)
-            if fundamentos_match:
-                resumen = fundamentos_match.group(1).strip()
+            # Usar OpenAI para generar un resumen inteligente
+            try:
+                client = openai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+                
+                prompt = f"""Analiza el siguiente proyecto de ley y genera un resumen conciso y claro de máximo 250 caracteres.
+                
+El resumen debe explicar:
+1. Qué propone o modifica el proyecto
+2. El objetivo principal
+3. Los aspectos más relevantes
+
+Título del proyecto: {titulo}
+
+Contenido del proyecto:
+{contenido_para_resumen}
+
+IMPORTANTE: 
+- El resumen debe ser en español
+- Máximo 250 caracteres
+- Debe ser claro y directo
+- No incluyas el número de boletín
+- Enfócate en lo esencial del proyecto
+
+Resumen:"""
+
+                response = client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": "Eres un experto analista legislativo chileno. Tu tarea es crear resúmenes concisos y claros de proyectos de ley."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=100,
+                    temperature=0.3
+                )
+                
+                resumen = response.choices[0].message.content.strip()
+                
+                # Asegurar que no exceda 300 caracteres
                 if len(resumen) > 300:
                     resumen = resumen[:297] + '...'
+                
+                logger.info(f"Resumen generado por IA para: {titulo[:50]}...")
                 return resumen
-            
-            # Buscar "que" seguido de la descripción del proyecto
-            que_match = re.search(r'que\s+([^.]{50,300})', contenido_limpio, re.IGNORECASE)
-            if que_match:
-                resumen = que_match.group(1).strip()
-                if not resumen.endswith('.'):
-                    resumen += '.'
-                return resumen
-            
-            # Buscar palabras clave importantes
-            palabras_clave = [
-                (r'modifica[^\.,]{20,250}', 'Modifica'),
-                (r'establece[^\.,]{20,250}', 'Establece'),
-                (r'crea[^\.,]{20,250}', 'Crea'),
-                (r'regula[^\.,]{20,250}', 'Regula'),
-                (r'prohíbe[^\.,]{20,250}', 'Prohíbe'),
-                (r'autoriza[^\.,]{20,250}', 'Autoriza'),
-                (r'concede[^\.,]{20,250}', 'Concede'),
-                (r'declara[^\.,]{20,250}', 'Declara')
-            ]
-            
-            for patron, inicio in palabras_clave:
-                match = re.search(patron, contenido_limpio, re.IGNORECASE)
-                if match:
-                    texto_encontrado = match.group(0).strip()
-                    # Capitalizar primera letra
-                    resumen = texto_encontrado[0].upper() + texto_encontrado[1:] if texto_encontrado else texto_encontrado
-                    if len(resumen) > 300:
-                        resumen = resumen[:297] + '...'
-                    if not resumen.endswith('.'):
-                        resumen += '.'
-                    return resumen
-            
-            # Si no encontramos patrones específicos, buscar el primer párrafo después del título
-            # Dividir por líneas y buscar contenido sustancial
-            lineas = contenido.split('\n')
-            contenido_sustancial = []
-            empezar = False
-            
-            for linea in lineas:
-                linea_limpia = linea.strip()
-                # Saltar líneas vacías, boletines y títulos
-                if not linea_limpia or 'Boletín' in linea_limpia or linea_limpia.isupper():
-                    continue
-                # Empezar a capturar después de FUNDAMENTOS o similar
-                if any(word in linea_limpia.upper() for word in ['FUNDAMENTO', 'PROYECTO DE LEY', 'MOCIÓN']):
-                    empezar = True
-                    continue
-                if empezar and len(linea_limpia) > 30:
-                    contenido_sustancial.append(linea_limpia)
-                    if len(' '.join(contenido_sustancial)) > 250:
-                        break
-            
-            if contenido_sustancial:
-                resumen = ' '.join(contenido_sustancial)[:300]
-                if len(resumen) == 300:
-                    resumen = resumen[:297] + '...'
-                return resumen
-            
-            # Fallback final: usar el título limpio
-            return titulo[:300] if len(titulo) <= 300 else titulo[:297] + '...'
-            
+                
+            except Exception as e:
+                logger.error(f"Error con OpenAI: {e}")
+                # Fallback: usar método simple si falla la IA
+                return self._generar_resumen_simple(contenido, titulo)
+                
         except Exception as e:
             logger.error(f"Error generando resumen: {e}")
             return titulo[:300] if len(titulo) <= 300 else titulo[:297] + '...'
+    
+    def _generar_resumen_simple(self, contenido: str, titulo: str) -> str:
+        """
+        Método de fallback para generar resumen sin IA
+        """
+        # Limpiar el contenido
+        contenido_limpio = contenido.replace('\n', ' ').replace('  ', ' ')
+        
+        # Buscar FUNDAMENTOS
+        fundamentos_match = re.search(r'FUNDAMENTO[S]?\s*([^.]+\.(?:[^.]+\.)?)', contenido_limpio, re.IGNORECASE)
+        if fundamentos_match:
+            resumen = fundamentos_match.group(1).strip()
+            if len(resumen) > 300:
+                resumen = resumen[:297] + '...'
+            return resumen
+        
+        # Si no hay fundamentos, tomar el primer párrafo sustancial
+        parrafos = contenido.split('\n\n')
+        for parrafo in parrafos:
+            if len(parrafo) > 50 and not parrafo.isupper() and 'Boletín' not in parrafo:
+                resumen = parrafo.strip()[:300]
+                if len(parrafo) > 300:
+                    resumen = resumen[:297] + '...'
+                return resumen
+        
+        return titulo[:300] if len(titulo) <= 300 else titulo[:297] + '...'
     
     def generar_resumen(self, proyecto: Dict) -> str:
         """

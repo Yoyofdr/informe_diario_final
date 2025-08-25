@@ -139,9 +139,9 @@ class ScraperSNIFAWeb:
                                         
                                         # Actualizar título
                                         if multa_valor > 0:
-                                            sancion['titulo'] = f"🚨 Multa de {multa_formateada} a {empresa}"
+                                            sancion['titulo'] = f"Multa de {multa_formateada} a {empresa}"
                                         else:
-                                            sancion['titulo'] = f"⚠️ Sanción a {empresa} - {categoria}"
+                                            sancion['titulo'] = f"Sanción a {empresa} - {categoria}"
                                         
                                         # Solo agregar si cumple con el período
                                         if dias_atras >= 365:  # Si buscamos todo el año
@@ -257,11 +257,11 @@ class ScraperSNIFAWeb:
                                             'url': url_detalle
                                         }
                                         
-                                        # Actualizar título con emoji según estado
+                                        # Actualizar título según estado
                                         if estado.lower() == "en curso":
-                                            procedimiento['titulo'] = f"⚖️ Procedimiento en curso contra {empresa} - {categoria}"
+                                            procedimiento['titulo'] = f"Procedimiento en curso contra {empresa} - {categoria}"
                                         else:
-                                            procedimiento['titulo'] = f"📋 Procedimiento {estado} - {empresa}"
+                                            procedimiento['titulo'] = f"Procedimiento {estado} - {empresa}"
                                         
                                         # Filtrar por expedientes D- (procedimientos)
                                         if procedimiento['expediente'].startswith('D-'):

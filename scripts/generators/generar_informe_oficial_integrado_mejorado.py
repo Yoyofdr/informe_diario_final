@@ -958,13 +958,9 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     <div style="margin: 0 0 8px 0;">
                                                         <span style="background-color: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">SEA</span>
                                                     </div>
-                                                    <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
+                                                    <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
                                                         {proyecto.get('titulo', '')}
                                                     </h3>
-                                                    <div style="margin: 0 0 12px 0; font-size: 13px; color: #6b7280;">
-                                                        <span style="font-weight: 500;">Empresa:</span> {proyecto.get('empresa', 'N/A')} | 
-                                                        <span style="font-weight: 500;">Fecha:</span> {proyecto.get('fecha', 'N/A')}
-                                                    </div>
                                                     <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
                                                         {proyecto.get('resumen', '')}
                                                     </p>
@@ -1001,13 +997,9 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                     <div style="margin: 0 0 8px 0;">
                                                         <span style="background-color: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">SMA</span>
                                                     </div>
-                                                    <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
+                                                    <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
                                                         {sancion.get('titulo', '')}
                                                     </h3>
-                                                    <div style="margin: 0 0 12px 0; font-size: 13px; color: #6b7280;">
-                                                        <span style="font-weight: 500;">Empresa:</span> {sancion.get('empresa', 'N/A')} | 
-                                                        <span style="font-weight: 500;">Multa:</span> {sancion.get('multa', 'N/A')}
-                                                    </div>
                                                     <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
                                                         {sancion.get('resumen', '')}
                                                     </p>

@@ -218,11 +218,22 @@ def panel_organizacion(request):
             Destinatario.objects.filter(id=dest_id, organizacion=organizacion).delete()
             messages.success(request, "Destinatario eliminado.")
     destinatarios = Destinatario.objects.select_related('organizacion').filter(organizacion=organizacion)
+    
+    # Calcular estadísticas de trials
+    trials_activos = sum(1 for d in destinatarios if d.trial_activo() and not d.es_pagado)
+    expiran_pronto = sum(1 for d in destinatarios if not d.es_pagado and 0 < d.dias_restantes_trial() <= 7)
+    usuarios_pagados = sum(1 for d in destinatarios if d.es_pagado)
+    trials_expirados = sum(1 for d in destinatarios if not d.es_pagado and d.dias_restantes_trial() == 0)
+    
     return render(request, 'panel_organizacion_chennai.html', {
         'organizacion': organizacion,
         'destinatarios': destinatarios,
         'dominio': dominio,
-        'form': form
+        'form': form,
+        'trials_activos': trials_activos,
+        'expiran_pronto': expiran_pronto,
+        'usuarios_pagados': usuarios_pagados,
+        'trials_expirados': trials_expirados
     })
 
 def registro_empresa_admin(request):

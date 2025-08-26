@@ -273,6 +273,38 @@
                 {% endif %}
                 
                 {% if organizacion %}
+                    <!-- Resumen de estado de trials -->
+                    <div class="info-card mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <h5 class="text-white mb-3">
+                            <i class="bi bi-speedometer2 me-2"></i>Resumen de Período de Prueba
+                        </h5>
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <div class="text-center p-3" style="background: rgba(255,255,255,0.1); border-radius: 8px;">
+                                    <div class="h3 mb-1">{{ destinatarios|length }}</div>
+                                    <small>Total Usuarios</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center p-3" style="background: rgba(255,255,255,0.1); border-radius: 8px;">
+                                    <div class="h3 mb-1">{{ trials_activos }}</div>
+                                    <small>Trials Activos</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center p-3" style="background: rgba(255,255,255,0.1); border-radius: 8px;">
+                                    <div class="h3 mb-1">{{ expiran_pronto }}</div>
+                                    <small>Expiran Pronto</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center p-3" style="background: rgba(255,255,255,0.1); border-radius: 8px;">
+                                    <div class="h3 mb-1">{{ usuarios_pagados }}</div>
+                                    <small>Pagados</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <!-- Info Card -->
                     <div class="info-card">
                         <h5>Información de la Organización</h5>
@@ -334,6 +366,9 @@
                                         <tr>
                                             <th>Nombre</th>
                                             <th>Email</th>
+                                            <th>Estado</th>
+                                            <th>Días Restantes</th>
+                                            <th>Vence</th>
                                             <th width="100">Acción</th>
                                         </tr>
                                     </thead>
@@ -342,6 +377,45 @@
                                         <tr>
                                             <td>{{ d.nombre|default:"Sin nombre" }}</td>
                                             <td><code>{{ d.email }}</code></td>
+                                            <td>
+                                                {% if d.es_pagado %}
+                                                    <span class="badge bg-success">
+                                                        <i class="bi bi-check-circle"></i> Pagado
+                                                    </span>
+                                                {% elif d.trial_activo %}
+                                                    <span class="badge bg-info">
+                                                        <i class="bi bi-clock"></i> Trial Activo
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">
+                                                        <i class="bi bi-x-circle"></i> Expirado
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if d.es_pagado %}
+                                                    <span class="text-success fw-bold">Sin límite</span>
+                                                {% else %}
+                                                    {% with dias=d.dias_restantes_trial %}
+                                                        {% if dias > 7 %}
+                                                            <span class="text-success fw-bold">{{ dias }} días</span>
+                                                        {% elif dias > 3 %}
+                                                            <span class="text-warning fw-bold">{{ dias }} días</span>
+                                                        {% elif dias > 0 %}
+                                                            <span class="text-danger fw-bold">{{ dias }} días</span>
+                                                        {% else %}
+                                                            <span class="text-danger fw-bold">0 días</span>
+                                                        {% endif %}
+                                                    {% endwith %}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if d.es_pagado %}
+                                                    <span class="text-muted">-</span>
+                                                {% else %}
+                                                    <small>{{ d.fecha_fin_trial|date:"d/m/Y" }}</small>
+                                                {% endif %}
+                                            </td>
                                             <td>
                                                 <form method="post" class="d-inline">
                                                     {% csrf_token %}

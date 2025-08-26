@@ -567,11 +567,11 @@ class ScraperSNIFAWeb:
         procedimientos = self.obtener_procedimientos_sancionatorios(dias_atras)
         datos.extend(procedimientos)
         
-        # Si no hay datos o todos sin fecha, generar ejemplos
+        # Si no hay datos o todos sin fecha, retornar lista vacía
         datos_con_fecha = [d for d in datos if d.get('fecha') != 'N/A']
         if not datos_con_fecha:
-            logger.warning("No se encontraron sanciones con fechas, usando datos de ejemplo")
-            datos = self._generar_sanciones_ejemplo(dias_atras)
+            logger.warning("No se encontraron sanciones con fechas válidas")
+            datos = []
         
         # Ordenar por relevancia
         datos.sort(key=lambda x: x.get('relevancia', 0), reverse=True)
@@ -580,59 +580,7 @@ class ScraperSNIFAWeb:
         
         return datos
     
-    def _generar_sanciones_ejemplo(self, dias_atras: int) -> List[Dict]:
-        """
-        Genera sanciones de ejemplo con fechas actuales cuando no hay datos reales
-        """
-        sanciones = []
-        fecha_base = datetime.now()
-        
-        ejemplos = [
-            {
-                'empresa': 'Minera Los Pelambres',
-                'motivo': 'Exceder límites de emisión de material particulado',
-                'multa_uta': 800,
-                'region': 'Región de Coquimbo',
-                'dias_atras': 3
-            },
-            {
-                'empresa': 'Celulosa Arauco y Constitución S.A.',
-                'motivo': 'Descarga de residuos líquidos sin tratamiento adecuado',
-                'multa_uta': 500,
-                'region': 'Región del Biobío',
-                'dias_atras': 5
-            },
-            {
-                'empresa': 'Pesquera San José S.A.',
-                'motivo': 'Incumplimiento de medidas de mitigación de olores',
-                'multa_uta': 200,
-                'region': 'Región de Los Lagos',
-                'dias_atras': 7
-            }
-        ]
-        
-        for i, ejemplo in enumerate(ejemplos):
-            fecha = fecha_base - timedelta(days=ejemplo['dias_atras'])
-            valor_uta = 789240  # Valor UTA 2024
-            multa_pesos = ejemplo['multa_uta'] * valor_uta
-            
-            sancion = {
-                'fuente': 'SMA',
-                'tipo': 'Sanción Firme',
-                'titulo': f"Multa de {ejemplo['multa_uta']} UTA a {ejemplo['empresa']}",
-                'empresa': ejemplo['empresa'],
-                'fecha': fecha.strftime('%d/%m/%Y'),
-                'expediente': f'D-{100+i}-{fecha.year}',
-                'region': ejemplo['region'],
-                'multa': f"{ejemplo['multa_uta']} UTA (~${multa_pesos/1000000:.0f}M CLP)",
-                'resumen': f"Sanción aplicada a {ejemplo['empresa']} por {ejemplo['motivo']}. {ejemplo['region']}. Multa de {ejemplo['multa_uta']} UTA.",
-                'relevancia': 8.0 if ejemplo['multa_uta'] >= 500 else 7.0,
-                'url': self.base_url + '/Sancionatorio'
-            }
-            
-            sanciones.append(sancion)
-        
-        return sanciones
+    # Método eliminado - no usar datos de ejemplo
 
 
 def test_snifa_web():

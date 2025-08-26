@@ -1167,6 +1167,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
         proyectos_sea = datos_ambientales.get('proyectos_sea', [])
         sanciones_sma = datos_ambientales.get('sanciones_sma', [])
         
+        # Solo mostrar si hay datos reales
         if proyectos_sea or sanciones_sma:
             html += """
                             <!-- NORMATIVA AMBIENTAL (SEA Y SMA) -->
@@ -1270,6 +1271,41 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                 </tr>"""
             
             html += """
+                            </table>"""
+        else:
+            # Si no hay datos ambientales, mostrar mensaje informativo
+            html += """
+                            <!-- NORMATIVA AMBIENTAL (SIN DATOS) -->
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 40px;">
+                                <tr>
+                                    <td>
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #d4f4dd;">
+                                            <tr>
+                                                <td>
+                                                    <h2 style="margin: 0 0 2px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
+                                                        NORMATIVA AMBIENTAL
+                                                    </h2>
+                                                    <p style="margin: 0; font-size: 14px; color: #16a34a;">
+                                                        Proyectos ambientales (SEA) y sanciones regulatorias (SMA)
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding-bottom: 16px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+                                            <tr>
+                                                <td style="padding: 20px; text-align: center;">
+                                                    <p style="margin: 0; font-size: 14px; color: #64748b; font-style: italic;">
+                                                        No se encontraron proyectos ambientales ni sanciones para el período consultado.
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
                             </table>"""
     
     # Sección Dirección del Trabajo (con color naranja)

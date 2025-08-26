@@ -65,10 +65,10 @@ class ScraperSEIABusqueda:
                     except:
                         pass
             
-            # Si no hay proyectos recientes, generar datos de ejemplo actualizados
+            # Si no hay proyectos recientes, retornar lista vacía
             if not proyectos_recientes:
-                logger.warning("No se encontraron proyectos recientes del SEA, usando datos de ejemplo")
-                proyectos_recientes = self._generar_proyectos_ejemplo(dias_atras)
+                logger.warning("No se encontraron proyectos recientes del SEA")
+                proyectos_recientes = []
             
             # Eliminar duplicados por título
             proyectos_unicos = []
@@ -537,63 +537,4 @@ class ScraperSEIABusqueda:
         
         return min(relevancia, 10.0)
     
-    def _generar_proyectos_ejemplo(self, dias_atras: int) -> List[Dict]:
-        """
-        Genera proyectos de ejemplo con fechas actuales cuando no hay datos reales
-        """
-        proyectos = []
-        fecha_base = datetime.now()
-        
-        ejemplos = [
-            {
-                'titulo': 'Parque Solar Fotovoltaico Atacama',
-                'empresa': 'Energías Renovables del Norte SpA',
-                'region': 'Región de Atacama',
-                'tipo_proyecto': 'Energía Renovable',
-                'inversion_mmusd': 150,
-                'estado': 'En Calificación',
-                'dias_atras': 2
-            },
-            {
-                'titulo': 'Planta Desaladora Caldera',
-                'empresa': 'Aguas del Pacífico S.A.',
-                'region': 'Región de Atacama',
-                'tipo_proyecto': 'Saneamiento Ambiental',
-                'inversion_mmusd': 80,
-                'estado': 'RCA Aprobada',
-                'dias_atras': 5
-            },
-            {
-                'titulo': 'Línea de Transmisión 220kV Copiapó-Diego de Almagro',
-                'empresa': 'Transmisora Eléctrica del Norte S.A.',
-                'region': 'Región de Atacama',
-                'tipo_proyecto': 'Transmisión Eléctrica',
-                'inversion_mmusd': 120,
-                'estado': 'En Calificación',
-                'dias_atras': 7
-            }
-        ]
-        
-        for ejemplo in ejemplos:
-            fecha = fecha_base - timedelta(days=ejemplo['dias_atras'])
-            
-            proyecto = {
-                'fuente': 'SEA',
-                'tipo': ejemplo['estado'],
-                'titulo': ejemplo['titulo'],
-                'empresa': ejemplo['empresa'],
-                'fecha': fecha.strftime('%d/%m/%Y'),
-                'region': ejemplo['region'],
-                'comuna': '',
-                'estado': ejemplo['estado'],
-                'tipo_proyecto': ejemplo['tipo_proyecto'],
-                'inversion_mmusd': ejemplo['inversion_mmusd'],
-                'expediente_id': f'EIA-{fecha.year}-{fecha.month:02d}-{fecha.day:02d}',
-                'url': self.search_url,
-                'relevancia': 7.0 if 'Aprobada' in ejemplo['estado'] else 6.0,
-                'resumen': f"{ejemplo['tipo_proyecto']} en {ejemplo['region']}. Inversión: USD {ejemplo['inversion_mmusd']} millones. Estado: {ejemplo['estado']}."
-            }
-            
-            proyectos.append(proyecto)
-        
-        return proyectos
+    # Método eliminado - no usar datos de ejemplo

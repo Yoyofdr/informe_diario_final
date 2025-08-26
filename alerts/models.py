@@ -200,14 +200,15 @@ class Destinatario(models.Model):
     
     def trial_activo(self):
         """Verifica si el trial está activo"""
-        if self.es_pagado:
-            return True  # Si es pagado, siempre está activo
+        # Por ahora, solo verificamos si está dentro del período de 14 días
+        if not self.fecha_fin_trial:
+            return False
         return timezone.now() <= self.fecha_fin_trial
     
     def dias_restantes_trial(self):
         """Retorna los días restantes del trial"""
-        if self.es_pagado:
-            return None  # No aplica si es pagado
+        if not self.fecha_fin_trial:
+            return 0
         dias = (self.fecha_fin_trial - timezone.now()).days
         return max(0, dias)
 

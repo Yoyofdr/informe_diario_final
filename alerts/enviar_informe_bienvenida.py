@@ -48,7 +48,7 @@ def enviar_informe_bienvenida(email_destinatario, nombre_destinatario, fecha_fin
         else:
             # Si no hay informe, enviar correo de bienvenida simple
             print(f"⚠️ No hay informe del día en caché, enviando correo de bienvenida...")
-            subject = "Bienvenido a Informe Diario - Período de Prueba Activado"
+            subject = "Bienvenido a Informe Diario - 14 días de prueba gratis"
             
             # Formatear la fecha de fin del trial si se proporciona
             trial_info = ""
@@ -70,13 +70,13 @@ def enviar_informe_bienvenida(email_destinatario, nombre_destinatario, fecha_fin
                                 <tr>
                                     <td style="padding: 20px; background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 6px;">
                                         <p style="margin: 0 0 10px 0; font-size: 16px; color: #0369a1; font-weight: 600;">
-                                            🎉 Período de Prueba Activado
+                                            🎉 14 Días de Prueba Gratis
                                         </p>
                                         <p style="margin: 0; font-size: 15px; color: #0c4a6e; line-height: 1.5;">
-                                            Tienes acceso completo a todos los informes diarios durante <strong>14 días</strong>.
+                                            Recibirás el informe diario completo durante <strong>14 días</strong> sin costo.
                                         </p>
                                         <p style="margin: 10px 0 0 0; font-size: 14px; color: #475569;">
-                                            Tu período de prueba finaliza el: <strong>{fecha_fin_str}</strong>
+                                            Tu período de prueba termina el: <strong>{fecha_fin_str}</strong>
                                         </p>
                                     </td>
                                 </tr>

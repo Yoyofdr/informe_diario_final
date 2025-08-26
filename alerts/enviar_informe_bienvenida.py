@@ -19,7 +19,7 @@ if os.path.exists(env_path):
     load_dotenv(env_path)
 
 
-def enviar_informe_bienvenida(email_destinatario, nombre_destinatario):
+def enviar_informe_bienvenida(email_destinatario, nombre_destinatario, fecha_fin_trial=None):
     """
     Envía el informe del día actual a un nuevo usuario.
     Si existe el informe del día en caché, lo envía.
@@ -28,6 +28,7 @@ def enviar_informe_bienvenida(email_destinatario, nombre_destinatario):
     Args:
         email_destinatario (str): Email del nuevo usuario
         nombre_destinatario (str): Nombre completo del nuevo usuario
+        fecha_fin_trial (datetime): Fecha de fin del período de prueba (opcional)
     
     Returns:
         bool: True si se envió correctamente, False en caso contrario
@@ -47,7 +48,41 @@ def enviar_informe_bienvenida(email_destinatario, nombre_destinatario):
         else:
             # Si no hay informe, enviar correo de bienvenida simple
             print(f"⚠️ No hay informe del día en caché, enviando correo de bienvenida...")
-            subject = "Bienvenido a Informe Diario"
+            subject = "Bienvenido a Informe Diario - Período de Prueba Activado"
+            
+            # Formatear la fecha de fin del trial si se proporciona
+            trial_info = ""
+            if fecha_fin_trial:
+                fecha_fin_str = fecha_fin_trial.strftime('%d de %B de %Y')
+                # Traducir el mes al español
+                meses = {
+                    'January': 'enero', 'February': 'febrero', 'March': 'marzo',
+                    'April': 'abril', 'May': 'mayo', 'June': 'junio',
+                    'July': 'julio', 'August': 'agosto', 'September': 'septiembre',
+                    'October': 'octubre', 'November': 'noviembre', 'December': 'diciembre'
+                }
+                for eng, esp in meses.items():
+                    fecha_fin_str = fecha_fin_str.replace(eng, esp)
+                
+                trial_info = f"""
+                            <!-- Trial Info Box -->
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 30px 0;">
+                                <tr>
+                                    <td style="padding: 20px; background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 6px;">
+                                        <p style="margin: 0 0 10px 0; font-size: 16px; color: #0369a1; font-weight: 600;">
+                                            🎉 Período de Prueba Activado
+                                        </p>
+                                        <p style="margin: 0; font-size: 15px; color: #0c4a6e; line-height: 1.5;">
+                                            Tienes acceso completo a todos los informes diarios durante <strong>14 días</strong>.
+                                        </p>
+                                        <p style="margin: 10px 0 0 0; font-size: 14px; color: #475569;">
+                                            Tu período de prueba finaliza el: <strong>{fecha_fin_str}</strong>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                """
+            
             # Crear mensaje HTML de bienvenida minimalista con colores del informe
             html_content = f"""
 <!DOCTYPE html>
@@ -87,12 +122,28 @@ def enviar_informe_bienvenida(email_destinatario, nombre_destinatario):
                                 Tu cuenta ha sido creada exitosamente.
                             </p>
                             
-                            <p style="margin: 0 0 30px 0; font-size: 16px; color: #475569; line-height: 1.6;">
+                            {trial_info}
+                            
+                            <p style="margin: 0 0 20px 0; font-size: 16px; color: #475569; line-height: 1.6;">
                                 <strong style="color: #1e293b;">Email:</strong> {email_destinatario}
                             </p>
                             
+                            <p style="margin: 0 0 20px 0; font-size: 16px; color: #475569; line-height: 1.6;">
+                                Recibirás tu primer informe diario mañana a las 9:00 AM con toda la información relevante de:
+                            </p>
+                            
+                            <ul style="margin: 0 0 25px 0; padding-left: 20px; font-size: 15px; color: #475569; line-height: 1.8;">
+                                <li>Diario Oficial</li>
+                                <li>Comisión para el Mercado Financiero (CMF)</li>
+                                <li>Servicio de Impuestos Internos (SII)</li>
+                                <li>Medio Ambiente (SEA y SMA)</li>
+                                <li>Proyectos de Ley</li>
+                                <li>Reglamentos</li>
+                                <li>Contraloría General de la República</li>
+                            </ul>
+                            
                             <p style="margin: 0 0 30px 0; font-size: 16px; color: #475569; line-height: 1.6;">
-                                Ya puedes iniciar sesión en la plataforma.
+                                Ya puedes iniciar sesión en la plataforma para configurar tus preferencias.
                             </p>
                             
                             <p style="margin: 0; font-size: 17px; color: #1e293b; line-height: 1.6;">

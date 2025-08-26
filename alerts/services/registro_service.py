@@ -6,6 +6,10 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from alerts.models import Organizacion, Destinatario
 from alerts.validators import validar_rut_estricto
+from alerts.enviar_informe_bienvenida import enviar_informe_bienvenida
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def handle_signup(
@@ -50,12 +54,24 @@ def handle_signup(
             )
             
             # Agregar al usuario como destinatario
-            Destinatario.objects.create(
+            destinatario = Destinatario.objects.create(
                 nombre=f"{nombre} {apellido}".strip(),
                 email=email,
                 telefono=telefono,
                 organizacion=org
             )
+            
+            # Enviar correo de bienvenida con información del trial
+            try:
+                enviar_informe_bienvenida(
+                    email_destinatario=email,
+                    nombre_destinatario=f"{nombre} {apellido}".strip(),
+                    fecha_fin_trial=destinatario.fecha_fin_trial
+                )
+                logger.info(f"Correo de bienvenida enviado a {email} con trial hasta {destinatario.fecha_fin_trial}")
+            except Exception as e:
+                logger.error(f"Error enviando correo de bienvenida: {e}")
+                # No fallar el registro si el email falla
             
             return org
         
@@ -73,12 +89,25 @@ def handle_signup(
         if org:
             # La organización ya existe, agregar al usuario como destinatario
             # No cambiamos el admin
-            Destinatario.objects.create(
+            destinatario = Destinatario.objects.create(
                 nombre=f"{nombre} {apellido}".strip(),
                 email=email,
                 telefono=telefono,
                 organizacion=org
             )
+            
+            # Enviar correo de bienvenida con información del trial
+            try:
+                enviar_informe_bienvenida(
+                    email_destinatario=email,
+                    nombre_destinatario=f"{nombre} {apellido}".strip(),
+                    fecha_fin_trial=destinatario.fecha_fin_trial
+                )
+                logger.info(f"Correo de bienvenida enviado a {email} con trial hasta {destinatario.fecha_fin_trial}")
+            except Exception as e:
+                logger.error(f"Error enviando correo de bienvenida: {e}")
+                # No fallar el registro si el email falla
+            
             return org
         
         # Crear nueva organización de empresa
@@ -91,12 +120,24 @@ def handle_signup(
         )
         
         # Agregar al usuario como destinatario
-        Destinatario.objects.create(
+        destinatario = Destinatario.objects.create(
             nombre=f"{nombre} {apellido}".strip(),
             email=email,
             telefono=telefono,
             organizacion=org
         )
+        
+        # Enviar correo de bienvenida con información del trial
+        try:
+            enviar_informe_bienvenida(
+                email_destinatario=email,
+                nombre_destinatario=f"{nombre} {apellido}".strip(),
+                fecha_fin_trial=destinatario.fecha_fin_trial
+            )
+            logger.info(f"Correo de bienvenida enviado a {email} con trial hasta {destinatario.fecha_fin_trial}")
+        except Exception as e:
+            logger.error(f"Error enviando correo de bienvenida: {e}")
+            # No fallar el registro si el email falla
         
         return org
 

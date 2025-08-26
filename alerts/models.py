@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
+from datetime import timedelta
 from .validators import validar_rut_estricto
 
 class PerfilUsuario(models.Model):
@@ -185,6 +186,30 @@ class Destinatario(models.Model):
     email = models.EmailField()
     telefono = models.CharField(max_length=30, blank=True, null=True)
     organizacion = models.ForeignKey(Organizacion, on_delete=models.CASCADE, related_name='destinatarios')
+    
+    # Campos para trial de 2 semanas
+    fecha_inicio_trial = models.DateTimeField(default=timezone.now, help_text="Fecha de inicio del período de prueba")
+    es_pagado = models.BooleanField(default=False, help_text="Indica si el cliente tiene una suscripción pagada activa")
+    fecha_fin_trial = models.DateTimeField(null=True, blank=True, help_text="Fecha de fin del período de prueba (se calcula automáticamente)")
+    
+    def save(self, *args, **kwargs):
+        # Calcular fecha de fin de trial si es nuevo registro
+        if not self.pk and not self.fecha_fin_trial:
+            self.fecha_fin_trial = self.fecha_inicio_trial + timedelta(days=14)
+        super().save(*args, **kwargs)
+    
+    def trial_activo(self):
+        """Verifica si el trial está activo"""
+        if self.es_pagado:
+            return True  # Si es pagado, siempre está activo
+        return timezone.now() <= self.fecha_fin_trial
+    
+    def dias_restantes_trial(self):
+        """Retorna los días restantes del trial"""
+        if self.es_pagado:
+            return None  # No aplica si es pagado
+        dias = (self.fecha_fin_trial - timezone.now()).days
+        return max(0, dias)
 
     def __str__(self):
         return f"{self.nombre} <{self.email}>"

@@ -1531,12 +1531,28 @@ def enviar_informe_email(html, fecha):
         destinatarios = [email.strip() for email in destinatarios_prueba.split(',')]
         logger.info(f"MODO PRUEBA: enviando solo a {len(destinatarios)} destinatarios específicos: {destinatarios}")
     else:
-        # Caso normal: obtener TODOS los destinatarios de la base de datos
-        destinatarios = list(Destinatario.objects.values_list('email', flat=True))
+        # Caso normal: obtener solo destinatarios con trial activo o pagados
+        destinatarios_activos = []
+        destinatarios_expirados = []
+        
+        for dest in Destinatario.objects.all():
+            if dest.trial_activo():
+                destinatarios_activos.append(dest.email)
+                # Si está en los últimos 3 días del trial, agregar nota
+                if not dest.es_pagado and dest.dias_restantes_trial() <= 3:
+                    logger.info(f"⚠️ {dest.email} tiene {dest.dias_restantes_trial()} días restantes de trial")
+            else:
+                destinatarios_expirados.append(dest.email)
+                logger.info(f"❌ Trial expirado para {dest.email} - no se enviará informe")
+        
+        if destinatarios_expirados:
+            logger.warning(f"Se excluirán {len(destinatarios_expirados)} destinatarios con trial expirado")
+        
+        destinatarios = destinatarios_activos
         if not destinatarios:
-            logger.warning("No hay destinatarios registrados en la base de datos")
+            logger.warning("No hay destinatarios activos (todos los trials expiraron)")
             return
-        logger.info(f"Enviando a {len(destinatarios)} destinatarios registrados")
+        logger.info(f"Enviando a {len(destinatarios)} destinatarios con trial activo o suscripción pagada")
     
     # Verificar que tenemos la contraseña
     if not password:

@@ -1,145 +1,108 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
-Script de verificación completa del sistema para el envío de informes
+Script para verificar que todo esté listo para el envío del informe mañana
 """
-
 import os
 import sys
 import django
-from pathlib import Path
-from datetime import datetime
-import pytz
-
-# Cargar variables de entorno
-from dotenv import load_dotenv
-load_dotenv()
+from datetime import datetime, timedelta
+from django.utils import timezone
 
 # Configurar Django
-BASE_DIR = Path(__file__).resolve().parent
-sys.path.insert(0, str(BASE_DIR))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'market_sniper.settings')
 django.setup()
 
-print("=" * 60)
-print("VERIFICACIÓN COMPLETA DEL SISTEMA DE INFORMES")
-print("=" * 60)
-
-# 1. Verificar hora actual
-chile_tz = pytz.timezone('America/Santiago')
-hora_chile = datetime.now(chile_tz)
-print(f"\n✅ Hora actual en Chile: {hora_chile.strftime('%Y-%m-%d %H:%M:%S %Z')}")
-
-# 2. Verificar comando de Django
-from django.core.management import get_commands
-commands = get_commands()
-if 'enviar_informes_diarios' in commands:
-    print("✅ Comando 'enviar_informes_diarios' disponible")
-else:
-    print("❌ ERROR: Comando 'enviar_informes_diarios' NO encontrado")
-
-# 3. Verificar base de datos
 from alerts.models import Destinatario, Organizacion
-total_org = Organizacion.objects.count()
-total_dest = Destinatario.objects.count()
-print(f"\n📊 Base de datos:")
-print(f"  - Organizaciones: {total_org}")
-print(f"  - Destinatarios: {total_dest}")
+from django.contrib.auth.models import User
 
-# 4. Verificar variables de entorno críticas
-env_vars = {
-    'OPENAI_API_KEY': os.environ.get('OPENAI_API_KEY'),
-    'HOSTINGER_EMAIL': os.environ.get('HOSTINGER_EMAIL'),
-    'HOSTINGER_EMAIL_PASSWORD': os.environ.get('HOSTINGER_EMAIL_PASSWORD'),
+print("\n" + "="*70)
+print("VERIFICACIÓN COMPLETA DEL SISTEMA PARA ENVÍO DE INFORMES")
+print("="*70 + "\n")
+
+# 1. Verificar destinatarios y trials
+print("📊 1. VERIFICANDO DESTINATARIOS Y PERÍODOS DE PRUEBA")
+print("-" * 50)
+
+destinatarios = Destinatario.objects.all()
+print(f"Total de destinatarios: {destinatarios.count()}")
+
+activos = []
+expirados = []
+
+for dest in destinatarios:
+    if dest.trial_activo():
+        activos.append(dest)
+        dias = dest.dias_restantes_trial()
+        print(f"  ✅ {dest.email:40} - {dias} días restantes")
+    else:
+        expirados.append(dest)
+        print(f"  ❌ {dest.email:40} - EXPIRADO")
+
+print(f"\nResumen:")
+print(f"  • Recibirán informe mañana: {len(activos)} usuarios")
+print(f"  • NO recibirán (expirados): {len(expirados)} usuarios")
+
+# 2. Verificar configuración de email
+print("\n📧 2. VERIFICANDO CONFIGURACIÓN DE EMAIL")
+print("-" * 50)
+
+from django.conf import settings
+email_config = {
+    'HOST': os.environ.get('SMTP_HOST', 'No configurado'),
+    'PORT': os.environ.get('SMTP_PORT', 'No configurado'),
+    'USER': os.environ.get('SMTP_USER', 'No configurado'),
+    'PASSWORD': '***CONFIGURADO***' if os.environ.get('HOSTINGER_EMAIL_PASSWORD') else '❌ NO CONFIGURADO'
 }
 
-print("\n🔑 Variables de entorno:")
-for var, value in env_vars.items():
-    if value:
-        print(f"  ✅ {var}: Configurada")
-    else:
-        print(f"  ❌ {var}: NO configurada")
+for key, value in email_config.items():
+    status = "✅" if value != 'No configurado' else "❌"
+    print(f"  {status} {key}: {value}")
 
-# 5. Verificar archivos críticos
-archivos_criticos = [
-    'scripts/generators/generar_informe_oficial_integrado_mejorado.py',
-    'alerts/cmf_resumenes_ai.py',
-    'alerts/services/pdf_extractor.py',
-    'alerts/scraper_diario_oficial.py',
-    'scripts/scrapers/scraper_cmf_mejorado.py',
-    'alerts/management/commands/enviar_informes_diarios.py'
-]
+# 3. Verificar horario de envío
+print("\n⏰ 3. VERIFICANDO HORARIO DE ENVÍO")
+print("-" * 50)
 
-print("\n📁 Archivos críticos:")
-for archivo in archivos_criticos:
-    path = BASE_DIR / archivo
-    if path.exists():
-        print(f"  ✅ {archivo}")
-    else:
-        print(f"  ❌ {archivo} - NO EXISTE")
+ahora = datetime.now()
+manana_9am = ahora.replace(hour=9, minute=0, second=0, microsecond=0) + timedelta(days=1)
+horas_restantes = (manana_9am - ahora).total_seconds() / 3600
 
-# 6. Verificar importaciones críticas
-print("\n📦 Dependencias críticas:")
-try:
-    import requests
-    print("  ✅ requests")
-except ImportError:
-    print("  ❌ requests")
+print(f"  Hora actual: {ahora.strftime('%H:%M:%S')}")
+print(f"  Próximo envío: {manana_9am.strftime('%Y-%m-%d %H:%M:%S')}")
+print(f"  Faltan: {horas_restantes:.1f} horas")
 
-try:
-    import PyPDF2
-    print("  ✅ PyPDF2")
-except ImportError:
-    print("  ❌ PyPDF2")
+# 4. Lista de emails que recibirán el informe
+print("\n📬 4. EMAILS QUE RECIBIRÁN EL INFORME MAÑANA:")
+print("-" * 50)
 
-try:
-    import openai
-    print("  ✅ openai")
-except ImportError:
-    print("  ❌ openai")
-
-try:
-    from selenium import webdriver
-    print("  ✅ selenium")
-except ImportError:
-    print("  ❌ selenium")
-
-# 7. Verificar que se puede importar el generador
-print("\n🔧 Módulo generador de informes:")
-try:
-    from scripts.generators import generar_informe_oficial_integrado_mejorado
-    print("  ✅ Módulo importable")
-    
-    # Verificar que tiene la función principal
-    if hasattr(generar_informe_oficial_integrado_mejorado, 'generar_informe_oficial'):
-        print("  ✅ Función generar_informe_oficial disponible")
-    else:
-        print("  ❌ Función generar_informe_oficial NO disponible")
-except Exception as e:
-    print(f"  ❌ Error al importar: {e}")
-
-# 8. Resumen final
-print("\n" + "=" * 60)
-print("RESUMEN DE VERIFICACIÓN")
-print("=" * 60)
-
-verificaciones = {
-    "Hora Chile": True,
-    "Comando Django": 'enviar_informes_diarios' in commands,
-    "Base de datos": total_dest > 0,
-    "API Keys": all([env_vars.get('OPENAI_API_KEY'), env_vars.get('HOSTINGER_EMAIL')]),
-    "Archivos": all([(BASE_DIR / archivo).exists() for archivo in archivos_criticos]),
-}
-
-todas_ok = all(verificaciones.values())
-
-for nombre, estado in verificaciones.items():
-    simbolo = "✅" if estado else "❌"
-    print(f"{simbolo} {nombre}: {'OK' if estado else 'FALLO'}")
-
-print("\n" + "=" * 60)
-if todas_ok:
-    print("✅ SISTEMA LISTO PARA ENVÍO DE INFORMES")
-    print("El próximo envío será mañana a las 9:00 AM hora Chile")
+if activos:
+    for i, dest in enumerate(activos, 1):
+        print(f"  {i:2}. {dest.email}")
 else:
-    print("⚠️ HAY PROBLEMAS QUE NECESITAN ATENCIÓN")
-print("=" * 60)
+    print("  ⚠️  No hay destinatarios activos")
+
+print("\n" + "="*70)
+print("RESUMEN FINAL:")
+print("="*70)
+
+todo_ok = True
+mensajes = []
+
+if len(activos) > 0:
+    mensajes.append(f"✅ {len(activos)} usuarios recibirán el informe")
+else:
+    mensajes.append("❌ No hay usuarios activos para recibir informes")
+    todo_ok = False
+
+if email_config['PASSWORD'] == '***CONFIGURADO***':
+    mensajes.append("✅ Configuración de email correcta")
+else:
+    mensajes.append("❌ Falta configuración de email")
+    todo_ok = False
+
+for msg in mensajes:
+    print(f"  {msg}")
+
+if todo_ok:
+    print("\n🎉 TODO ESTÁ LISTO PARA EL ENVÍO DE MAÑANA A LAS 9:00 AM")
+else:
+    print("\n⚠️  HAY PROBLEMAS QUE RESOLVER ANTES DEL ENVÍO")

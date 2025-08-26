@@ -1538,10 +1538,6 @@ def enviar_informe_email(html, fecha):
         for dest in Destinatario.objects.all():
             if dest.trial_activo():
                 destinatarios_activos.append(dest.email)
-                dias_restantes = dest.dias_restantes_trial()
-                # Mostrar advertencia si quedan pocos días
-                if dias_restantes <= 3:
-                    logger.info(f"⚠️ {dest.email} - Quedan {dias_restantes} días de período de prueba")
             else:
                 destinatarios_expirados.append(dest.email)
                 logger.info(f"❌ Período de prueba expirado para {dest.email} - no se enviará informe")
@@ -1551,9 +1547,9 @@ def enviar_informe_email(html, fecha):
         
         destinatarios = destinatarios_activos
         if not destinatarios:
-            logger.warning("No hay destinatarios activos (todos los trials expiraron)")
+            logger.warning("No hay destinatarios activos (todos los períodos de prueba expiraron)")
             return
-        logger.info(f"Enviando a {len(destinatarios)} destinatarios con trial activo o suscripción pagada")
+        logger.info(f"Enviando a {len(destinatarios)} destinatarios con período de prueba activo")
     
     # Verificar que tenemos la contraseña
     if not password:

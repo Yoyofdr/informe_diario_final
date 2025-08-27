@@ -34,70 +34,170 @@
             font-family: 'Inter', sans-serif;
         }
         
-        /* Modern Hero Section */
-        .modern-hero {
+        /* NEW Modern Hero Section */
+        .hero-section {
             position: relative;
             overflow: hidden;
-            padding: 5rem 0 3rem 0;
+            background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+            padding: 5rem 1rem;
         }
-        .hero-card {
-            background: white;
-            border-radius: 1.5rem;
-            padding: 3rem;
+        
+        /* Grid pattern background */
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(241, 245, 249, 0.5) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(241, 245, 249, 0.5) 1px, transparent 1px);
+            background-size: 20px 20px;
+            mask-image: linear-gradient(0deg, white, rgba(255,255,255,0.6));
+            -webkit-mask-image: linear-gradient(0deg, white, rgba(255,255,255,0.6));
+        }
+        
+        .hero-content {
             position: relative;
-            overflow: hidden;
-            box-shadow: 0 8px 32px 0 rgba(37,99,235,0.07);
-            border: 1px solid #e5e7eb;
+            z-index: 1;
+            max-width: 1280px;
+            margin: 0 auto;
         }
-        .modern-badge {
-            background: #E0E8FF;
-            color: #4A67D6;
+        
+        .hero-inner {
+            max-width: 56rem;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .badge-ai {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: #dbeafe;
+            color: #1e40af;
             padding: 0.5rem 1.5rem;
             border-radius: 9999px;
+            font-weight: 500;
             font-size: 0.875rem;
-            font-weight: 600;
-            display: inline-block;
             margin-bottom: 1.5rem;
         }
-        .modern-headline {
+        
+        .hero-title {
+            margin-bottom: 1.5rem;
             font-size: 3rem;
             font-weight: 700;
-            color: #212121;
             letter-spacing: -0.025em;
-            margin-bottom: 1rem;
+            color: #0f172a;
+            line-height: 1.1;
         }
-        .modern-subtitle {
-            font-size: 1.5rem;
-            color: #424242;
-            font-weight: 500;
-            margin-bottom: 1rem;
+        
+        @media (min-width: 640px) {
+            .hero-title {
+                font-size: 3.75rem;
+            }
         }
-        .modern-highlight {
-            color: #3366FF;
-            font-weight: 700;
+        
+        .hero-subtitle {
+            margin-bottom: 2rem;
+            font-size: 1.25rem;
+            color: #475569;
+        }
+        
+        .hero-subtitle .highlight {
+            font-weight: 600;
+            color: #2563eb;
+        }
+        
+        .hero-description {
+            margin: 0 auto 2.5rem;
+            max-width: 48rem;
+            font-size: 1.125rem;
+            line-height: 1.75;
+            color: #64748b;
+        }
+        
+        .buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        @media (min-width: 640px) {
+            .buttons-container {
+                flex-direction: row;
+            }
+        }
+        
+        .btn-primary-custom {
+            display: inline-flex;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: #2563eb;
+            color: white;
+            font-weight: 600;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            border: none;
+            font-size: 1rem;
+        }
+        
+        .btn-primary-custom:hover {
+            background-color: #1d4ed8;
+            color: white;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary-custom .arrow {
+            margin-left: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .btn-primary-custom:hover .arrow {
+            transform: translateX(4px);
+        }
+        
+        .btn-secondary-custom {
+            display: inline-flex;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: white;
+            color: #334155;
+            font-weight: 600;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+        
+        .btn-secondary-custom:hover {
+            background-color: #f8fafc;
+            color: #334155;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        /* Lucide Zap Icon */
+        .icon-zap {
+            width: 1rem;
+            height: 1rem;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        /* OLD Hero styles - Keep for reference but not used */
+        .modern-hero {
+            display: none;
         }
         .modern-btn-primary {
-            background: #3366FF;
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 0.75rem;
-            font-weight: 600;
-            font-size: 1.125rem;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            transform: translateY(0);
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .modern-btn-primary:hover {
-            background: #2952cc;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 15px -3px rgba(0,0,0,0.1);
+            display: none;
         }
         .modern-btn-secondary {
-            background: white;
-            color: #212121;
+            display: none;
             padding: 1rem 2rem;
             border-radius: 0.75rem;
             font-weight: 600;
@@ -308,23 +408,47 @@
     </style>
 </head>
 <body>
-    <!-- Modern Hero Section -->
-    <div class="modern-hero">
-        <div class="container">
-            <div class="hero-card text-center">
-                <span class="modern-badge">✨ Resumen con IA</span>
-                <h1 class="modern-headline">Informe Diario</h1>
-                <div class="modern-subtitle">Toda la información relevante de <span class="modern-highlight">7 fuentes oficiales</span> en un solo informe</div>
-                <p class="mb-5" style="color: #4b5563; font-size: 1.125rem; max-width: 700px; margin: 0 auto;">
-                    Cada mañana recibes un resumen ejecutivo completo: normativas, hechos esenciales, novedades tributarias, temas medioambientales, proyectos de ley y reglamentos en tramitación. Analizamos con IA y te explicamos en simple lo que realmente impacta a tu empresa.
+    <!-- NEW Modern Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <div class="hero-inner">
+                <div class="mb-3">
+                    <span class="badge-ai">
+                        <svg class="icon-zap" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        Resumen con IA
+                    </span>
+                </div>
+                
+                <h1 class="hero-title">
+                    Informe Diario
+                </h1>
+                
+                <p class="hero-subtitle">
+                    Toda la información relevante de 
+                    <span class="highlight">7 fuentes oficiales</span> 
+                    en un solo informe
                 </p>
-                <div class="d-flex flex-column flex-md-row justify-content-center align-items-center" style="gap: 1rem; position: relative; z-index: 10;">
-                    <a href="{% url 'alerts:registro_prueba' %}" class="modern-btn-primary">Registrarse</a>
-                    <a href="{% url 'alerts:login' %}" class="modern-btn-secondary">Iniciar sesión</a>
+                
+                <p class="hero-description">
+                    Cada mañana recibes un resumen ejecutivo completo: normativas, hechos esenciales, 
+                    novedades tributarias, temas medioambientales, proyectos de ley y reglamentos en 
+                    tramitación. Analizamos con IA y te explicamos en simple lo que realmente impacta a tu empresa.
+                </p>
+                
+                <div class="buttons-container">
+                    <a href="{% url 'alerts:registro_prueba' %}" class="btn-primary-custom">
+                        Registrarse
+                        <span class="arrow">→</span>
+                    </a>
+                    <a href="{% url 'alerts:login' %}" class="btn-secondary-custom">
+                        Iniciar sesión
+                    </a>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- Benefits Section -->
     <section class="benefits-section">

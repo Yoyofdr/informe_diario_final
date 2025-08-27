@@ -18,6 +18,8 @@ import pytz
 import time
 from collections import defaultdict
 from email import utils as email_utils
+import re
+from html2text import html2text
 
 # Cargar variables de entorno
 try:
@@ -54,6 +56,64 @@ import time
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+def html_a_texto(html):
+    """
+    Convierte HTML a texto plano conservando la estructura
+    Optimizado para emails que deben pasar filtros Mimecast
+    """
+    try:
+        # Usar html2text si está disponible
+        import html2text
+        h = html2text.HTML2Text()
+        h.ignore_links = False
+        h.ignore_images = True
+        h.body_width = 0  # Sin límite de ancho
+        texto = h.handle(html)
+        
+        # Limpiar texto extra
+        texto = re.sub(r'\n\s*\n\s*\n', '\n\n', texto)  # Máximo 2 líneas vacías
+        texto = texto.strip()
+        
+        return texto
+    except ImportError:
+        # Fallback simple si html2text no está disponible
+        return html_a_texto_simple(html)
+    except Exception as e:
+        logger.warning(f"Error convirtiendo HTML a texto: {e}")
+        return html_a_texto_simple(html)
+
+def html_a_texto_simple(html):
+    """
+    Conversión simple de HTML a texto sin dependencias externas
+    """
+    # Remover scripts y styles
+    texto = re.sub(r'<script[^>]*>.*?</script>', '', html, flags=re.DOTALL | re.IGNORECASE)
+    texto = re.sub(r'<style[^>]*>.*?</style>', '', texto, flags=re.DOTALL | re.IGNORECASE)
+    
+    # Convertir elementos de bloque en saltos de línea
+    texto = re.sub(r'<(div|p|br|h[1-6]|li|tr)[^>]*>', '\n', texto, flags=re.IGNORECASE)
+    texto = re.sub(r'</(div|p|h[1-6]|li|tr)>', '\n', texto, flags=re.IGNORECASE)
+    
+    # Convertir listas
+    texto = re.sub(r'<ul[^>]*>', '\n', texto, flags=re.IGNORECASE)
+    texto = re.sub(r'</ul>', '\n', texto, flags=re.IGNORECASE)
+    texto = re.sub(r'<ol[^>]*>', '\n', texto, flags=re.IGNORECASE)
+    texto = re.sub(r'</ol>', '\n', texto, flags=re.IGNORECASE)
+    
+    # Remover todas las etiquetas HTML restantes
+    texto = re.sub(r'<[^>]+>', '', texto)
+    
+    # Decodificar entidades HTML
+    import html
+    texto = html.unescape(texto)
+    
+    # Limpiar espacios excesivos
+    texto = re.sub(r'\n\s*\n\s*\n', '\n\n', texto)
+    texto = re.sub(r'[ \t]+', ' ', texto)
+    texto = texto.strip()
+    
+    return texto
 
 def formatear_fecha_espanol(fecha_obj, con_coma=True, mes_mayuscula=False):
     """
@@ -1538,6 +1598,46 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
     
     return html
 
+def enviar_con_reintentos(server, msg, destinatario, de_email, password, max_reintentos=3):
+    """
+    Envía email con reintentos automáticos para superar greylisting de Mimecast
+    """
+    for intento in range(max_reintentos):
+        try:
+            server.send_message(msg, from_addr=de_email, to_addrs=[destinatario])
+            logger.info(f"✅ Email enviado exitosamente a {destinatario} (intento {intento+1})")
+            return True
+            
+        except Exception as e:
+            error_msg = str(e).lower()
+            
+            # Detectar greylisting (códigos 451, 450, o mensaje específico)
+            if any(x in error_msg for x in ['451', '450', 'greylist', 'try again', 'deferred', 'temporary']):
+                if intento < max_reintentos - 1:
+                    tiempo_espera = 300 * (intento + 1)  # 5, 10, 15 minutos
+                    logger.warning(f"⏳ Greylisting detectado para {destinatario}")
+                    logger.warning(f"   Esperando {tiempo_espera/60:.0f} minutos antes de reintentar...")
+                    time.sleep(tiempo_espera)
+                    
+                    # Verificar y reconectar si es necesario
+                    try:
+                        server.noop()  # Verificar conexión
+                    except:
+                        logger.info("Reconectando al servidor SMTP...")
+                        from django.conf import settings
+                        server = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
+                        server.starttls()
+                        server.login(de_email, password)
+                else:
+                    logger.error(f"❌ No se pudo enviar a {destinatario} después de {max_reintentos} intentos")
+                    return False
+            else:
+                # Error diferente, no reintentar
+                logger.error(f"❌ Error enviando a {destinatario}: {e}")
+                return False
+    
+    return False
+
 def enviar_informe_email(html, fecha):
     """
     Envía el informe por email a TODOS los destinatarios
@@ -1675,22 +1775,26 @@ def enviar_informe_email(html, fecha):
             msg['X-Mailer'] = 'Informe Diario Chile v1.0'
             msg['X-Priority'] = '3'  # Normal priority
             
-            # Agregar contenido HTML
+            # IMPORTANTE: Crear versión texto plano para mejor compatibilidad con Mimecast
+            texto_plano = html_a_texto(html)
+            
+            # Agregar ambas versiones: texto plano y HTML
+            text_part = MIMEText(texto_plano, 'plain', 'utf-8')
             html_part = MIMEText(html, 'html', 'utf-8')
+            
+            # El orden importa: texto primero, HTML después
+            msg.attach(text_part)
             msg.attach(html_part)
             
-            try:
-                # Enviar mensaje individual con envelope-from explícito
-                server.send_message(msg, from_addr=de_email, to_addrs=[email_destinatario])
+            # Usar la nueva función con reintentos para superar greylisting
+            if enviar_con_reintentos(server, msg, email_destinatario, de_email, password):
                 enviados += 1
                 ventana[bucket]['count'] += 1
-                logger.info(f"✅ Enviado a: {email_destinatario} [bucket: {bucket}]")
                 print(f"✅ Enviado a: {email_destinatario}")  # También imprimir
-            except Exception as e:
+            else:
                 errores += 1
                 emails_fallidos.append(email_destinatario)
-                logger.error(f"❌ Error enviando a {email_destinatario}: {str(e)}")
-                print(f"❌ Error enviando a {email_destinatario}: {str(e)}")  # También imprimir
+                print(f"❌ Error enviando a {email_destinatario} después de reintentos")  # También imprimir
                 
                 # Si es un error de autenticación o conexión, reconectar
                 if "connection" in str(e).lower() or "auth" in str(e).lower():

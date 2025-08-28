@@ -1159,34 +1159,54 @@
     
     <!-- Infinite Scroll Script -->
     <script>
-        let isPaused = false;
-        let currentPosition = 0;
+        let animationPaused = false;
+        let scrollPosition = 0;
+        let animationId = null;
         
         function scrollCarousel(direction) {
             const scrollContent = document.querySelector('.scroll-content');
+            const scrollContainer = document.querySelector('.scroll-container');
+            
+            if (!scrollContent || !scrollContainer) return;
+            
+            // Get current transform value
+            const computedStyle = window.getComputedStyle(scrollContent);
+            const matrix = new DOMMatrix(computedStyle.transform);
+            let currentX = matrix.m41;
+            
+            // Calculate card width
             const cardWidth = 350; // Width of one card including padding
+            const moveDistance = direction === 'prev' ? cardWidth : -cardWidth;
             
-            // Pause animation
+            // Pause the CSS animation
             scrollContent.style.animationPlayState = 'paused';
-            isPaused = true;
+            animationPaused = true;
             
-            // Calculate new position
-            if (direction === 'prev') {
-                currentPosition += cardWidth;
-            } else {
-                currentPosition -= cardWidth;
-            }
+            // Apply smooth transition
+            scrollContent.style.transition = 'transform 0.5s ease';
+            scrollContent.style.transform = `translateX(${currentX + moveDistance}px)`;
             
-            // Apply transform
-            scrollContent.style.transform = `translateX(${currentPosition}px)`;
-            
-            // Resume animation after a delay
+            // After transition, reset and resume animation
             setTimeout(() => {
-                scrollContent.style.animationPlayState = 'running';
-                isPaused = false;
-                currentPosition = 0;
-                scrollContent.style.transform = '';
-            }, 3000);
+                // Remove transition
+                scrollContent.style.transition = '';
+                
+                // Get the cards container width
+                const containerWidth = scrollContent.scrollWidth / 2;
+                
+                // Normalize position for infinite scroll
+                if (currentX + moveDistance <= -containerWidth) {
+                    scrollContent.style.transform = `translateX(0px)`;
+                } else if (currentX + moveDistance >= 0) {
+                    scrollContent.style.transform = `translateX(${-containerWidth + cardWidth}px)`;
+                }
+                
+                // Resume animation after a short delay
+                setTimeout(() => {
+                    scrollContent.style.animationPlayState = 'running';
+                    animationPaused = false;
+                }, 100);
+            }, 500);
         }
         
         document.addEventListener('DOMContentLoaded', function() {
@@ -1205,13 +1225,13 @@
                 
                 // Pause on hover
                 scrollContent.addEventListener('mouseenter', function() {
-                    if (!isPaused) {
+                    if (!animationPaused) {
                         this.style.animationPlayState = 'paused';
                     }
                 });
                 
                 scrollContent.addEventListener('mouseleave', function() {
-                    if (!isPaused) {
+                    if (!animationPaused) {
                         this.style.animationPlayState = 'running';
                     }
                 });
@@ -1222,10 +1242,12 @@
                     btn.addEventListener('mouseenter', function() {
                         this.style.background = '#f3f4f6';
                         this.style.borderColor = '#9ca3af';
+                        this.style.transform = 'translateY(-50%) scale(1.1)';
                     });
                     btn.addEventListener('mouseleave', function() {
                         this.style.background = 'white';
                         this.style.borderColor = '#e5e7eb';
+                        this.style.transform = 'translateY(-50%) scale(1)';
                     });
                 });
             }

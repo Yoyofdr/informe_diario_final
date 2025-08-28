@@ -27,6 +27,9 @@ google-generativeai
 pdfminer.six
 PyPDF2
 
+# Conversión de HTML
+html2text
+
 # Variables de entorno
 python-dotenv
 

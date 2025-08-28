@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Scraper para obtener proyectos de ley de la Cámara de Diputados de Chile
+Scraper para obtener proyectos de ley del Congreso Nacional de Chile
 """
 
 import requests

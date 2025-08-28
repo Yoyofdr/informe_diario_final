@@ -56,7 +56,7 @@ class ScraperProyectosLeyIntegrado:
         
         proyectos = []
         
-        # Buscar en Cámara de Diputados (últimos 7 días para luego filtrar)
+        # Buscar en Congreso Nacional (últimos 7 días para luego filtrar)
         proyectos_recientes = self._buscar_proyectos_camara_recientes(dias_atras=7)
         
         # Filtrar solo los que realmente son del día anterior
@@ -168,7 +168,7 @@ class ScraperProyectosLeyIntegrado:
     
     def _buscar_proyectos_camara(self, fecha: datetime) -> List[Dict]:
         """
-        Busca proyectos en el sitio de la Cámara de Diputados
+        Busca proyectos en el sitio del Congreso Nacional
         """
         try:
             # Hacer búsqueda por fecha específica
@@ -246,7 +246,7 @@ class ScraperProyectosLeyIntegrado:
             
             proyecto = {
                 'fecha_ingreso': fecha.strftime('%d/%m/%Y'),
-                'origen': 'Cámara de Diputados'
+                'origen': 'Congreso Nacional'
             }
             
             # Extraer boletín
@@ -288,7 +288,7 @@ class ScraperProyectosLeyIntegrado:
             proyecto = {
                 'boletin': match.group(1),
                 'fecha_ingreso': fecha.strftime('%d/%m/%Y'),
-                'origen': 'Cámara de Diputados'
+                'origen': 'Congreso Nacional'
             }
             
             # Construir URL

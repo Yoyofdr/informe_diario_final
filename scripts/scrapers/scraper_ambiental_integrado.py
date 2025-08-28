@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Scraper integrado para datos ambientales (SEA y SMA)
-Usa scrapers especializados para cada fuente
+Scraper integrado para datos ambientales del SEA
+Usa scraper especializado para obtener proyectos del SEA
 """
 
 import logging
@@ -19,22 +19,16 @@ logger = logging.getLogger(__name__)
 
 # Importar scrapers directamente sin fallbacks complejos
 try:
-    from scripts.scrapers.scraper_sea_selenium_completo import ScraperSEASeleniumCompleto
+    from scraper_sea_selenium_completo import ScraperSEASeleniumCompleto
     logger.info("✅ Importado ScraperSEASeleniumCompleto")
 except ImportError as e:
     logger.error(f"❌ Error importando ScraperSEASeleniumCompleto: {e}")
     ScraperSEASeleniumCompleto = None
 
-try:
-    from scripts.scrapers.scraper_snifa_web import ScraperSNIFAWeb
-    logger.info("✅ Importado ScraperSNIFAWeb")
-except ImportError as e:
-    logger.error(f"❌ Error importando ScraperSNIFAWeb: {e}")
-    ScraperSNIFAWeb = None
 
 # Importar telemetría
 try:
-    from scripts.scrapers.telemetria import TelemetriaScrapers
+    from telemetria_ambiental import TelemetriaScrapers
     telemetria = TelemetriaScrapers()
 except ImportError:
     logger.warning("⚠️ Telemetría no disponible")
@@ -50,30 +44,23 @@ class ScraperAmbiental:
             'Accept-Language': 'es-ES,es;q=0.9'
         })
         
-        # Inicializar scrapers
+        # Inicializar scraper SEA
         if ScraperSEASeleniumCompleto:
             self.scraper_sea = ScraperSEASeleniumCompleto()
             logger.info("✅ Scraper SEA con Selenium inicializado")
         else:
             self.scraper_sea = None
             logger.error("❌ Scraper SEA no disponible")
-            
-        if ScraperSNIFAWeb:
-            self.scraper_sma = ScraperSNIFAWeb()
-            logger.info("✅ Scraper SMA/SNIFA inicializado")
-        else:
-            self.scraper_sma = None
-            logger.error("❌ Scraper SMA no disponible")
     
     def obtener_datos_ambientales(self, dias_atras: int = 7) -> Dict:
         """
-        Obtiene datos ambientales de SEA y SMA
+        Obtiene datos ambientales del SEA
         
         Args:
             dias_atras: Número de días hacia atrás para buscar
             
         Returns:
-            Diccionario con proyectos SEA y sanciones SMA
+            Diccionario con proyectos SEA
         """
         logger.info(f"🔍 Obteniendo datos ambientales de los últimos {dias_atras} días...")
         
@@ -115,40 +102,6 @@ class ScraperAmbiental:
             logger.warning("⚠️ Scraper SEA no disponible")
             errores_totales.append("SEA: Scraper no disponible")
         
-        # Obtener sanciones SMA
-        sanciones_sma = []
-        if self.scraper_sma:
-            try:
-                logger.info("📋 Obteniendo sanciones SMA...")
-                sanciones_sma = self._obtener_sanciones_sma(dias_atras)
-                
-                if telemetria:
-                    telemetria.registrar_extraccion('SMA', {
-                        'total_items': len(sanciones_sma),
-                        'tiempo_ms': (time.time() - inicio) * 1000,
-                        'exitoso': True
-                    })
-                    
-                if sanciones_sma:
-                    logger.info(f"✅ {len(sanciones_sma)} sanciones SMA encontradas")
-                else:
-                    logger.warning("⚠️ No se encontraron sanciones SMA")
-                    errores_totales.append("SMA: No se encontraron sanciones")
-                    
-            except Exception as e:
-                logger.error(f"❌ Error obteniendo datos SMA: {str(e)}")
-                errores_totales.append(f"SMA: {str(e)}")
-                
-                if telemetria:
-                    telemetria.registrar_extraccion('SMA', {
-                        'total_items': 0,
-                        'tiempo_ms': (time.time() - inicio) * 1000,
-                        'exitoso': False,
-                        'errores': [str(e)]
-                    })
-        else:
-            logger.warning("⚠️ Scraper SMA no disponible")
-            errores_totales.append("SMA: Scraper no disponible")
         
         tiempo_total = (time.time() - inicio) * 1000
         
@@ -158,20 +111,18 @@ class ScraperAmbiental:
         
         datos = {
             'proyectos_sea': proyectos_sea,
-            'sanciones_sma': sanciones_sma,
             'metadata': {
                 'timestamp': datetime.now().isoformat(),
                 'tiempo_total_ms': tiempo_total,
                 'errores': errores_totales,
                 'telemetria': {
                     'sea_items': len(proyectos_sea),
-                    'sma_items': len(sanciones_sma),
-                    'total_items': len(proyectos_sea) + len(sanciones_sma)
+                    'total_items': len(proyectos_sea)
                 }
             }
         }
         
-        logger.info(f"✅ Datos ambientales obtenidos en {tiempo_total:.0f}ms - SEA: {len(proyectos_sea)}, SMA: {len(sanciones_sma)}")
+        logger.info(f"✅ Datos ambientales obtenidos en {tiempo_total:.0f}ms - SEA: {len(proyectos_sea)}")
         
         return datos
     
@@ -214,50 +165,14 @@ class ScraperAmbiental:
             logger.error(f"❌ Error en _obtener_proyectos_sea: {str(e)}")
             raise
     
-    def _obtener_sanciones_sma(self, dias_atras: int) -> List[Dict]:
-        """
-        Obtiene sanciones del SMA/SNIFA
-        """
-        try:
-            logger.info(f"🔄 Obteniendo sanciones SMA de los últimos {dias_atras} días...")
-            sanciones = self.scraper_sma.obtener_sanciones(dias_atras=dias_atras)
-            
-            if sanciones:
-                logger.info(f"✅ {len(sanciones)} sanciones SMA obtenidas")
-                # Formatear para el informe
-                sanciones_formateadas = []
-                for s in sanciones:
-                    sancion = {
-                        'fuente': 'SMA',
-                        'fecha_extraccion': datetime.now().isoformat(),
-                        'titulo': s.get('razon_social', ''),
-                        'url': s.get('url', ''),
-                        'expediente': s.get('expediente', ''),
-                        'tipo_sancion': s.get('tipo_sancion', ''),
-                        'estado': s.get('estado', ''),
-                        'comuna': s.get('comuna', ''),
-                        'region': s.get('region', ''),
-                        'fecha': s.get('fecha_expediente', ''),
-                        'resumen': s.get('resumen', '')
-                    }
-                    sanciones_formateadas.append(sancion)
-                return sanciones_formateadas
-            else:
-                logger.warning("⚠️ No se encontraron sanciones SMA")
-                return []
-                
-        except Exception as e:
-            logger.error(f"❌ Error en _obtener_sanciones_sma: {str(e)}")
-            raise
     
     def formatear_para_informe(self, datos_ambientales: Dict) -> Dict:
         """
         Formatea los datos ambientales para el informe HTML
-        Solo usa datos REALES obtenidos de los scrapers
+        Solo usa datos REALES obtenidos del scraper SEA
         """
         resultado = {
-            'proyectos_sea': [],
-            'sanciones_sma': []
+            'proyectos_sea': []
         }
         
         # Formatear proyectos SEA reales
@@ -267,14 +182,7 @@ class ScraperAmbiental:
                 if proyecto.get('titulo'):
                     resultado['proyectos_sea'].append(proyecto)
                     
-        # Formatear sanciones SMA reales  
-        if datos_ambientales.get('sanciones_sma'):
-            for sancion in datos_ambientales['sanciones_sma']:
-                # Solo incluir si tiene título o expediente (es una sanción real)
-                if sancion.get('titulo') or sancion.get('expediente'):
-                    resultado['sanciones_sma'].append(sancion)
-                    
-        logger.info(f"📊 Formateado para informe: {len(resultado['proyectos_sea'])} proyectos SEA, {len(resultado['sanciones_sma'])} sanciones SMA")
+        logger.info(f"📊 Formateado para informe: {len(resultado['proyectos_sea'])} proyectos SEA")
         
         return resultado
 
@@ -287,7 +195,6 @@ if __name__ == "__main__":
     
     print(f"\n📊 RESULTADOS:")
     print(f"   Proyectos SEA: {len(datos.get('proyectos_sea', []))}")
-    print(f"   Sanciones SMA: {len(datos.get('sanciones_sma', []))}")
     
     if datos.get('metadata', {}).get('errores'):
         print(f"\n⚠️ Errores encontrados:")

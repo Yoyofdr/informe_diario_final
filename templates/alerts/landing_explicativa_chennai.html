@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Informe Diario | Resúmenes integrados: Diario Oficial, CMF, DT, SII, Medio Ambiente, Proyectos de Ley y Reglamentos</title>
     <meta name="description" content="Recibe cada mañana un resumen ejecutivo completo: Diario Oficial, CMF, DT, SII, temas medioambientales, proyectos de ley y reglamentos en tramitación. Información filtrada con IA, explicada en simple y directo a tu correo." />
-    <meta name="keywords" content="Diario Oficial, CMF, DT, SII, Dirección del Trabajo, SEA, SMA, proyectos de ley, reglamentos Contraloría, resumen ejecutivo, Chile, hechos esenciales, normativa laboral, normativa tributaria, medio ambiente, boletín, correo, informe diario, leyes, normativa, empresa, inteligencia artificial" />
+    <meta name="keywords" content="Diario Oficial, CMF, DT, SII, Dirección del Trabajo, SEA, proyectos de ley, reglamentos Contraloría, resumen ejecutivo, Chile, hechos esenciales, normativa laboral, normativa tributaria, medio ambiente, boletín, correo, informe diario, leyes, normativa, empresa, inteligencia artificial" />
     <meta property="og:title" content="Informe Diario | Resúmenes integrados: Diario Oficial, CMF, DT, SII y más" />
     <meta property="og:description" content="Resumen ejecutivo diario con lo más relevante de 7 fuentes oficiales: Diario Oficial, CMF, DT, SII, medio ambiente, proyectos de ley y reglamentos. Filtrado con IA para tu empresa." />
     <meta property="og:type" content="website" />
@@ -511,7 +511,19 @@
         <div class="container-fluid px-0">
             <h2 class="text-center mb-5 h1 fw-bold">¿Qué información recibes?</h2>
             <div class="scroll-container" style="overflow: hidden; position: relative; padding: 2rem 0;">
-                <div class="scroll-content" style="display: flex; animation: scroll 50s linear infinite; width: fit-content;">
+                <!-- Botón de navegación izquierda -->
+                <button class="carousel-nav-btn carousel-nav-prev" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); z-index: 10; background: white; border: 2px solid #e5e7eb; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s;" onclick="scrollCarousel('prev')">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <!-- Botón de navegación derecha -->
+                <button class="carousel-nav-btn carousel-nav-next" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); z-index: 10; background: white; border: 2px solid #e5e7eb; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s;" onclick="scrollCarousel('next')">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <div class="scroll-content" style="display: flex; animation: scroll 50s linear infinite; width: fit-content; transition: transform 0.5s ease;">
                 <!-- Diario Oficial -->
                 <div style="flex: 0 0 320px; padding: 0 15px;">
                     <div class="card h-100 border-0 shadow-sm rounded-4 transition-all hover-scale">
@@ -675,7 +687,7 @@
                                 </li>
                                 <li class="mb-3 d-flex align-items-start">
                                     <i class="bi bi-check2-circle text-success me-2 fs-5"></i>
-                                    <span class="text-muted">Sanciones firmes SMA</span>
+                                    <span class="text-muted">Proyectos ambientales SEA</span>
                                 </li>
                                 <li class="mb-3 d-flex align-items-start">
                                     <i class="bi bi-check2-circle text-success me-2 fs-5"></i>
@@ -978,10 +990,10 @@
                                 <div class="d-flex align-items-center justify-content-between mb-3 pb-3" style="border-bottom: 1px solid #d1fae5;">
                                     <div>
                                         <h2 style="margin: 0 0 2px 0; font-size: 18px; font-weight: 600; color: #1e293b;">
-                                            Medio Ambiente SEA/SMA
+                                            Medio Ambiente SEA
                                         </h2>
                                         <p style="margin: 0; font-size: 14px; color: #059669;">
-                                            Proyectos ambientales y sanciones
+                                            Proyectos ambientales
                                         </p>
                                     </div>
                                     <span style="font-size: 14px; color: #059669; font-weight: 500;">
@@ -1099,7 +1111,7 @@
                         <!-- Footer -->
                         <div style="background-color: #f8fafc; padding: 24px 32px; text-align: center; border-top: 1px solid #e2e8f0;">
                             <p style="margin: 0; font-size: 13px; color: #64748b; line-height: 1.5;">
-                                Información obtenida de fuentes oficiales: diariooficial.interior.gob.cl • cmfchile.cl • sii.cl • dt.gob.cl • sea.gob.cl • sma.gob.cl • camara.cl • contraloria.cl
+                                Información obtenida de fuentes oficiales: diariooficial.interior.gob.cl • cmfchile.cl • sii.cl • dt.gob.cl • sea.gob.cl • camara.cl • contraloria.cl
                             </p>
                         </div>
                         
@@ -1118,7 +1130,7 @@
             <div class="row g-4">
                 <div class="col-md-6">
                     <h4 class="fw-bold mb-3">Informe Diario</h4>
-                    <p class="mb-0" style="color: #e5e7eb;">Resúmenes integrados de 7 fuentes oficiales: Diario Oficial, CMF, DT, SII, SEA, SMA, Cámara de Diputados y Contraloría. Todo lo relevante en un solo correo.</p>
+                    <p class="mb-0" style="color: #e5e7eb;">Resúmenes integrados de 6 fuentes oficiales: Diario Oficial, CMF, DT, SII, SEA, Congreso Nacional y Contraloría. Todo lo relevante en un solo correo.</p>
                 </div>
                 <div class="col-md-3">
                     <h6 class="fw-semibold mb-3" style="color: #f3f4f6;">Enlaces</h6>
@@ -1131,7 +1143,7 @@
                 <div class="col-md-3">
                     <h6 class="fw-semibold mb-3" style="color: #f3f4f6;">Contacto</h6>
                     <ul class="list-unstyled mb-0">
-                        <li style="color: #e5e7eb;">contacto@informediario.cl</li>
+                        <li style="color: #e5e7eb;">contacto@informediariochile.cl</li>
                     </ul>
                 </div>
             </div>
@@ -1147,6 +1159,36 @@
     
     <!-- Infinite Scroll Script -->
     <script>
+        let isPaused = false;
+        let currentPosition = 0;
+        
+        function scrollCarousel(direction) {
+            const scrollContent = document.querySelector('.scroll-content');
+            const cardWidth = 350; // Width of one card including padding
+            
+            // Pause animation
+            scrollContent.style.animationPlayState = 'paused';
+            isPaused = true;
+            
+            // Calculate new position
+            if (direction === 'prev') {
+                currentPosition += cardWidth;
+            } else {
+                currentPosition -= cardWidth;
+            }
+            
+            // Apply transform
+            scrollContent.style.transform = `translateX(${currentPosition}px)`;
+            
+            // Resume animation after a delay
+            setTimeout(() => {
+                scrollContent.style.animationPlayState = 'running';
+                isPaused = false;
+                currentPosition = 0;
+                scrollContent.style.transform = '';
+            }, 3000);
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
             const scrollContainer = document.querySelector('.scroll-container');
             const scrollContent = document.querySelector('.scroll-content');
@@ -1163,11 +1205,28 @@
                 
                 // Pause on hover
                 scrollContent.addEventListener('mouseenter', function() {
-                    this.style.animationPlayState = 'paused';
+                    if (!isPaused) {
+                        this.style.animationPlayState = 'paused';
+                    }
                 });
                 
                 scrollContent.addEventListener('mouseleave', function() {
-                    this.style.animationPlayState = 'running';
+                    if (!isPaused) {
+                        this.style.animationPlayState = 'running';
+                    }
+                });
+                
+                // Add hover effect to nav buttons
+                const navButtons = document.querySelectorAll('.carousel-nav-btn');
+                navButtons.forEach(btn => {
+                    btn.addEventListener('mouseenter', function() {
+                        this.style.background = '#f3f4f6';
+                        this.style.borderColor = '#9ca3af';
+                    });
+                    btn.addEventListener('mouseleave', function() {
+                        this.style.background = 'white';
+                        this.style.borderColor = '#e5e7eb';
+                    });
                 });
             }
         });

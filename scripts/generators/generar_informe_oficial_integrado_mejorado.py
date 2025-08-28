@@ -429,8 +429,8 @@ def generar_informe_oficial(fecha=None):
         logger.error(f"Error obteniendo reglamentos de Contraloría: {e}")
         reglamentos_contraloria = []
     
-    # 7. Obtener datos ambientales (SEA y SMA)
-    logger.info("Obteniendo datos ambientales (SEA y SMA)...")
+    # 7. Obtener datos ambientales del SEA
+    logger.info("Obteniendo datos ambientales del SEA...")
     try:
         scraper_ambiental = ScraperAmbiental()
         # Solo obtener datos del día anterior (1 día atrás)
@@ -438,7 +438,7 @@ def generar_informe_oficial(fecha=None):
         datos_ambientales_formateados = scraper_ambiental.formatear_para_informe(datos_ambientales)
     except Exception as e:
         logger.error(f"Error obteniendo datos ambientales: {e}")
-        datos_ambientales_formateados = {'proyectos_sea': [], 'sanciones_sma': []}
+        datos_ambientales_formateados = {'proyectos_sea': []}
     
     # 8. Generar HTML del informe
     html = generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii, documentos_dt, datos_ambientales_formateados, proyectos_ley, scraper_proyectos, reglamentos_contraloria)
@@ -722,7 +722,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                             <li style="margin-bottom: 8px;"><strong>Diario Oficial:</strong> Normativas y avisos relevantes</li>
                                             <li style="margin-bottom: 8px;"><strong>CMF:</strong> Hechos esenciales del mercado financiero</li>
                                             <li style="margin-bottom: 8px;"><strong>SII:</strong> Circulares y resoluciones tributarias</li>
-                                            <li style="margin-bottom: 8px;"><strong>SEA/SMA:</strong> Evaluación ambiental y sanciones</li>
+                                            <li style="margin-bottom: 8px;"><strong>SEA:</strong> Evaluación ambiental de proyectos</li>
                                             <li style="margin-bottom: 8px;"><strong>DT:</strong> Dictámenes y ordinarios laborales</li>
                                         </ul>
                                         <p style="margin: 0; font-size: 14px; color: #047857;">
@@ -955,7 +955,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
             # URL del proyecto
             url_proyecto = proyecto.get('url_detalle', '#')
             if not url_proyecto or url_proyecto == '#':
-                url_proyecto = f"https://www.camara.cl/legislacion/ProyectosDeLey/tramitacion.aspx?prmBOLETIN={boletin}"
+                url_proyecto = f"https://www.congreso.cl/legislacion/ProyectosDeLey/tramitacion.aspx?prmBOLETIN={boletin}"
             
             # Construir metadata (sin autores y sin urgencia)
             metadata_parts = []
@@ -1222,13 +1222,12 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
         html += """
                             </table>"""
     
-    # Sección Medio Ambiente (SEA y SMA)
+    # Sección Medio Ambiente (SEA)
     if datos_ambientales:
         proyectos_sea = datos_ambientales.get('proyectos_sea', [])
-        sanciones_sma = datos_ambientales.get('sanciones_sma', [])
         
         # Solo mostrar si hay datos reales
-        if proyectos_sea or sanciones_sma:
+        if proyectos_sea:
             html += """
                             <!-- NORMATIVA AMBIENTAL (SEA Y SMA) -->
                             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 40px;">
@@ -1241,7 +1240,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                         NORMATIVA AMBIENTAL
                                                     </h2>
                                                     <p style="margin: 0; font-size: 14px; color: #16a34a;">
-                                                        Proyectos ambientales (SEA) y sanciones regulatorias (SMA)
+                                                        Proyectos ambientales del SEA
                                                     </p>
                                                 </td>
                                             </tr>
@@ -1291,44 +1290,6 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                     </td>
                                 </tr>"""
             
-            # Mostrar sanciones SMA
-            for sancion in sanciones_sma[:2]:  # Máximo 2 sanciones
-                html += f"""
-                                <tr>
-                                    <td style="padding-bottom: 16px;">
-                                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; -webkit-border-radius: 12px; -moz-border-radius: 12px; overflow: hidden;">
-                                            <tr>
-                                                <td style="padding: 24px; border-top: 3px solid #16a34a; border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; -moz-border-radius: 12px 12px 0 0;">
-                                                    <div style="margin: 0 0 8px 0;">
-                                                        <span style="background-color: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">SMA</span>
-                                                    </div>
-                                                    <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.4;">
-                                                        {sancion.get('titulo', '')}
-                                                    </h3>
-                                                    <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b; line-height: 1.6;">
-                                                        {sancion.get('resumen', '')}
-                                                    </p>
-                                                    <!-- Botón compatible con Outlook -->
-                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                                                        <tr>
-                                                            <td>
-                                                                <table border="0" cellspacing="0" cellpadding="0">
-                                                                    <tr>
-                                                                        <td align="center" style="border-radius: 6px;" bgcolor="#16a34a">
-                                                                            <a href="{sancion.get('url', '#')}" target="_blank" style="font-size: 14px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 12px 24px; border: 1px solid #16a34a; display: inline-block; font-weight: 500;">
-                                                                                Ver sanción SMA
-                                                                            </a>
-                                                                        </td>
-                                                                    </tr>
-                                                                </table>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>"""
             
             html += """
                             </table>"""
@@ -1346,7 +1307,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                                         NORMATIVA AMBIENTAL
                                                     </h2>
                                                     <p style="margin: 0; font-size: 14px; color: #16a34a;">
-                                                        Proyectos ambientales (SEA) y sanciones regulatorias (SMA)
+                                                        Proyectos ambientales del SEA
                                                     </p>
                                                 </td>
                                             </tr>
@@ -1359,7 +1320,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                             <tr>
                                                 <td style="padding: 20px; text-align: center;">
                                                     <p style="margin: 0; font-size: 14px; color: #64748b; font-style: italic;">
-                                                        No se encontraron proyectos ambientales ni sanciones para el período consultado.
+                                                        No se encontraron proyectos ambientales para el período consultado.
                                                     </p>
                                                 </td>
                                             </tr>

@@ -16,21 +16,96 @@ from scripts.scrapers.telemetria_ambiental import telemetria
 
 # Importar nuevos scrapers más confiables
 try:
-    from scripts.scrapers.scraper_seia_busqueda import ScraperSEIABusqueda
+    # PRIMERO intentar el scraper SELENIUM COMPLETO que SÍ FUNCIONA
+    from scripts.scrapers.scraper_sea_selenium_completo import ScraperSEASeleniumCompleto
     from scripts.scrapers.scraper_snifa_web import ScraperSNIFAWeb
     USE_NEW_SCRAPERS = True
-    USE_SEIA_BUSQUEDA = True
+    USE_SEA_SELENIUM_COMPLETO = True
+    USE_SEA_CORRECTO = False
+    USE_SEA_ROBUSTO = False
+    USE_SEA_FINAL = False
+    USE_SEA_DEFINITIVO = False
+    USE_SEIA_BUSQUEDA = False
 except ImportError:
     try:
-        from scripts.scrapers.scraper_sea_simple import ScraperSEASimple
+        # Si no está disponible, usar scraper CORRECTO que usa buscarProyectoResumen.php
+        from scripts.scrapers.scraper_sea_correcto import ScraperSEACorrecto
         from scripts.scrapers.scraper_snifa_web import ScraperSNIFAWeb
         USE_NEW_SCRAPERS = True
+        USE_SEA_SELENIUM_COMPLETO = False
+        USE_SEA_CORRECTO = True
+        USE_SEA_ROBUSTO = False
+        USE_SEA_FINAL = False
+        USE_SEA_DEFINITIVO = False
         USE_SEIA_BUSQUEDA = False
     except ImportError:
-        USE_NEW_SCRAPERS = False
-        USE_SEIA_BUSQUEDA = False
-        logger = logging.getLogger(__name__)
-        logger.warning("No se pudieron importar los nuevos scrapers")
+        try:
+            # Si no está disponible, usar scraper FINAL con Selenium
+            from scripts.scrapers.scraper_sea_final import ScraperSEAFinal
+            from scripts.scrapers.scraper_snifa_web import ScraperSNIFAWeb
+            USE_NEW_SCRAPERS = True
+            USE_SEA_SELENIUM_COMPLETO = False
+            USE_SEA_CORRECTO = False
+            USE_SEA_ROBUSTO = False
+            USE_SEA_FINAL = True
+            USE_SEA_DEFINITIVO = False
+            USE_SEIA_BUSQUEDA = False
+        except ImportError:
+            try:
+                # Luego intentar el scraper ROBUSTO
+                from scripts.scrapers.scraper_sea_robusto import ScraperSEARobusto
+                from scripts.scrapers.scraper_snifa_web import ScraperSNIFAWeb
+                USE_NEW_SCRAPERS = True
+                USE_SEA_SELENIUM_COMPLETO = False
+                USE_SEA_CORRECTO = False
+                USE_SEA_ROBUSTO = True
+                USE_SEA_FINAL = False
+                USE_SEA_DEFINITIVO = False
+                USE_SEIA_BUSQUEDA = False
+            except ImportError:
+                try:
+                    # Intentar el scraper definitivo
+                    from scripts.scrapers.scraper_sea_definitivo import ScraperSEADefinitivo
+                    from scripts.scrapers.scraper_snifa_web import ScraperSNIFAWeb
+                    USE_NEW_SCRAPERS = True
+                    USE_SEA_SELENIUM_COMPLETO = False
+                    USE_SEA_CORRECTO = False
+                    USE_SEA_ROBUSTO = False
+                    USE_SEA_FINAL = False
+                    USE_SEA_DEFINITIVO = True
+                    USE_SEIA_BUSQUEDA = False
+                except ImportError:
+                    try:
+                        from scripts.scrapers.scraper_seia_busqueda import ScraperSEIABusqueda
+                        from scripts.scrapers.scraper_snifa_web import ScraperSNIFAWeb
+                        USE_NEW_SCRAPERS = True
+                        USE_SEA_SELENIUM_COMPLETO = False
+                        USE_SEA_CORRECTO = False
+                        USE_SEA_ROBUSTO = False
+                        USE_SEA_FINAL = False
+                        USE_SEA_DEFINITIVO = False
+                        USE_SEIA_BUSQUEDA = True
+                    except ImportError:
+                        try:
+                            from scripts.scrapers.scraper_sea_simple import ScraperSEASimple
+                            from scripts.scrapers.scraper_snifa_web import ScraperSNIFAWeb
+                            USE_NEW_SCRAPERS = True
+                            USE_SEA_SELENIUM_COMPLETO = False
+                            USE_SEA_CORRECTO = False
+                            USE_SEA_ROBUSTO = False
+                            USE_SEA_FINAL = False
+                            USE_SEA_DEFINITIVO = False
+                            USE_SEIA_BUSQUEDA = False
+                        except ImportError:
+                            USE_NEW_SCRAPERS = False
+                            USE_SEA_SELENIUM_COMPLETO = False
+                            USE_SEA_CORRECTO = False
+                            USE_SEA_ROBUSTO = False
+                            USE_SEA_FINAL = False
+                            USE_SEA_DEFINITIVO = False
+                            USE_SEIA_BUSQUEDA = False
+                            logger = logging.getLogger(__name__)
+                            logger.warning("No se pudieron importar los nuevos scrapers")
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +120,22 @@ class ScraperAmbiental:
         
         # Inicializar nuevos scrapers si están disponibles
         if USE_NEW_SCRAPERS:
-            if USE_SEIA_BUSQUEDA:
+            if USE_SEA_SELENIUM_COMPLETO:
+                self.scraper_sea = ScraperSEASeleniumCompleto()
+                logger.info("✅ Usando scraper SEA SELENIUM COMPLETO (¡FUNCIONA!)")
+            elif USE_SEA_CORRECTO:
+                self.scraper_sea = ScraperSEACorrecto()
+                logger.info("✅ Usando scraper SEA CORRECTO (buscarProyectoResumen.php)")
+            elif USE_SEA_FINAL:
+                self.scraper_sea = ScraperSEAFinal()
+                logger.info("✅ Usando scraper SEA FINAL con Selenium")
+            elif USE_SEA_ROBUSTO:
+                self.scraper_sea = ScraperSEARobusto()
+                logger.info("✅ Usando scraper SEA ROBUSTO (optimizado)")
+            elif USE_SEA_DEFINITIVO:
+                self.scraper_sea = ScraperSEADefinitivo()
+                logger.info("✅ Usando scraper SEA DEFINITIVO")
+            elif USE_SEIA_BUSQUEDA:
                 self.scraper_sea = ScraperSEIABusqueda()
                 logger.info("✅ Usando scraper SEIA búsqueda para SEA")
             else:

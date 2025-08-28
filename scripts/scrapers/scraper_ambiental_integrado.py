@@ -249,6 +249,34 @@ class ScraperAmbiental:
         except Exception as e:
             logger.error(f"❌ Error en _obtener_sanciones_sma: {str(e)}")
             raise
+    
+    def formatear_para_informe(self, datos_ambientales: Dict) -> Dict:
+        """
+        Formatea los datos ambientales para el informe HTML
+        Solo usa datos REALES obtenidos de los scrapers
+        """
+        resultado = {
+            'proyectos_sea': [],
+            'sanciones_sma': []
+        }
+        
+        # Formatear proyectos SEA reales
+        if datos_ambientales.get('proyectos_sea'):
+            for proyecto in datos_ambientales['proyectos_sea']:
+                # Solo incluir si tiene título (es un proyecto real)
+                if proyecto.get('titulo'):
+                    resultado['proyectos_sea'].append(proyecto)
+                    
+        # Formatear sanciones SMA reales  
+        if datos_ambientales.get('sanciones_sma'):
+            for sancion in datos_ambientales['sanciones_sma']:
+                # Solo incluir si tiene título o expediente (es una sanción real)
+                if sancion.get('titulo') or sancion.get('expediente'):
+                    resultado['sanciones_sma'].append(sancion)
+                    
+        logger.info(f"📊 Formateado para informe: {len(resultado['proyectos_sea'])} proyectos SEA, {len(resultado['sanciones_sma'])} sanciones SMA")
+        
+        return resultado
 
 # Función de test
 if __name__ == "__main__":

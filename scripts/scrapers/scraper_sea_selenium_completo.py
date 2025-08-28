@@ -73,6 +73,11 @@ class ScraperSEASeleniumCompleto:
             fecha_hasta = datetime.now()
             fecha_desde = fecha_hasta - timedelta(days=dias_atras)
             
+            # Ajustar año si es necesario (corregir problema de año 2025)
+            if fecha_hasta.year > 2024:
+                fecha_hasta = fecha_hasta.replace(year=2024)
+                fecha_desde = fecha_hasta - timedelta(days=dias_atras)
+            
             # Construir URL con parámetros
             url_completa = (
                 f"{self.search_url}?"

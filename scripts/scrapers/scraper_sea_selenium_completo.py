@@ -4,6 +4,7 @@ Scraper SEA usando Selenium - Versión Completa
 Navega a la tabla de proyectos y luego hace clic en cada proyecto para obtener detalles
 """
 
+import os
 import logging
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional
@@ -39,7 +40,18 @@ class ScraperSEASeleniumCompleto:
         chrome_options.add_experimental_option('useAutomationExtension', False)
         chrome_options.add_argument("--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36")
         
-        service = Service(ChromeDriverManager().install())
+        # Detectar si estamos en Heroku
+        if os.path.exists('/app/.chrome-for-testing'):
+            # En Heroku, usar Chrome y ChromeDriver de Heroku
+            chrome_options.binary_location = '/app/.chrome-for-testing/chrome-linux64/chrome'
+            chromedriver_path = '/app/.chrome-for-testing/chromedriver-linux64/chromedriver'
+            logger.info(f"🚀 Usando Chrome de Heroku: {chrome_options.binary_location}")
+            logger.info(f"🚀 Usando ChromeDriver de Heroku: {chromedriver_path}")
+            service = Service(chromedriver_path)
+        else:
+            # En local, usar webdriver-manager
+            service = Service(ChromeDriverManager().install())
+            
         driver = webdriver.Chrome(service=service, options=chrome_options)
         
         # Ocultar indicadores de automatización

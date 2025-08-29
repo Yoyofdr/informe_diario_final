@@ -19,11 +19,22 @@ logger = logging.getLogger(__name__)
 
 # Importar scrapers directamente sin fallbacks complejos
 try:
-    from scraper_sea_selenium_completo import ScraperSEASeleniumCompleto
-    logger.info("✅ Importado ScraperSEASeleniumCompleto")
-except ImportError as e:
-    logger.error(f"❌ Error importando ScraperSEASeleniumCompleto: {e}")
-    ScraperSEASeleniumCompleto = None
+    # Intentar importación relativa primero
+    from .scraper_sea_selenium_completo import ScraperSEASeleniumCompleto
+    logger.info("✅ Importado ScraperSEASeleniumCompleto (relativo)")
+except ImportError:
+    try:
+        # Intentar importación absoluta
+        from scripts.scrapers.scraper_sea_selenium_completo import ScraperSEASeleniumCompleto
+        logger.info("✅ Importado ScraperSEASeleniumCompleto (absoluto)")
+    except ImportError:
+        try:
+            # Intentar importación directa (cuando se ejecuta desde el mismo directorio)
+            from scraper_sea_selenium_completo import ScraperSEASeleniumCompleto
+            logger.info("✅ Importado ScraperSEASeleniumCompleto (directo)")
+        except ImportError as e:
+            logger.error(f"❌ Error importando ScraperSEASeleniumCompleto: {e}")
+            ScraperSEASeleniumCompleto = None
 
 
 # Importar telemetría
@@ -150,10 +161,10 @@ class ScraperAmbiental:
                         'comuna': p.get('comuna', ''),
                         'tipo_proyecto': p.get('tipo_proyecto', ''),
                         'razon_ingreso': p.get('razon_ingreso', ''),
-                        'empresa': p.get('titular', ''),
-                        'inversion': p.get('inversion', ''),
+                        'empresa': p.get('empresa', p.get('titular', '')),
+                        'inversion': p.get('inversion_mmusd', p.get('inversion', '')),
                         'fecha': p.get('fecha_presentacion', ''),
-                        'resumen': p.get('resumen', '')
+                        'resumen': p.get('resumen_completo', p.get('resumen', ''))
                     }
                     proyectos_formateados.append(proyecto)
                 return proyectos_formateados

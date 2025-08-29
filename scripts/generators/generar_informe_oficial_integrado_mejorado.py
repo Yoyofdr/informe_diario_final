@@ -259,13 +259,10 @@ def obtener_hechos_cmf_dia(fecha):
             materia = hecho.get('materia', hecho.get('titulo', ''))
             url_pdf = hecho.get('url_pdf', '')
             
-            # Si no hay URL de PDF, generar resumen basado en título/materia
+            # Si no hay URL de PDF, no incluir el hecho
             if not url_pdf:
-                logger.warning(f"⚠️ {entidad}: Sin URL de PDF")
-                resumen = f"Hecho esencial: {materia}."
-                if resumen:
-                    hecho['resumen'] = resumen
-                return hecho
+                logger.warning(f"⚠️ {entidad}: Sin URL de PDF - NO SE INCLUIRÁ")
+                return None  # Retornar None para excluir este hecho
             
             # Verificar que la URL sea válida
             if not url_pdf.startswith('http'):
@@ -273,9 +270,8 @@ def obtener_hechos_cmf_dia(fecha):
                     url_pdf = f"https://www.cmfchile.cl{url_pdf}"
                     hecho['url_pdf'] = url_pdf  # Actualizar URL en el hecho
                 else:
-                    logger.warning(f"⚠️ {entidad}: URL de PDF inválida")
-                    hecho['resumen'] = f"Hecho esencial: {materia}."
-                    return hecho
+                    logger.warning(f"⚠️ {entidad}: URL de PDF inválida - NO SE INCLUIRÁ")
+                    return None  # Retornar None para excluir este hecho
             
             # Primero verificar caché
             pdf_content = None
@@ -297,7 +293,7 @@ def obtener_hechos_cmf_dia(fecha):
                     })
                     
                     # Reintentos con timeouts progresivos
-                    timeouts = [30, 60, 90]  # Aumentar timeout en cada intento
+                    timeouts = [60, 120, 180]  # Timeouts más largos para PDFs grandes
                     for intento, timeout in enumerate(timeouts):
                         try:
                             response = session.get(url_pdf, timeout=timeout, verify=False)
@@ -336,7 +332,7 @@ def obtener_hechos_cmf_dia(fecha):
             texto_pdf = ""
             if pdf_content:
                 try:
-                    texto_extraido, metodo = pdf_extractor.extract_text(pdf_content, max_pages=5)  # Más páginas
+                    texto_extraido, metodo = pdf_extractor.extract_text(pdf_content, max_pages=10)  # Intentar más páginas
                     if texto_extraido:
                         texto_pdf = texto_extraido
                         logger.info(f"✅ Texto extraído de {entidad} con {metodo} ({len(texto_pdf)} caracteres)")
@@ -345,22 +341,20 @@ def obtener_hechos_cmf_dia(fecha):
                 except Exception as e:
                     logger.error(f"❌ Error extrayendo texto de {entidad}: {str(e)[:100]}")
             
-            # Generar resumen con IA o resumen básico si no hay texto
+            # Solo incluir si tenemos texto extraído del PDF
             if texto_pdf:
                 resumen_ai = generar_resumen_cmf(entidad, materia, texto_pdf)
                 if resumen_ai:
                     hecho['resumen'] = resumen_ai
                     logger.info(f"✅ Resumen generado con IA para {entidad}")
+                    return hecho  # Incluir solo si tenemos resumen real
                 else:
-                    # Fallback si IA falla
-                    hecho['resumen'] = f"Hecho esencial: {materia}. Consultar documento en CMF."
-                    logger.warning(f"⚠️ No se pudo generar resumen AI para {entidad}")
+                    logger.warning(f"⚠️ No se pudo generar resumen AI para {entidad} - NO SE INCLUIRÁ")
+                    return None  # No incluir si no hay resumen
             else:
-                # Sin texto PDF: generar resumen básico
-                hecho['resumen'] = f"Hecho esencial: {materia}. Documento disponible en el sitio web de CMF."
-                logger.info(f"📝 Resumen básico generado para {entidad} (sin PDF)")
-            
-            return hecho
+                # Sin texto PDF: NO incluir el hecho
+                logger.warning(f"⚠️ Sin texto extraído para {entidad} - NO SE INCLUIRÁ")
+                return None  # Retornar None para excluir este hecho
         
         # Limpiar caché viejo antes de empezar
         pdf_cache.clear_old()
@@ -368,6 +362,7 @@ def obtener_hechos_cmf_dia(fecha):
         # Procesar hechos en paralelo para mayor velocidad
         logger.info(f"Procesando {len(hechos_filtrados)} hechos CMF en paralelo...")
         
+        hechos_procesados = []
         with ThreadPoolExecutor(max_workers=5) as executor:
             # Enviar todos los trabajos al pool
             futures = {executor.submit(procesar_hecho_cmf, hecho): hecho 
@@ -377,13 +372,16 @@ def obtener_hechos_cmf_dia(fecha):
             for future in as_completed(futures):
                 try:
                     resultado = future.result(timeout=120)  # Timeout global de 2 minutos por hecho
+                    # Solo incluir hechos que fueron procesados exitosamente (no None)
+                    if resultado is not None:
+                        hechos_procesados.append(resultado)
                 except Exception as e:
                     hecho_original = futures[future]
                     logger.error(f"Error procesando {hecho_original.get('entidad', 'desconocido')}: {e}")
         
-        logger.info(f"✅ Procesamiento de hechos CMF completado")
+        logger.info(f"✅ Procesamiento de hechos CMF completado: {len(hechos_procesados)} de {len(hechos_filtrados)} incluidos")
         
-        return hechos_filtrados
+        return hechos_procesados
         
     except Exception as e:
         logger.error(f"Error al leer hechos CMF: {str(e)}")

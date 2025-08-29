@@ -57,8 +57,8 @@ class PDFExtractor:
         logger.error("Todos los métodos de extracción fallaron")
         return "", "failed"
     
-    def _is_valid_text(self, text: str, min_length: int = 50, min_word_count: int = 10) -> bool:
-        """Valida si el texto extraído es útil"""
+    def _is_valid_text(self, text: str, min_length: int = 30, min_word_count: int = 5) -> bool:
+        """Valida si el texto extraído es útil - más leniente para CMF"""
         if not text or len(text.strip()) < min_length:
             return False
         
@@ -67,9 +67,9 @@ class PDFExtractor:
         if len(words) < min_word_count:
             return False
         
-        # Verificar que no sea solo basura (caracteres especiales)
-        alphanumeric_ratio = sum(c.isalnum() or c.isspace() for c in text) / len(text)
-        if alphanumeric_ratio < 0.7:
+        # Verificar que no sea solo basura (caracteres especiales) - más leniente
+        alphanumeric_ratio = sum(c.isalnum() or c.isspace() or c in '.,;:-()[]{}' for c in text) / len(text)
+        if alphanumeric_ratio < 0.5:  # Más leniente (antes era 0.7)
             return False
         
         return True

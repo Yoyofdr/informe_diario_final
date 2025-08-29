@@ -23,6 +23,8 @@ class PDFExtractor:
         self.methods_priority = [
             ('pypdf2', self._extract_with_pypdf2),
             ('pdfminer', self._extract_with_pdfminer),
+            ('pypdf_fallback', self._extract_with_pypdf_fallback),
+            ('force_text', self._extract_force_text),
             ('ocr', self._extract_with_ocr),
             ('ocr_enhanced', self._extract_with_enhanced_ocr)
         ]
@@ -57,8 +59,8 @@ class PDFExtractor:
         logger.error("Todos los métodos de extracción fallaron")
         return "", "failed"
     
-    def _is_valid_text(self, text: str, min_length: int = 30, min_word_count: int = 5) -> bool:
-        """Valida si el texto extraído es útil - más leniente para CMF"""
+    def _is_valid_text(self, text: str, min_length: int = 20, min_word_count: int = 3) -> bool:
+        """Valida si el texto extraído es útil - MUY leniente para CMF"""
         if not text or len(text.strip()) < min_length:
             return False
         
@@ -67,9 +69,10 @@ class PDFExtractor:
         if len(words) < min_word_count:
             return False
         
-        # Verificar que no sea solo basura (caracteres especiales) - más leniente
-        alphanumeric_ratio = sum(c.isalnum() or c.isspace() or c in '.,;:-()[]{}' for c in text) / len(text)
-        if alphanumeric_ratio < 0.5:  # Más leniente (antes era 0.7)
+        # Verificar que no sea solo basura - MUY leniente
+        # Aceptar cualquier texto que tenga al menos 30% de caracteres legibles
+        alphanumeric_ratio = sum(c.isalnum() or c.isspace() or c in '.,;:-()[]{}/@#$%&*+=|<>"\'' for c in text) / len(text)
+        if alphanumeric_ratio < 0.3:  # MUY leniente
             return False
         
         return True
@@ -106,6 +109,50 @@ class PDFExtractor:
             text += page_text + "\n"
         
         return text.strip()
+    
+    def _extract_with_pypdf_fallback(self, pdf_content: bytes, max_pages: int) -> str:
+        """Extrae texto usando pypdf (alternativa a PyPDF2)"""
+        try:
+            import pypdf
+            text = ""
+            with BytesIO(pdf_content) as pdf_file:
+                reader = pypdf.PdfReader(pdf_file)
+                num_pages = min(len(reader.pages), max_pages)
+                
+                for i in range(num_pages):
+                    page = reader.pages[i]
+                    page_text = page.extract_text()
+                    if page_text:
+                        text += page_text + "\n"
+            
+            return text.strip()
+        except:
+            return ""
+    
+    def _extract_force_text(self, pdf_content: bytes, max_pages: int) -> str:
+        """Extracción forzada buscando cualquier texto legible en el PDF"""
+        try:
+            # Decodificar el PDF buscando texto
+            pdf_str = pdf_content.decode('latin-1', errors='ignore')
+            
+            # Buscar patrones de texto entre delimitadores de PDF
+            import re
+            # Buscar texto entre paréntesis (formato común en PDFs)
+            matches = re.findall(r'\((.*?)\)', pdf_str)
+            text = ' '.join(matches)
+            
+            # También buscar secuencias de caracteres imprimibles
+            if len(text) < 100:
+                ascii_matches = re.findall(r'[\x20-\x7E]{20,}', pdf_str)
+                text += ' '.join(ascii_matches)
+            
+            # Limpiar el texto
+            text = re.sub(r'[^\x20-\x7E\n\r\t]+', ' ', text)
+            text = re.sub(r'\s+', ' ', text)
+            
+            return text.strip()[:10000]  # Limitar a 10k caracteres
+        except:
+            return ""
     
     def _extract_with_enhanced_ocr(self, pdf_content: bytes, max_pages: int) -> str:
         """Extrae texto usando OCR mejorado con preprocesamiento de imagen"""

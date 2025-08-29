@@ -259,10 +259,19 @@ def obtener_hechos_cmf_dia(fecha):
             materia = hecho.get('materia', hecho.get('titulo', ''))
             url_pdf = hecho.get('url_pdf', '')
             
-            # Si no hay URL de PDF, no incluir el hecho
+            # Si no hay URL de PDF, intentar construirla basado en patrones conocidos
             if not url_pdf:
-                logger.warning(f"⚠️ {entidad}: Sin URL de PDF - NO SE INCLUIRÁ")
-                return None  # Retornar None para excluir este hecho
+                # Intentar generar URL basada en fecha y número
+                fecha_pub = hecho.get('fecha_publicacion', '')
+                numero = hecho.get('numero_hecho', '') or hecho.get('numero', '')
+                if fecha_pub and numero:
+                    # Formato típico: he_YYYYMMDD_N.pdf
+                    fecha_sin_barras = fecha_pub.replace('/', '')
+                    url_pdf = f"https://www.cmfchile.cl/institucional/publicaciones/normativa_pdf/he/2025/he_{fecha_sin_barras}_{numero}.pdf"
+                    logger.info(f"📝 URL generada para {entidad}: {url_pdf}")
+                else:
+                    logger.warning(f"⚠️ {entidad}: Sin URL de PDF y no se pudo generar - NO SE INCLUIRÁ")
+                    return None
             
             # Verificar que la URL sea válida
             if not url_pdf.startswith('http'):
@@ -284,30 +293,57 @@ def obtener_hechos_cmf_dia(fecha):
             if url_pdf and not pdf_content:
                 try:
                     logger.info(f"📥 Descargando PDF de {entidad}")
-                    session = requests.Session()
-                    session.headers.update({
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                        'Accept': 'application/pdf,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                        'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
-                        'Referer': 'https://www.cmfchile.cl/institucional/hechos/hechos_portada.php'
-                    })
                     
-                    # Reintentos con timeouts progresivos
+                    # Lista de User-Agents para rotar
+                    user_agents = [
+                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0'
+                    ]
+                    
+                    # Reintentos con timeouts progresivos y diferentes User-Agents
                     timeouts = [60, 120, 180]  # Timeouts más largos para PDFs grandes
-                    for intento, timeout in enumerate(timeouts):
-                        try:
-                            response = session.get(url_pdf, timeout=timeout, verify=False)
-                            response.raise_for_status()
-                            pdf_content = response.content
-                            # Guardar en caché para futuro uso
-                            pdf_cache.put(url_pdf, pdf_content)
+                    descarga_exitosa = False
+                    
+                    for ua_index, user_agent in enumerate(user_agents):
+                        if descarga_exitosa:
                             break
-                        except (requests.Timeout, requests.ConnectionError) as e:
-                            if intento < len(timeouts) - 1:
-                                logger.warning(f"Intento {intento + 1} falló para {entidad}, reintentando con timeout {timeouts[intento + 1]}s...")
-                                time.sleep(3)
-                            else:
-                                raise
+                            
+                        session = requests.Session()
+                        session.headers.update({
+                            'User-Agent': user_agent,
+                            'Accept': 'application/pdf,application/octet-stream,text/html,application/xhtml+xml,*/*',
+                            'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
+                            'Accept-Encoding': 'gzip, deflate, br',
+                            'Connection': 'keep-alive',
+                            'Referer': 'https://www.cmfchile.cl/'
+                        })
+                        
+                        for intento, timeout in enumerate(timeouts):
+                            try:
+                                logger.info(f"  Intento {ua_index*3 + intento + 1}: User-Agent {ua_index+1}, timeout {timeout}s")
+                                response = session.get(url_pdf, timeout=timeout, verify=False, allow_redirects=True, stream=True)
+                                response.raise_for_status()
+                                
+                                # Verificar que sea un PDF
+                                content = response.content
+                                if content[:4] == b'%PDF' or b'PDF' in content[:1024]:
+                                    pdf_content = content
+                                    # Guardar en caché para futuro uso
+                                    pdf_cache.put(url_pdf, pdf_content)
+                                    descarga_exitosa = True
+                                    logger.info(f"✅ PDF descargado exitosamente con User-Agent {ua_index+1}")
+                                    break
+                                else:
+                                    logger.warning(f"  Contenido no es PDF, reintentando...")
+                                    
+                            except (requests.Timeout, requests.ConnectionError) as e:
+                                if intento < len(timeouts) - 1:
+                                    logger.warning(f"  Timeout con User-Agent {ua_index+1}, reintentando...")
+                                    time.sleep(2)
+                                else:
+                                    logger.warning(f"  User-Agent {ua_index+1} agotó todos los intentos")
+                                    break
                 except requests.exceptions.HTTPError as e:
                     if e.response.status_code == 404:
                         logger.warning(f"⚠️ PDF no encontrado (404) para {entidad}")

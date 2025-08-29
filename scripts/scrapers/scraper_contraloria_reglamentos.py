@@ -172,12 +172,12 @@ class ScraperContraloriaReglamentos:
                 estado_text = celdas[7].get_text(strip=True)
                 reglamento['estado'] = estado_text
             
-            # Verificar si es de la fecha objetivo o reciente (últimos 3 días)
-            if fecha_text == fecha_objetivo:
-                # Es exactamente la fecha que buscamos
-                reglamento['es_objetivo'] = True
-            elif not self._es_fecha_reciente_flexible(fecha_text):
+            # Solo incluir si es exactamente la fecha objetivo (día inmediatamente anterior)
+            if fecha_text != fecha_objetivo:
                 return None
+            
+            # Es exactamente la fecha que buscamos
+            reglamento['es_objetivo'] = True
             
             # Buscar enlace de descarga en la última celda o en botones
             enlace_descarga = self._buscar_enlace_descarga(fila)

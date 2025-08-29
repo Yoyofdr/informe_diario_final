@@ -116,8 +116,8 @@ class ScraperContraloriaReglamentos:
                 logger.debug(f"Error procesando fila {i}: {e}")
                 continue
             
-            # Limitar búsqueda a los primeros 50 para pruebas
-            if i > 50:
+            # Limitar búsqueda a los primeros 200 para capturar más reglamentos
+            if i > 200:
                 break
         
         return reglamentos
@@ -172,8 +172,11 @@ class ScraperContraloriaReglamentos:
                 estado_text = celdas[7].get_text(strip=True)
                 reglamento['estado'] = estado_text
             
-            # Verificar si es de fecha reciente (últimos 3 días)
-            if not self._es_fecha_reciente_flexible(fecha_text):
+            # Verificar si es de la fecha objetivo o reciente (últimos 3 días)
+            if fecha_text == fecha_objetivo:
+                # Es exactamente la fecha que buscamos
+                reglamento['es_objetivo'] = True
+            elif not self._es_fecha_reciente_flexible(fecha_text):
                 return None
             
             # Buscar enlace de descarga en la última celda o en botones

@@ -259,6 +259,24 @@ def obtener_hechos_cmf_dia(fecha):
             materia = hecho.get('materia', hecho.get('titulo', ''))
             url_pdf = hecho.get('url_pdf', '')
             
+            # Si no hay URL de PDF, generar resumen basado en título/materia
+            if not url_pdf:
+                logger.warning(f"⚠️ {entidad}: Sin URL de PDF")
+                resumen = f"Hecho esencial: {materia}."
+                if resumen:
+                    hecho['resumen'] = resumen
+                return hecho
+            
+            # Verificar que la URL sea válida
+            if not url_pdf.startswith('http'):
+                if url_pdf.startswith('/'):
+                    url_pdf = f"https://www.cmfchile.cl{url_pdf}"
+                    hecho['url_pdf'] = url_pdf  # Actualizar URL en el hecho
+                else:
+                    logger.warning(f"⚠️ {entidad}: URL de PDF inválida")
+                    hecho['resumen'] = f"Hecho esencial: {materia}."
+                    return hecho
+            
             # Primero verificar caché
             pdf_content = None
             if url_pdf:
@@ -294,11 +312,16 @@ def obtener_hechos_cmf_dia(fecha):
                                 time.sleep(3)
                             else:
                                 raise
+                except requests.exceptions.HTTPError as e:
+                    if e.response.status_code == 404:
+                        logger.warning(f"⚠️ PDF no encontrado (404) para {entidad}")
+                    else:
+                        logger.error(f"❌ Error HTTP {e.response.status_code} para {entidad}")
                 except Exception as e:
                     logger.error(f"❌ Error descargando PDF de {entidad}: {str(e)[:100]}")
                     
                     # FALLBACK: Intentar con Selenium si falla descarga directa
-                    if not pdf_content:
+                    if not pdf_content and 'timeout' not in str(e).lower():
                         logger.info(f"🔄 Intentando con Selenium para {entidad}")
                         try:
                             pdf_content = selenium_downloader.download_pdf_with_selenium(url_pdf)
@@ -322,13 +345,20 @@ def obtener_hechos_cmf_dia(fecha):
                 except Exception as e:
                     logger.error(f"❌ Error extrayendo texto de {entidad}: {str(e)[:100]}")
             
-            # Generar resumen con IA
-            resumen_ai = generar_resumen_cmf(entidad, materia, texto_pdf)
-            if resumen_ai:
-                hecho['resumen'] = resumen_ai
-                logger.info(f"✅ Resumen generado para {entidad}")
+            # Generar resumen con IA o resumen básico si no hay texto
+            if texto_pdf:
+                resumen_ai = generar_resumen_cmf(entidad, materia, texto_pdf)
+                if resumen_ai:
+                    hecho['resumen'] = resumen_ai
+                    logger.info(f"✅ Resumen generado con IA para {entidad}")
+                else:
+                    # Fallback si IA falla
+                    hecho['resumen'] = f"Hecho esencial: {materia}. Consultar documento en CMF."
+                    logger.warning(f"⚠️ No se pudo generar resumen AI para {entidad}")
             else:
-                logger.warning(f"⚠️ No se pudo generar resumen AI para {entidad}")
+                # Sin texto PDF: generar resumen básico
+                hecho['resumen'] = f"Hecho esencial: {materia}. Documento disponible en el sitio web de CMF."
+                logger.info(f"📝 Resumen básico generado para {entidad} (sin PDF)")
             
             return hecho
         

@@ -54,6 +54,10 @@ import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
 
+# Importar el descargador especializado de CMF
+sys.path.append(str(BASE_DIR / 'scripts' / 'scrapers'))
+from cmf_pdf_downloader import cmf_pdf_downloader
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -284,100 +288,64 @@ def obtener_hechos_cmf_dia(fecha):
             
             # Primero verificar caché
             pdf_content = None
+            texto_pdf = ""
+            
             if url_pdf:
                 pdf_content = pdf_cache.get(url_pdf)
                 if pdf_content:
                     logger.info(f"📦 Usando PDF cacheado para {entidad}")
             
-            # Si no está en caché, descargar
+            # Si no está en caché, usar el descargador especializado de CMF
             if url_pdf and not pdf_content:
-                try:
-                    logger.info(f"📥 Descargando PDF de {entidad}")
+                logger.info(f"📥 Descargando PDF de {entidad} con descargador especializado")
+                
+                # Usar el descargador especializado de CMF
+                pdf_content, download_method = cmf_pdf_downloader.download_pdf(url_pdf, max_retries=3)
+                
+                if pdf_content:
+                    logger.info(f"✅ PDF descargado para {entidad} usando método: {download_method}")
+                    # Guardar en caché
+                    pdf_cache.put(url_pdf, pdf_content)
+                else:
+                    # Si no se pudo descargar el PDF, intentar con URLs alternativas
+                    logger.warning(f"No se pudo descargar PDF para {entidad}, intentando alternativas...")
                     
-                    # Lista de User-Agents para rotar
-                    user_agents = [
-                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0'
-                    ]
-                    
-                    # Reintentos con timeouts progresivos y diferentes User-Agents
-                    timeouts = [60, 120, 180]  # Timeouts más largos para PDFs grandes
-                    descarga_exitosa = False
-                    
-                    for ua_index, user_agent in enumerate(user_agents):
-                        if descarga_exitosa:
+                    alternative_urls = cmf_pdf_downloader.get_alternative_urls(url_pdf)
+                    for alt_url in alternative_urls:
+                        logger.debug(f"Probando URL alternativa: {alt_url[:80]}...")
+                        pdf_content, download_method = cmf_pdf_downloader.download_pdf(alt_url, max_retries=1)
+                        if pdf_content:
+                            logger.info(f"✅ PDF descargado con URL alternativa usando: {download_method}")
+                            pdf_cache.put(alt_url, pdf_content)
                             break
-                            
-                        session = requests.Session()
-                        session.headers.update({
-                            'User-Agent': user_agent,
-                            'Accept': 'application/pdf,application/octet-stream,text/html,application/xhtml+xml,*/*',
-                            'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
-                            'Accept-Encoding': 'gzip, deflate, br',
-                            'Connection': 'keep-alive',
-                            'Referer': 'https://www.cmfchile.cl/'
-                        })
-                        
-                        for intento, timeout in enumerate(timeouts):
-                            try:
-                                logger.info(f"  Intento {ua_index*3 + intento + 1}: User-Agent {ua_index+1}, timeout {timeout}s")
-                                response = session.get(url_pdf, timeout=timeout, verify=False, allow_redirects=True, stream=True)
-                                response.raise_for_status()
-                                
-                                # Verificar que sea un PDF
-                                content = response.content
-                                if content[:4] == b'%PDF' or b'PDF' in content[:1024]:
-                                    pdf_content = content
-                                    # Guardar en caché para futuro uso
-                                    pdf_cache.put(url_pdf, pdf_content)
-                                    descarga_exitosa = True
-                                    logger.info(f"✅ PDF descargado exitosamente con User-Agent {ua_index+1}")
-                                    break
-                                else:
-                                    logger.warning(f"  Contenido no es PDF, reintentando...")
-                                    
-                            except (requests.Timeout, requests.ConnectionError) as e:
-                                if intento < len(timeouts) - 1:
-                                    logger.warning(f"  Timeout con User-Agent {ua_index+1}, reintentando...")
-                                    time.sleep(2)
-                                else:
-                                    logger.warning(f"  User-Agent {ua_index+1} agotó todos los intentos")
-                                    break
-                except requests.exceptions.HTTPError as e:
-                    if e.response.status_code == 404:
-                        logger.warning(f"⚠️ PDF no encontrado (404) para {entidad}")
-                    else:
-                        logger.error(f"❌ Error HTTP {e.response.status_code} para {entidad}")
-                except Exception as e:
-                    logger.error(f"❌ Error descargando PDF de {entidad}: {str(e)[:100]}")
                     
-                    # FALLBACK: Intentar con Selenium si falla descarga directa
-                    if not pdf_content and 'timeout' not in str(e).lower():
-                        logger.info(f"🔄 Intentando con Selenium para {entidad}")
+                    # Si aún no tenemos PDF, intentar extraer contenido del sitio web
+                    if not pdf_content:
                         try:
-                            pdf_content = selenium_downloader.download_pdf_with_selenium(url_pdf)
-                            if pdf_content:
-                                # Guardar en caché el PDF obtenido con Selenium
-                                pdf_cache.put(url_pdf, pdf_content)
-                                logger.info(f"✅ PDF obtenido con Selenium para {entidad}")
-                        except Exception as se:
-                            logger.error(f"❌ Selenium también falló para {entidad}: {str(se)[:100]}")
+                            logger.info(f"Intentando extraer contenido del sitio web para {entidad}...")
+                            response = requests.get(url_pdf, timeout=30, verify=False)
+                            if response.status_code == 200 and b'<html' in response.content[:1000].lower():
+                                texto_html = cmf_pdf_downloader.extract_from_html(response.text)
+                                if texto_html and len(texto_html) > 100:
+                                    # Usar el texto HTML directamente
+                                    texto_pdf = texto_html
+                                    logger.info(f"✅ Texto extraído del sitio web para {entidad}")
+                        except Exception as e:
+                            logger.error(f"Error extrayendo contenido web para {entidad}: {e}")
             
-            # Extraer texto del PDF
-            texto_pdf = ""
-            if pdf_content:
+            # Extraer texto del PDF si tenemos contenido
+            if pdf_content and not texto_pdf:
                 try:
-                    texto_extraido, metodo = pdf_extractor.extract_text(pdf_content, max_pages=10)  # Intentar más páginas
-                    if texto_extraido:
+                    texto_extraido, metodo = pdf_extractor.extract_text(pdf_content, max_pages=15)  # Más páginas
+                    if texto_extraido and len(texto_extraido.strip()) > 50:
                         texto_pdf = texto_extraido
                         logger.info(f"✅ Texto extraído de {entidad} con {metodo} ({len(texto_pdf)} caracteres)")
                     else:
-                        logger.warning(f"⚠️ No se pudo extraer texto del PDF de {entidad}")
+                        logger.warning(f"⚠️ Texto extraído insuficiente del PDF de {entidad}")
                 except Exception as e:
                     logger.error(f"❌ Error extrayendo texto de {entidad}: {str(e)[:100]}")
             
-            # Solo incluir si tenemos texto extraído del PDF
+            # Solo incluir si tenemos texto extraído
             if texto_pdf:
                 resumen_ai = generar_resumen_cmf(entidad, materia, texto_pdf)
                 if resumen_ai:
@@ -388,7 +356,7 @@ def obtener_hechos_cmf_dia(fecha):
                     logger.warning(f"⚠️ No se pudo generar resumen AI para {entidad} - NO SE INCLUIRÁ")
                     return None  # No incluir si no hay resumen
             else:
-                # Sin texto PDF: NO incluir el hecho
+                # Sin texto: NO incluir el hecho
                 logger.warning(f"⚠️ Sin texto extraído para {entidad} - NO SE INCLUIRÁ")
                 return None  # Retornar None para excluir este hecho
         

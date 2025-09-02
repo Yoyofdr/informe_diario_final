@@ -45,6 +45,22 @@ except ImportError:
     logger.warning("⚠️ Telemetría no disponible")
     telemetria = None
 
+# Importar extractor de resúmenes SEA
+try:
+    from .sea_resumen_extractor import sea_resumen_extractor
+    logger.info("✅ Importado extractor de resúmenes SEA")
+except ImportError:
+    try:
+        from scripts.scrapers.sea_resumen_extractor import sea_resumen_extractor
+        logger.info("✅ Importado extractor de resúmenes SEA (absoluto)")
+    except ImportError:
+        try:
+            from sea_resumen_extractor import sea_resumen_extractor
+            logger.info("✅ Importado extractor de resúmenes SEA (directo)")
+        except ImportError:
+            logger.warning("⚠️ Extractor de resúmenes SEA no disponible")
+            sea_resumen_extractor = None
+
 class ScraperAmbiental:
     def __init__(self):
         """Inicializa el scraper ambiental integrado"""
@@ -181,6 +197,7 @@ class ScraperAmbiental:
         """
         Formatea los datos ambientales para el informe HTML
         Solo usa datos REALES obtenidos del scraper SEA
+        Incluye resúmenes ejecutivos de los proyectos
         """
         resultado = {
             'proyectos_sea': []
@@ -191,6 +208,41 @@ class ScraperAmbiental:
             for proyecto in datos_ambientales['proyectos_sea']:
                 # Solo incluir si tiene título (es un proyecto real)
                 if proyecto.get('titulo'):
+                    # Intentar obtener resumen si tenemos URL y el extractor está disponible
+                    if not proyecto.get('resumen') and proyecto.get('url') and sea_resumen_extractor:
+                        try:
+                            # Extraer ID del expediente de la URL
+                            id_expediente = sea_resumen_extractor.obtener_id_de_url(proyecto['url'])
+                            if id_expediente:
+                                logger.info(f"🔍 Obteniendo resumen para proyecto {proyecto['titulo'][:30]}...")
+                                info_extra = sea_resumen_extractor.extraer_resumen_proyecto(id_expediente)
+                                
+                                # Agregar resumen y otros datos si los encontramos
+                                if info_extra.get('resumen'):
+                                    proyecto['resumen'] = info_extra['resumen']
+                                    logger.info(f"✅ Resumen obtenido ({len(info_extra['resumen'])} caracteres)")
+                                
+                                # Agregar inversión si la encontramos
+                                if info_extra.get('inversion') and not proyecto.get('inversion'):
+                                    proyecto['inversion'] = info_extra['inversion']
+                                
+                                # Agregar ubicación más detallada si la encontramos
+                                if info_extra.get('ubicacion') and not proyecto.get('region'):
+                                    proyecto['region'] = info_extra['ubicacion']
+                        except Exception as e:
+                            logger.warning(f"⚠️ No se pudo obtener resumen para {proyecto['titulo'][:30]}: {e}")
+                    
+                    # Si no hay resumen, crear uno básico con la información disponible
+                    if not proyecto.get('resumen'):
+                        resumen_basico = f"{proyecto.get('tipo', 'DIA')} presentado"
+                        if proyecto.get('titular'):
+                            resumen_basico += f" por {proyecto['titular']}"
+                        if proyecto.get('region'):
+                            resumen_basico += f" en {proyecto['region']}"
+                        if proyecto.get('inversion'):
+                            resumen_basico += f". Inversión: {proyecto['inversion']}"
+                        proyecto['resumen'] = resumen_basico
+                    
                     resultado['proyectos_sea'].append(proyecto)
                     
         logger.info(f"📊 Formateado para informe: {len(resultado['proyectos_sea'])} proyectos SEA")

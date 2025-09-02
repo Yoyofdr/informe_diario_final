@@ -43,6 +43,73 @@ class ScraperSEASelenium:
         
         return driver
     
+    def obtener_resumen_proyecto(self, url_proyecto: str) -> str:
+        """
+        Obtiene el resumen ejecutivo de un proyecto desde su página de ficha
+        """
+        driver = None
+        try:
+            driver = self._setup_driver()
+            driver.get(url_proyecto)
+            time.sleep(2)
+            
+            # Buscar el resumen ejecutivo en varios posibles lugares
+            resumen = ""
+            
+            # Buscar por texto "Resumen Ejecutivo" o similar
+            elementos_resumen = driver.find_elements(By.XPATH, "//td[contains(text(), 'Resumen') or contains(text(), 'Descripción')]")
+            
+            for elemento in elementos_resumen:
+                # Buscar el siguiente TD que contiene el texto del resumen
+                try:
+                    padre = elemento.find_element(By.XPATH, "..")
+                    celdas = padre.find_elements(By.TAG_NAME, "td")
+                    if len(celdas) > 1:
+                        texto_resumen = celdas[-1].text.strip()
+                        if texto_resumen and len(texto_resumen) > 50:
+                            resumen = texto_resumen
+                            break
+                except:
+                    pass
+            
+            # Si no encontramos resumen, buscar en divs con clase específica
+            if not resumen:
+                divs_contenido = driver.find_elements(By.CLASS_NAME, "contenido") + \
+                                driver.find_elements(By.CLASS_NAME, "descripcion") + \
+                                driver.find_elements(By.CLASS_NAME, "resumen")
+                
+                for div in divs_contenido:
+                    texto = div.text.strip()
+                    if texto and len(texto) > 100 and len(texto) < 5000:
+                        resumen = texto
+                        break
+            
+            # Buscar en tablas con información del proyecto
+            if not resumen:
+                tablas = driver.find_elements(By.TAG_NAME, "table")
+                for tabla in tablas:
+                    filas = tabla.find_elements(By.TAG_NAME, "tr")
+                    for fila in filas:
+                        celdas = fila.find_elements(By.TAG_NAME, "td")
+                        if len(celdas) >= 2:
+                            header = celdas[0].text.strip().lower()
+                            if any(palabra in header for palabra in ['resumen', 'descripción', 'objeto', 'proyecto']):
+                                contenido = celdas[1].text.strip()
+                                if contenido and len(contenido) > 100:
+                                    resumen = contenido
+                                    break
+                    if resumen:
+                        break
+            
+            return resumen
+            
+        except Exception as e:
+            logger.error(f"Error obteniendo resumen del proyecto: {e}")
+            return ""
+        finally:
+            if driver:
+                driver.quit()
+    
     def obtener_datos_sea(self, dias_atras: int = 7) -> List[Dict]:
         """
         Obtiene proyectos recientes del SEIA usando Selenium
@@ -111,6 +178,12 @@ class ScraperSEASelenium:
                             if proyecto:
                                 # Verificar fecha reciente
                                 if self._es_proyecto_reciente(proyecto, dias_atras):
+                                    # Intentar obtener resumen si tenemos URL
+                                    if proyecto.get('url') and len(proyectos) < 10:  # Limitar para no demorar mucho
+                                        resumen = self.obtener_resumen_proyecto(proyecto['url'])
+                                        if resumen:
+                                            proyecto['resumen'] = resumen[:1000]  # Limitar longitud
+                                    
                                     proyectos.append(proyecto)
                                     logger.debug(f"✅ Proyecto encontrado: {proyecto.get('titulo', '')[:50]}...")
                                     
@@ -130,6 +203,12 @@ class ScraperSEASelenium:
                 for elemento in elementos[:50]:
                     proyecto = self._extraer_proyecto_de_elemento(elemento)
                     if proyecto and self._es_proyecto_reciente(proyecto, dias_atras):
+                        # Intentar obtener resumen si tenemos URL
+                        if proyecto.get('url') and len(proyectos) < 10:
+                            resumen = self.obtener_resumen_proyecto(proyecto['url'])
+                            if resumen:
+                                proyecto['resumen'] = resumen[:1000]
+                        
                         proyectos.append(proyecto)
             
             logger.info(f"✅ Total proyectos encontrados: {len(proyectos)}")

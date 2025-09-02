@@ -130,7 +130,7 @@ Responde SOLO con el resumen basado ÚNICAMENTE en la información proporcionada
             result = response.json()
             resumen = result['choices'][0]['message']['content'].strip()
             
-            # Validación final: detectar si el modelo está inventando
+            # Validación final: detectar si el modelo está inventando o usando frases genéricas
             frases_prohibidas = [
                 "no tengo acceso",
                 "no puedo acceder",
@@ -141,13 +141,30 @@ Responde SOLO con el resumen basado ÚNICAMENTE en la información proporcionada
                 "noviembre de 2023",
                 "15 de octubre",
                 "1 de octubre",
-                "20 de octubre"
+                "20 de octubre",
+                "no se especifican detalles",
+                "no se especifica",
+                "detalles adicionales"
             ]
             
             resumen_lower = resumen.lower()
             for frase in frases_prohibidas:
                 if frase in resumen_lower:
-                    return f"{entidad} comunicó {materia}. Información detallada no disponible en el documento."
+                    # En lugar de mensaje genérico, usar el texto directo
+                    if texto_pdf and len(texto_pdf) > 100:
+                        # Extraer las primeras palabras legibles
+                        palabras_legibles = []
+                        for palabra in texto_pdf.split():
+                            if palabra.isalnum() or any(c.isalpha() for c in palabra):
+                                palabras_legibles.append(palabra)
+                            if len(palabras_legibles) >= 30:
+                                break
+                        
+                        if palabras_legibles:
+                            extracto = ' '.join(palabras_legibles)
+                            return f"{entidad} - {materia}: {extracto[:150]}..."
+                    
+                    return f"{entidad} informó sobre {materia}. Consultar documento original en CMF para detalles completos."
             
             # Detectar patrones de invención
             import re
@@ -247,7 +264,7 @@ Responde SOLO con el resumen basado ÚNICAMENTE en la información proporcionada
             result = response.json()
             resumen = result['choices'][0]['message']['content'].strip()
             
-            # Validación final: detectar si el modelo está inventando
+            # Validación final: detectar si el modelo está inventando o usando frases genéricas
             frases_prohibidas = [
                 "no tengo acceso",
                 "no puedo acceder",
@@ -258,13 +275,30 @@ Responde SOLO con el resumen basado ÚNICAMENTE en la información proporcionada
                 "noviembre de 2023",
                 "15 de octubre",
                 "1 de octubre",
-                "20 de octubre"
+                "20 de octubre",
+                "no se especifican detalles",
+                "no se especifica",
+                "detalles adicionales"
             ]
             
             resumen_lower = resumen.lower()
             for frase in frases_prohibidas:
                 if frase in resumen_lower:
-                    return f"{entidad} comunicó {materia}. Información detallada no disponible en el documento."
+                    # En lugar de mensaje genérico, usar el texto directo
+                    if texto_pdf and len(texto_pdf) > 100:
+                        # Extraer las primeras palabras legibles
+                        palabras_legibles = []
+                        for palabra in texto_pdf.split():
+                            if palabra.isalnum() or any(c.isalpha() for c in palabra):
+                                palabras_legibles.append(palabra)
+                            if len(palabras_legibles) >= 30:
+                                break
+                        
+                        if palabras_legibles:
+                            extracto = ' '.join(palabras_legibles)
+                            return f"{entidad} - {materia}: {extracto[:150]}..."
+                    
+                    return f"{entidad} informó sobre {materia}. Consultar documento original en CMF para detalles completos."
             
             # Detectar patrones de invención
             import re

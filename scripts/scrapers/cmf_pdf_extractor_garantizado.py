@@ -133,7 +133,7 @@ class CMFPDFExtractorGarantizado:
             text_matches = re.findall(r'\((.*?)\)', pdf_str)
             
             # Buscar texto entre Tj comandos (texto en PDFs)
-            tj_matches = re.findall(r'(\S+)\s*Tj', pdf_str)
+            tj_matches = re.findall(r'\(([^)]+)\)\s*Tj', pdf_str)
             
             # Buscar texto en streams
             stream_matches = re.findall(r'stream\s*(.*?)\s*endstream', pdf_str, re.DOTALL)
@@ -141,26 +141,52 @@ class CMFPDFExtractorGarantizado:
             # Combinar todos los textos encontrados
             all_text = []
             
+            # Procesar matches de paréntesis
             for match in text_matches:
                 # Decodificar caracteres escapados
                 cleaned = match.replace('\\n', '\n').replace('\\t', '\t')
                 cleaned = re.sub(r'\\[0-9]{3}', '', cleaned)  # Remover códigos octales
-                if len(cleaned) > 3 and cleaned.isprintable():
-                    all_text.append(cleaned)
-            
-            for match in tj_matches:
-                if match.startswith('(') and match.endswith(')'):
-                    cleaned = match[1:-1]
-                    if len(cleaned) > 3:
+                # Decodificar caracteres hexadecimales
+                cleaned = re.sub(r'\\x[0-9a-fA-F]{2}', '', cleaned)
+                
+                # Solo incluir si tiene contenido legible significativo
+                if len(cleaned) > 5:
+                    # Verificar que al menos 50% sean caracteres alfanuméricos o espacios
+                    legible_chars = sum(c.isalnum() or c.isspace() or c in '.,;:()[]{}' for c in cleaned)
+                    if legible_chars > len(cleaned) * 0.5:
                         all_text.append(cleaned)
             
-            # Procesar streams buscando texto
-            for stream in stream_matches[:5]:  # Limitar a primeros 5 streams
-                # Buscar secuencias de caracteres imprimibles
-                printable_matches = re.findall(r'[\x20-\x7E]{10,}', stream)
-                all_text.extend(printable_matches)
+            # Procesar comandos Tj (más específico)
+            for match in tj_matches:
+                cleaned = match.replace('\\n', '\n').replace('\\t', '\t')
+                if len(cleaned) > 5 and cleaned.isprintable():
+                    all_text.append(cleaned)
             
-            return ' '.join(all_text)
+            # Procesar streams buscando texto real (más inteligente)
+            for stream in stream_matches[:3]:  # Limitar a primeros 3 streams
+                # Buscar patrones de texto real en español
+                # Palabras comunes en documentos CMF
+                palabras_pattern = r'\b(?:hecho|esencial|informa|comunica|señor|señora|directorio|' \
+                                  r'accionista|junta|dividendo|empresa|sociedad|' \
+                                  r'Santiago|presente|atentamente|gerente|director|' \
+                                  r'administración|financiero|mercado|comisión)[^\x00-\x1F]{0,100}'
+                
+                palabras_encontradas = re.findall(palabras_pattern, stream, re.IGNORECASE)
+                for palabra in palabras_encontradas:
+                    if len(palabra) > 10:
+                        all_text.append(palabra)
+                
+                # Buscar secuencias largas de texto legible
+                legible_pattern = r'[a-zA-ZáéíóúñÁÉÍÓÚÑ\s,\.;:]{20,}'
+                legible_matches = re.findall(legible_pattern, stream)
+                all_text.extend([m for m in legible_matches if len(m.split()) > 3])
+            
+            # Unir y limpiar el texto
+            result = ' '.join(all_text)
+            # Eliminar repeticiones
+            result = re.sub(r'(\b\w+\b)(?:\s+\1)+', r'\1', result)
+            
+            return result
             
         except Exception as e:
             logger.error(f"Error en extracción binaria: {e}")
@@ -286,55 +312,117 @@ class CMFPDFExtractorGarantizado:
         """
         ÚLTIMO RECURSO: Extrae ALGO de texto, lo que sea
         """
-        # Buscar patrones específicos de CMF
+        # Buscar patrones específicos de CMF con contexto más amplio
         patterns = [
-            b'HECHO\s+ESENCIAL',
-            b'Comisi[^\n]+Financiero',
-            b'Santiago,\s+\d+\s+de',
-            b'Se\xf1or[^\n]+',  # ñ en bytes
-            b'INFORMA',
-            b'COMUNICA',
-            b'directorio',
-            b'accionistas',
-            b'junta',
-            b'dividendo'
+            (b'HECHO\s+ESENCIAL', 500),
+            (b'Comisi[^\x00]+Financiero', 300),
+            (b'Santiago,\s+\d+\s+de\s+\w+\s+de\s+\d{4}', 400),
+            (b'Se\xf1or[^\x00]{10,300}', 300),
+            (b'INFORMA[^\x00]{10,500}', 500),
+            (b'COMUNICA[^\x00]{10,500}', 500),
+            (b'[Dd]irectorio[^\x00]{10,300}', 300),
+            (b'[Aa]ccionistas[^\x00]{10,300}', 300),
+            (b'[Jj]unta[^\x00]{10,300}', 300),
+            (b'[Dd]ividendo[^\x00]{10,300}', 300),
+            (b'[Gg]erente\s+[Gg]eneral[^\x00]{10,300}', 300),
+            (b'[Pp]resente[^\x00]{10,500}', 500)
         ]
         
         found_text = []
         
-        for pattern in patterns:
-            matches = re.findall(pattern + b'[^\n]{0,200}', pdf_content, re.IGNORECASE)
-            for match in matches:
-                try:
-                    text = match.decode('utf-8', errors='ignore')
-                    found_text.append(text)
-                except:
-                    try:
-                        text = match.decode('latin-1', errors='ignore')
-                        found_text.append(text)
-                    except:
-                        pass
+        for pattern, max_len in patterns:
+            try:
+                # Buscar con expresión regular más flexible
+                regex = pattern + b'[^\x00]{0,' + str(max_len).encode() + b'}'
+                matches = re.findall(pattern + b'[^\x00]{0,%d}' % max_len, pdf_content, re.IGNORECASE | re.DOTALL)
+                
+                for match in matches[:3]:  # Limitar a 3 matches por patrón
+                    # Intentar decodificar con varios encodings
+                    for encoding in ['utf-8', 'latin-1', 'cp1252', 'iso-8859-1']:
+                        try:
+                            text = match.decode(encoding, errors='ignore')
+                            # Limpiar el texto
+                            text = re.sub(r'[^\x20-\x7E\xA0-\xFF\n\r]', ' ', text)
+                            text = re.sub(r'\s+', ' ', text)
+                            
+                            # Solo agregar si tiene contenido significativo
+                            if len(text) > 20 and text.count(' ') > 2:
+                                found_text.append(text.strip())
+                                break
+                        except:
+                            continue
+            except Exception as e:
+                logger.debug(f"Error en patrón {pattern}: {e}")
+                continue
         
         if found_text:
-            return ' '.join(found_text)
+            # Eliminar duplicados y unir
+            unique_texts = []
+            for text in found_text:
+                if not any(text in existing for existing in unique_texts):
+                    unique_texts.append(text)
+            
+            combined = ' '.join(unique_texts[:5])  # Máximo 5 fragmentos
+            
+            # Si tenemos suficiente texto, devolverlo
+            if len(combined) > 100:
+                return combined
         
-        # Si todo falla, al menos extraer los primeros caracteres legibles
+        # Buscar cualquier bloque de texto largo y coherente
         try:
-            # Buscar cualquier texto después de "stream"
-            stream_pos = pdf_content.find(b'stream')
-            if stream_pos > 0:
-                chunk = pdf_content[stream_pos:stream_pos+5000]
-                text = chunk.decode('latin-1', errors='ignore')
-                # Limpiar y devolver
-                clean = re.sub(r'[^\x20-\x7E\n\r]', ' ', text)
-                words = clean.split()
-                if len(words) > 10:
-                    return ' '.join(words[:200])
+            # Buscar bloques de texto entre marcadores PDF comunes
+            text_blocks = re.findall(b'BT[^\x00]+?ET', pdf_content[:100000])  # Limitar búsqueda
+            
+            for block in text_blocks[:10]:
+                # Extraer texto de comandos Tj
+                tj_texts = re.findall(b'\(([^)]+)\)\s*Tj', block)
+                if tj_texts:
+                    decoded_texts = []
+                    for tj_text in tj_texts:
+                        try:
+                            decoded = tj_text.decode('latin-1', errors='ignore')
+                            if len(decoded) > 3 and decoded.isprintable():
+                                decoded_texts.append(decoded)
+                        except:
+                            pass
+                    
+                    if decoded_texts:
+                        block_text = ' '.join(decoded_texts)
+                        if len(block_text) > 50:
+                            found_text.append(block_text)
+            
+            if found_text:
+                return ' '.join(found_text[:3])
         except:
             pass
         
-        # Verdadero último recurso
-        return "PDF con contenido pero no se pudo extraer el texto. El documento existe y tiene información."
+        # Último intento: extraer cualquier texto cerca de palabras clave
+        try:
+            pdf_str = pdf_content[:50000].decode('latin-1', errors='ignore')
+            
+            # Buscar contexto alrededor de palabras clave
+            keywords = ['Santiago', 'CMF', 'hecho', 'esencial', 'informa', 'comunica', 
+                       'presente', 'atentamente', 'gerente', 'director']
+            
+            for keyword in keywords:
+                pos = pdf_str.find(keyword)
+                if pos > 0:
+                    # Extraer contexto alrededor
+                    start = max(0, pos - 100)
+                    end = min(len(pdf_str), pos + 300)
+                    context = pdf_str[start:end]
+                    
+                    # Limpiar
+                    context = re.sub(r'[^\x20-\x7E\xA0-\xFF]', ' ', context)
+                    context = re.sub(r'\s+', ' ', context)
+                    
+                    if len(context) > 50:
+                        return f"Extracto del documento: {context}"
+        except:
+            pass
+        
+        # Verdadero último recurso - al menos indicar que el PDF existe
+        return f"Documento PDF de CMF detectado ({len(pdf_content):,} bytes) pero el contenido no pudo ser extraído en formato legible. El documento existe y contiene información."
     
     def _clean_text(self, text: str) -> str:
         """Limpia el texto extraído"""

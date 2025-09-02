@@ -512,13 +512,13 @@
             <h2 class="text-center mb-5 h1 fw-bold">¿Qué información recibes?</h2>
             <div class="scroll-container" style="overflow: hidden; position: relative; padding: 2rem 0;">
                 <!-- Botón de navegación izquierda -->
-                <button class="carousel-nav-btn carousel-nav-prev" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); z-index: 10; background: white; border: 2px solid #e5e7eb; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s;" onclick="scrollCarousel('prev')">
+                <button id="carousel-prev" class="carousel-nav-btn carousel-nav-prev" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); z-index: 10; background: white; border: 2px solid #e5e7eb; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background 0.3s, border-color 0.3s;">
                     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </button>
                 <!-- Botón de navegación derecha -->
-                <button class="carousel-nav-btn carousel-nav-next" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); z-index: 10; background: white; border: 2px solid #e5e7eb; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s;" onclick="scrollCarousel('next')">
+                <button id="carousel-next" class="carousel-nav-btn carousel-nav-next" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); z-index: 10; background: white; border: 2px solid #e5e7eb; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background 0.3s, border-color 0.3s;">
                     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
@@ -1169,43 +1169,51 @@
             
             if (!scrollContent || !scrollContainer) return;
             
-            // Get current transform value
-            const computedStyle = window.getComputedStyle(scrollContent);
-            const matrix = new DOMMatrix(computedStyle.transform);
-            let currentX = matrix.m41;
+            // Stop any existing animation
+            scrollContent.style.animation = 'none';
             
-            // Calculate card width
-            const cardWidth = 350; // Width of one card including padding
+            // Get current transform value or default to 0
+            const computedStyle = window.getComputedStyle(scrollContent);
+            const transformValue = computedStyle.transform;
+            let currentX = 0;
+            
+            if (transformValue && transformValue !== 'none') {
+                const matrix = new DOMMatrix(transformValue);
+                currentX = matrix.m41 || 0;
+            }
+            
+            // Calculate card width (adjust based on your actual card width)
+            const cards = scrollContent.querySelectorAll('.bg-white');
+            const cardWidth = cards[0] ? cards[0].offsetWidth + 20 : 370; // Card width + margin
             const moveDistance = direction === 'prev' ? cardWidth : -cardWidth;
             
-            // Pause the CSS animation
-            scrollContent.style.animationPlayState = 'paused';
-            animationPaused = true;
+            // Calculate new position
+            let newX = currentX + moveDistance;
+            
+            // Get boundaries for wrapping
+            const totalWidth = scrollContent.scrollWidth / 2; // Since content is duplicated
+            
+            // Wrap around if needed
+            if (newX > 0) {
+                newX = -totalWidth + cardWidth;
+            } else if (Math.abs(newX) > totalWidth) {
+                newX = 0;
+            }
             
             // Apply smooth transition
             scrollContent.style.transition = 'transform 0.5s ease';
-            scrollContent.style.transform = `translateX(${currentX + moveDistance}px)`;
+            scrollContent.style.transform = `translateX(${newX}px)`;
             
-            // After transition, reset and resume animation
+            // Store the position
+            scrollPosition = newX;
+            
+            // After transition, restart animation from this position
             setTimeout(() => {
-                // Remove transition
                 scrollContent.style.transition = '';
-                
-                // Get the cards container width
-                const containerWidth = scrollContent.scrollWidth / 2;
-                
-                // Normalize position for infinite scroll
-                if (currentX + moveDistance <= -containerWidth) {
-                    scrollContent.style.transform = `translateX(0px)`;
-                } else if (currentX + moveDistance >= 0) {
-                    scrollContent.style.transform = `translateX(${-containerWidth + cardWidth}px)`;
-                }
-                
-                // Resume animation after a short delay
-                setTimeout(() => {
-                    scrollContent.style.animationPlayState = 'running';
-                    animationPaused = false;
-                }, 100);
+                // Restart the animation from the new position
+                const duration = totalWidth / 30;
+                scrollContent.style.animation = `scroll ${duration}s linear infinite`;
+                scrollContent.style.animationDelay = `${-Math.abs(newX) / 30}s`;
             }, 500);
         }
         
@@ -1236,18 +1244,36 @@
                     }
                 });
                 
+                // Add click handlers to navigation buttons
+                const prevBtn = document.getElementById('carousel-prev');
+                const nextBtn = document.getElementById('carousel-next');
+                
+                if (prevBtn) {
+                    prevBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        scrollCarousel('prev');
+                    });
+                }
+                
+                if (nextBtn) {
+                    nextBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        scrollCarousel('next');
+                    });
+                }
+                
                 // Add hover effect to nav buttons
                 const navButtons = document.querySelectorAll('.carousel-nav-btn');
                 navButtons.forEach(btn => {
                     btn.addEventListener('mouseenter', function() {
                         this.style.background = '#f3f4f6';
                         this.style.borderColor = '#9ca3af';
-                        this.style.transform = 'translateY(-50%) scale(1.1)';
                     });
                     btn.addEventListener('mouseleave', function() {
                         this.style.background = 'white';
                         this.style.borderColor = '#e5e7eb';
-                        this.style.transform = 'translateY(-50%) scale(1)';
                     });
                 });
             }

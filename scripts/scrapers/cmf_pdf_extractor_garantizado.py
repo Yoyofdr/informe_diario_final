@@ -38,8 +38,8 @@ class CMFPDFExtractorGarantizado:
             ("pdfminer", self._extract_with_pdfminer),
             ("pdfplumber", self._extract_with_pdfplumber),
             ("pypdf", self._extract_with_pypdf),
+            ("ocr_tesseract", self._extract_with_ocr),  # Mover OCR antes de binary
             ("binary_extraction", self._extract_from_binary),
-            ("ocr_tesseract", self._extract_with_ocr),
             ("pdftotext_system", self._extract_with_pdftotext),
             ("strings_command", self._extract_with_strings),
             ("force_binary", self._force_extract_binary)
@@ -193,23 +193,50 @@ class CMFPDFExtractorGarantizado:
             return ""
     
     def _extract_with_ocr(self, pdf_content: bytes) -> str:
-        """Extracción usando OCR con pytesseract"""
+        """Extracción usando OCR con pytesseract - MEJORADO"""
         try:
             from pdf2image import convert_from_bytes
             import pytesseract
             
-            # Convertir PDF a imágenes
-            images = convert_from_bytes(pdf_content, dpi=300, first_page=1, last_page=5)
+            # Convertir PDF a imágenes con mejor calidad
+            try:
+                # Primero intentar con alta resolución
+                images = convert_from_bytes(pdf_content, dpi=300, first_page=1, last_page=3)
+            except:
+                # Si falla, intentar con resolución más baja
+                try:
+                    images = convert_from_bytes(pdf_content, dpi=150, first_page=1, last_page=2)
+                except:
+                    return ""
             
             text = ""
             for i, image in enumerate(images):
                 logger.info(f"Aplicando OCR a página {i+1}")
-                # OCR con configuración para español
-                page_text = pytesseract.image_to_string(image, lang='spa+eng')
-                text += page_text + "\n"
+                
+                # Intentar diferentes configuraciones de OCR
+                try:
+                    # Primero intentar con español
+                    page_text = pytesseract.image_to_string(image, lang='spa')
+                    if not page_text or len(page_text) < 50:
+                        # Si no funciona, intentar con inglés
+                        page_text = pytesseract.image_to_string(image, lang='eng')
+                    
+                    if page_text and len(page_text) > 10:
+                        text += page_text + "\n"
+                except:
+                    # Fallback: OCR básico sin configuración de idioma
+                    try:
+                        page_text = pytesseract.image_to_string(image)
+                        if page_text:
+                            text += page_text + "\n"
+                    except:
+                        pass
             
             return text
             
+        except ImportError:
+            logger.warning("pytesseract o pdf2image no instalados")
+            return ""
         except Exception as e:
             logger.error(f"Error en OCR: {e}")
             return ""

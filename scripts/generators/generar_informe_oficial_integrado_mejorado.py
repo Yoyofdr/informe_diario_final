@@ -58,6 +58,7 @@ import time
 sys.path.append(str(BASE_DIR / 'scripts' / 'scrapers'))
 from cmf_pdf_downloader import cmf_pdf_downloader
 from cmf_pdf_processor_mejorado import cmf_pdf_processor
+from cmf_pdf_extractor_garantizado import cmf_pdf_extractor_garantizado
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -336,54 +337,55 @@ def obtener_hechos_cmf_dia(fecha):
             
             # Extraer texto del PDF si tenemos contenido
             if pdf_content and not texto_pdf:
-                try:
-                    texto_extraido, metodo = pdf_extractor.extract_text(pdf_content, max_pages=15)  # Más páginas
-                    if texto_extraido:
-                        # Procesar y limpiar el texto extraído
-                        texto_limpio, info_clave = cmf_pdf_processor.process_pdf_text(texto_extraido, entidad, materia)
-                        if texto_limpio and len(texto_limpio) > 30:
-                            texto_pdf = texto_limpio
-                            logger.info(f"✅ Texto procesado de {entidad}: {len(texto_pdf)} caracteres")
-                        else:
-                            # Aunque no sea perfecto, usar lo que tenemos
-                            texto_pdf = texto_extraido
-                            logger.warning(f"⚠️ Usando texto sin procesar para {entidad}")
-                    else:
-                        logger.warning(f"⚠️ No se extrajo texto del PDF de {entidad}")
-                except Exception as e:
-                    logger.error(f"❌ Error extrayendo texto de {entidad}: {str(e)[:100]}")
-            
-            # Procesar cualquier texto que tengamos
-            if texto_pdf:
-                # Intentar generar resumen con IA
-                resumen_ai = generar_resumen_cmf(entidad, materia, texto_pdf)
+                # USAR EXTRACTOR GARANTIZADO - SIEMPRE extrae algo
+                logger.info(f"🔍 Extrayendo texto GARANTIZADO de {entidad}...")
+                texto_extraido, metodo = cmf_pdf_extractor_garantizado.extract_text_guaranteed(pdf_content)
                 
-                # Verificar calidad del resumen
+                if texto_extraido:
+                    texto_pdf = texto_extraido
+                    logger.info(f"✅ Texto extraído con {metodo}: {len(texto_pdf)} caracteres")
+                    logger.debug(f"Preview: {texto_pdf[:200]}...")
+                else:
+                    # Esto NO debería pasar con el extractor garantizado
+                    logger.error(f"❌ ALERTA: Extractor garantizado no extrajo texto de {entidad}")
+                    # Forzar extracción de emergencia
+                    texto_pdf = f"Hecho esencial de {entidad} sobre {materia}. Documento PDF disponible pero no se pudo extraer el contenido textual."
+            
+            # SIEMPRE debemos tener texto en este punto
+            if texto_pdf:
+                # Limpiar y procesar el texto
+                texto_limpio, info_clave = cmf_pdf_processor.process_pdf_text(texto_pdf, entidad, materia)
+                
+                # Usar el texto más completo disponible
+                texto_para_resumen = texto_limpio if texto_limpio else texto_pdf
+                
+                # Generar resumen con IA
+                resumen_ai = generar_resumen_cmf(entidad, materia, texto_para_resumen)
+                
+                # NUNCA aceptar resúmenes genéricos
                 if resumen_ai and "no se especifican detalles" not in resumen_ai.lower():
                     hecho['resumen'] = resumen_ai
                     logger.info(f"✅ Resumen generado con IA para {entidad}")
                     return hecho
                 else:
-                    # El resumen es genérico, intentar mejorarlo
-                    logger.warning(f"⚠️ Resumen genérico detectado para {entidad}")
+                    # Si la IA no puede generar un buen resumen, usar el texto directo
+                    logger.warning(f"⚠️ IA no pudo generar resumen útil para {entidad}")
                     
-                    # Extraer información clave del texto
-                    _, info_clave = cmf_pdf_processor.process_pdf_text(texto_pdf, entidad, materia)
+                    # Crear resumen con los primeros 300 caracteres del texto
+                    if len(texto_para_resumen) > 300:
+                        resumen_directo = f"{entidad}: {materia}. {texto_para_resumen[:300]}..."
+                    else:
+                        resumen_directo = f"{entidad}: {materia}. {texto_para_resumen}"
                     
-                    # Generar resumen de respaldo con la información disponible
-                    resumen_fallback = cmf_pdf_processor.generate_fallback_summary(entidad, materia, info_clave)
-                    hecho['resumen'] = resumen_fallback
-                    logger.info(f"✅ Resumen de respaldo generado para {entidad}")
+                    hecho['resumen'] = resumen_directo
+                    logger.info(f"✅ Resumen directo creado para {entidad}")
                     return hecho
             else:
-                # Sin texto pero con materia, generar resumen mínimo
-                if materia:
-                    hecho['resumen'] = f"{entidad}: {materia}. Los detalles están disponibles en el documento original en el sitio web de CMF."
-                    logger.warning(f"⚠️ Resumen mínimo generado para {entidad}")
-                    return hecho  # Incluir con resumen mínimo
-                else:
-                    logger.warning(f"⚠️ Sin información para {entidad} - NO SE INCLUIRÁ")
-                    return None
+                # Esto NO debería pasar nunca con el extractor garantizado
+                logger.error(f"❌ ERROR CRÍTICO: No hay texto para {entidad} después de extracción garantizada")
+                # Aún así, incluir el hecho con información mínima
+                hecho['resumen'] = f"{entidad}: {materia}. [Error en extracción de contenido - verificar PDF original]"
+                return hecho
         
         # Limpiar caché viejo antes de empezar
         pdf_cache.clear_old()

@@ -107,7 +107,27 @@ class SEAResumenExtractor:
                             descripcion_lineas.append(siguiente)
                         
                         if descripcion_lineas:
-                            resultado['resumen'] = ' '.join(descripcion_lineas)[:2000]
+                            # Unir las líneas y tomar solo las primeras oraciones importantes
+                            texto_completo = ' '.join(descripcion_lineas)
+                            # Buscar las primeras 2-3 oraciones que describan el proyecto
+                            oraciones = texto_completo.split('.')
+                            resumen_corto = []
+                            caracteres = 0
+                            
+                            for oracion in oraciones:
+                                oracion = oracion.strip()
+                                if oracion and caracteres + len(oracion) < 400:
+                                    resumen_corto.append(oracion)
+                                    caracteres += len(oracion)
+                                    # Detenerse después de capturar la esencia del proyecto
+                                    if any(palabra in oracion.lower() for palabra in ['consiste', 'contempla', 'incluye', 'capacidad', 'superficie', 'potencia']):
+                                        if caracteres > 150:  # Ya tenemos suficiente información
+                                            break
+                            
+                            if resumen_corto:
+                                resultado['resumen'] = '. '.join(resumen_corto) + '.'
+                            else:
+                                resultado['resumen'] = texto_completo[:400]
                     
                     # Buscar monto de inversión
                     elif 'monto de inversión' in linea_lower or 'inversión' in linea_lower:
@@ -198,7 +218,18 @@ class SEAResumenExtractor:
                         # Mapear campos
                         if any(palabra in header for palabra in ['resumen', 'descripción', 'objeto']):
                             if len(contenido) > 100:
-                                resultado['resumen'] = contenido[:2000]
+                                # Tomar solo las primeras oraciones relevantes
+                                oraciones = contenido.split('.')
+                                resumen = []
+                                chars = 0
+                                for oracion in oraciones[:3]:  # Máximo 3 oraciones
+                                    if chars + len(oracion) < 400:
+                                        resumen.append(oracion.strip())
+                                        chars += len(oracion)
+                                if resumen:
+                                    resultado['resumen'] = '. '.join(resumen) + '.'
+                                else:
+                                    resultado['resumen'] = contenido[:400]
                         elif any(palabra in header for palabra in ['inversión', 'monto', 'usd', 'millones']):
                             resultado['inversion'] = contenido
                         elif any(palabra in header for palabra in ['ubicación', 'comuna', 'región']):

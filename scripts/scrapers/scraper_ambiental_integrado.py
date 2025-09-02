@@ -219,8 +219,19 @@ class ScraperAmbiental:
                                 
                                 # Agregar resumen y otros datos si los encontramos
                                 if info_extra.get('resumen'):
-                                    proyecto['resumen'] = info_extra['resumen']
-                                    logger.info(f"✅ Resumen obtenido ({len(info_extra['resumen'])} caracteres)")
+                                    # Limitar el resumen a máximo 400 caracteres
+                                    resumen_completo = info_extra['resumen']
+                                    if len(resumen_completo) > 400:
+                                        # Cortar en la última oración completa antes de 400 caracteres
+                                        resumen_corto = resumen_completo[:400]
+                                        ultimo_punto = resumen_corto.rfind('.')
+                                        if ultimo_punto > 200:  # Si hay un punto después del caracter 200
+                                            proyecto['resumen'] = resumen_corto[:ultimo_punto + 1]
+                                        else:
+                                            proyecto['resumen'] = resumen_corto[:397] + '...'
+                                    else:
+                                        proyecto['resumen'] = resumen_completo
+                                    logger.info(f"✅ Resumen obtenido ({len(proyecto['resumen'])} caracteres)")
                                 
                                 # Agregar inversión si la encontramos
                                 if info_extra.get('inversion') and not proyecto.get('inversion'):
@@ -242,6 +253,14 @@ class ScraperAmbiental:
                         if proyecto.get('inversion'):
                             resumen_basico += f". Inversión: {proyecto['inversion']}"
                         proyecto['resumen'] = resumen_basico
+                    
+                    # Agregar inversión como campo separado si está en el resumen
+                    if 'USD' in proyecto.get('resumen', '') or 'MM' in proyecto.get('resumen', ''):
+                        import re
+                        # Buscar patrón de inversión en el resumen
+                        match = re.search(r'(USD?\s*[\d,.]+(\s*M+|\s*millones)?)', proyecto['resumen'], re.IGNORECASE)
+                        if match and not proyecto.get('inversion'):
+                            proyecto['inversion'] = match.group(1)
                     
                     resultado['proyectos_sea'].append(proyecto)
                     

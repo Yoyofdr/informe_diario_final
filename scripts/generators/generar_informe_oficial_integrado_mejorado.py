@@ -57,6 +57,7 @@ import time
 # Importar el descargador especializado de CMF
 sys.path.append(str(BASE_DIR / 'scripts' / 'scrapers'))
 from cmf_pdf_downloader import cmf_pdf_downloader
+from cmf_pdf_processor_mejorado import cmf_pdf_processor
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -337,28 +338,52 @@ def obtener_hechos_cmf_dia(fecha):
             if pdf_content and not texto_pdf:
                 try:
                     texto_extraido, metodo = pdf_extractor.extract_text(pdf_content, max_pages=15)  # Más páginas
-                    if texto_extraido and len(texto_extraido.strip()) > 50:
-                        texto_pdf = texto_extraido
-                        logger.info(f"✅ Texto extraído de {entidad} con {metodo} ({len(texto_pdf)} caracteres)")
+                    if texto_extraido:
+                        # Procesar y limpiar el texto extraído
+                        texto_limpio, info_clave = cmf_pdf_processor.process_pdf_text(texto_extraido, entidad, materia)
+                        if texto_limpio and len(texto_limpio) > 30:
+                            texto_pdf = texto_limpio
+                            logger.info(f"✅ Texto procesado de {entidad}: {len(texto_pdf)} caracteres")
+                        else:
+                            # Aunque no sea perfecto, usar lo que tenemos
+                            texto_pdf = texto_extraido
+                            logger.warning(f"⚠️ Usando texto sin procesar para {entidad}")
                     else:
-                        logger.warning(f"⚠️ Texto extraído insuficiente del PDF de {entidad}")
+                        logger.warning(f"⚠️ No se extrajo texto del PDF de {entidad}")
                 except Exception as e:
                     logger.error(f"❌ Error extrayendo texto de {entidad}: {str(e)[:100]}")
             
-            # Solo incluir si tenemos texto extraído
+            # Procesar cualquier texto que tengamos
             if texto_pdf:
+                # Intentar generar resumen con IA
                 resumen_ai = generar_resumen_cmf(entidad, materia, texto_pdf)
-                if resumen_ai:
+                
+                # Verificar calidad del resumen
+                if resumen_ai and "no se especifican detalles" not in resumen_ai.lower():
                     hecho['resumen'] = resumen_ai
                     logger.info(f"✅ Resumen generado con IA para {entidad}")
-                    return hecho  # Incluir solo si tenemos resumen real
+                    return hecho
                 else:
-                    logger.warning(f"⚠️ No se pudo generar resumen AI para {entidad} - NO SE INCLUIRÁ")
-                    return None  # No incluir si no hay resumen
+                    # El resumen es genérico, intentar mejorarlo
+                    logger.warning(f"⚠️ Resumen genérico detectado para {entidad}")
+                    
+                    # Extraer información clave del texto
+                    _, info_clave = cmf_pdf_processor.process_pdf_text(texto_pdf, entidad, materia)
+                    
+                    # Generar resumen de respaldo con la información disponible
+                    resumen_fallback = cmf_pdf_processor.generate_fallback_summary(entidad, materia, info_clave)
+                    hecho['resumen'] = resumen_fallback
+                    logger.info(f"✅ Resumen de respaldo generado para {entidad}")
+                    return hecho
             else:
-                # Sin texto: NO incluir el hecho
-                logger.warning(f"⚠️ Sin texto extraído para {entidad} - NO SE INCLUIRÁ")
-                return None  # Retornar None para excluir este hecho
+                # Sin texto pero con materia, generar resumen mínimo
+                if materia:
+                    hecho['resumen'] = f"{entidad}: {materia}. Los detalles están disponibles en el documento original en el sitio web de CMF."
+                    logger.warning(f"⚠️ Resumen mínimo generado para {entidad}")
+                    return hecho  # Incluir con resumen mínimo
+                else:
+                    logger.warning(f"⚠️ Sin información para {entidad} - NO SE INCLUIRÁ")
+                    return None
         
         # Limpiar caché viejo antes de empezar
         pdf_cache.clear_old()

@@ -44,12 +44,60 @@ class ScraperProyectosLeyIntegrado:
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
         })
     
-    def obtener_proyectos_dia_anterior(self) -> List[Dict]:
+    def _fechas_equivalentes(self, fecha1: str, fecha2: str) -> bool:
         """
-        Obtiene solo los proyectos ingresados el día anterior
+        Compara dos fechas en formato DD/MM/YYYY permitiendo variaciones
+        como falta de ceros (2/9/2025 vs 02/09/2025)
         """
-        # Calcular fecha del día anterior
-        ayer = datetime.now() - timedelta(days=1)
+        try:
+            # Normalizar ambas fechas a datetime y comparar
+            from datetime import datetime
+            
+            # Intentar parsear fecha1
+            for fmt in ['%d/%m/%Y', '%d-%m-%Y', '%Y-%m-%d']:
+                try:
+                    dt1 = datetime.strptime(fecha1, fmt)
+                    break
+                except:
+                    continue
+            else:
+                return False
+            
+            # Intentar parsear fecha2
+            for fmt in ['%d/%m/%Y', '%d-%m-%Y', '%Y-%m-%d']:
+                try:
+                    dt2 = datetime.strptime(fecha2, fmt)
+                    break
+                except:
+                    continue
+            else:
+                return False
+            
+            return dt1 == dt2
+        except:
+            return False
+    
+    def obtener_proyectos_dia_anterior(self, fecha_informe: str = None) -> List[Dict]:
+        """
+        Obtiene los proyectos ingresados el día anterior
+        NOTA: Para el informe del día N, incluye proyectos del día N-1
+        
+        Args:
+            fecha_informe: Fecha del informe en formato DD-MM-YYYY. Si es None, usa fecha actual
+        """
+        # Si se proporciona fecha del informe, usar el día anterior a esa fecha
+        if fecha_informe:
+            try:
+                # Convertir DD-MM-YYYY a datetime
+                fecha_informe_dt = datetime.strptime(fecha_informe, "%d-%m-%Y")
+                ayer = fecha_informe_dt - timedelta(days=1)
+            except:
+                # Si hay error en el formato, usar fecha actual
+                ayer = datetime.now() - timedelta(days=1)
+        else:
+            # Calcular fecha del día anterior a hoy
+            ayer = datetime.now() - timedelta(days=1)
+        
         fecha_busqueda = ayer.strftime('%d/%m/%Y')
         
         logger.info(f"Buscando proyectos del {fecha_busqueda}")
@@ -61,17 +109,49 @@ class ScraperProyectosLeyIntegrado:
         
         # Filtrar solo los que realmente son del día anterior
         proyectos_filtrados = []
+        proyectos_vistos = set()  # Para evitar duplicados por número de boletín
+        
         for proyecto in proyectos_recientes:
             # Primero obtener detalles para tener la fecha real
-            proyecto_con_detalle = self.obtener_detalle_proyecto(proyecto)
+            try:
+                proyecto_con_detalle = self.obtener_detalle_proyecto(proyecto)
+            except Exception as e:
+                logger.error(f"Error obteniendo detalles del proyecto {proyecto.get('boletin', 'desconocido')}: {e}")
+                continue
             
             # Verificar si la fecha de ingreso coincide con ayer
             fecha_ingreso = proyecto_con_detalle.get('fecha_ingreso', '')
-            if fecha_ingreso == fecha_busqueda:
+            boletin = proyecto_con_detalle.get('boletin', '')
+            
+            # LOG CRÍTICO: Mostrar TODAS las fechas que se están comparando
+            logger.info(f"Comparando fechas - Buscada: '{fecha_busqueda}' vs Encontrada: '{fecha_ingreso}' para boletín {boletin}")
+            
+            # Evitar duplicados por número de boletín
+            if boletin and boletin in proyectos_vistos:
+                logger.debug(f"Proyecto {boletin} ya procesado, omitiendo duplicado")
+                continue
+            
+            # Mejorar comparación de fechas - normalizar formatos
+            fecha_match = False
+            
+            if fecha_ingreso:
+                # Comparación exacta
+                if fecha_ingreso == fecha_busqueda:
+                    fecha_match = True
+                # Comparación flexible (sin ceros)
+                elif self._fechas_equivalentes(fecha_ingreso, fecha_busqueda):
+                    fecha_match = True
+                    logger.warning(f"Fechas equivalentes pero formato diferente: '{fecha_ingreso}' vs '{fecha_busqueda}'")
+                
+            if fecha_match:
                 proyectos_filtrados.append(proyecto_con_detalle)
-                logger.info(f"Proyecto {proyecto_con_detalle.get('boletin')} ingresado el {fecha_ingreso}")
+                if boletin:
+                    proyectos_vistos.add(boletin)
+                logger.info(f"✅ Proyecto {boletin} incluido - fecha {fecha_ingreso}")
+            else:
+                logger.warning(f"❌ Proyecto {boletin} excluido - fecha no coincide: '{fecha_ingreso}' != '{fecha_busqueda}'")
         
-        logger.info(f"Total proyectos realmente ingresados el {fecha_busqueda}: {len(proyectos_filtrados)}")
+        logger.info(f"Total proyectos únicos ingresados el {fecha_busqueda}: {len(proyectos_filtrados)}")
         
         return proyectos_filtrados
     

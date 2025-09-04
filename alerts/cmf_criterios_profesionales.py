@@ -560,9 +560,10 @@ def filtrar_hechos_profesional(hechos, max_hechos=12):
     - EXCLUIR siempre:
       * Todos los fondos de inversión
       * Colocación de valores (bonos, acciones, etc.)
+      * Todas las compañías de seguros
       * Hechos con relevancia < 7
     """
-    # Primero, filtrar hechos relacionados con fondos y colocación de valores
+    # Primero, filtrar hechos relacionados con fondos, colocación de valores y compañías de seguros
     hechos_filtrados = []
     for hecho in hechos:
         titulo = hecho.get('titulo', '').lower()
@@ -585,13 +586,31 @@ def filtrar_hechos_profesional(hechos, max_hechos=12):
                                           'colocación en el mercado', 'colocacion en el mercado',
                                           'colocación internacional', 'colocacion internacional'])
         
-        if not es_fondo and not es_colocacion:
+        # Excluir si es compañía de seguros
+        es_seguro = any(palabra in entidad 
+                       for palabra in ['seguro', 'seguros', 'aseguradora', 'aseguradoras',
+                                      'insurance', 'vida security', 'metlife', 'consorcio seguros',
+                                      'bice vida', 'euroamerica', 'ohio national', 'principal seguros',
+                                      'zurich santander', 'confuturo', 'chilena consolidada',
+                                      'sura', 'mapfre', 'liberty', 'rsa', 'hdi', 'bci seguros',
+                                      'santander seguros', 'compañía de seguros', 'compania de seguros',
+                                      'cia de seguros', 'cia. de seguros', 'cía de seguros',
+                                      'cía. de seguros', 'rigel', 'reale chile'])
+        
+        # También excluir si la materia menciona seguros específicamente
+        es_materia_seguros = any(palabra in materia 
+                                for palabra in ['poliza', 'póliza', 'siniestro', 'prima', 'reaseguro',
+                                              'cobertura de seguro', 'contrato de seguro'])
+        
+        if not es_fondo and not es_colocacion and not es_seguro and not es_materia_seguros:
             hechos_filtrados.append(hecho)
         else:
             if es_fondo:
                 print(f"  → Excluido (es fondo): {hecho.get('entidad', '')} - {hecho.get('titulo', '')[:50]}...")
             elif es_colocacion:
                 print(f"  → Excluido (colocación de valores): {hecho.get('entidad', '')} - {hecho.get('titulo', '')[:50]}...")
+            elif es_seguro or es_materia_seguros:
+                print(f"  → Excluido (compañía de seguros): {hecho.get('entidad', '')} - {hecho.get('titulo', '')[:50]}...")
     
     # Calcular relevancia para cada hecho que no es fondo ni colocación
     hechos_evaluados = []
@@ -636,7 +655,7 @@ def filtrar_hechos_profesional(hechos, max_hechos=12):
     # Log de filtrado para transparencia
     print(f"\n=== Filtrado Profesional CMF ===")
     print(f"Total hechos originales: {len(hechos)}")
-    print(f"- Excluidos (fondos + colocaciones): {len(hechos) - len(hechos_filtrados)}")
+    print(f"- Excluidos (fondos + colocaciones + seguros): {len(hechos) - len(hechos_filtrados)}")
     print(f"- Hechos con relevancia >= 7 (incluidos): {len(hechos_relevantes)}")
     print(f"- Hechos con relevancia < 7 (excluidos): {len(hechos_evaluados) - len(hechos_relevantes)}")
     print(f"Total hechos seleccionados: {len(hechos_finales)}")
@@ -649,6 +668,7 @@ def filtrar_hechos_profesional(hechos, max_hechos=12):
     print(f"- Búsqueda inversionistas: SIEMPRE incluidos")
     print(f"- Aumentos/disminuciones capital: SIEMPRE incluidos")
     print(f"- Colocación de valores: SIEMPRE EXCLUIDOS")
+    print(f"- Compañías de seguros: SIEMPRE EXCLUIDAS")
     print(f"================================\n")
     
     return hechos_finales

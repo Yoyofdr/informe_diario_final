@@ -63,6 +63,19 @@ class CMFPDFExtractorGarantizado:
         # ÚLTIMO RECURSO: Extraer TODO el texto posible del binario
         logger.warning("⚠️ Todos los métodos fallaron, extrayendo forzadamente del binario")
         forced_text = self._ultimate_force_extraction(pdf_content)
+        
+        # Validar que el texto forzado sea legible antes de retornarlo
+        if forced_text:
+            # Contar caracteres legibles vs basura
+            import re
+            legible_chars = len(re.findall(r'[a-zA-Z0-9áéíóúñÑÁÉÍÓÚ\s\.,;:\-]', forced_text))
+            total_chars = len(forced_text)
+            legibility_ratio = (legible_chars / total_chars) if total_chars > 0 else 0
+            
+            if legibility_ratio < 0.5:  # Menos del 50% legible = texto basura
+                logger.warning(f"⚠️ Texto forzado es ilegible ({legibility_ratio*100:.1f}% legible), retornando mensaje genérico")
+                return "No se pudo extraer texto legible del PDF. Documento posiblemente corrupto o con formato no compatible.", "extraction_failed"
+        
         return forced_text, "forced_extraction"
     
     def _extract_with_pypdf2(self, pdf_content: bytes) -> str:

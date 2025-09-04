@@ -51,8 +51,10 @@ class ScraperContraloriaReglamentos:
         """
         Obtiene los reglamentos de una fecha específica
         """
+        # Generar múltiples formatos de fecha para mayor compatibilidad
         fecha_str = fecha.strftime('%d/%m/%Y')
-        logger.info(f"Buscando reglamentos del {fecha_str}")
+        fecha_str_sin_cero = fecha.strftime('%-d/%-m/%Y') if hasattr(fecha, 'strftime') else fecha.strftime('%d/%m/%Y').replace('/0', '/')
+        logger.info(f"Buscando reglamentos del {fecha_str} (también probando {fecha_str_sin_cero})")
         
         driver = None
         try:
@@ -86,7 +88,14 @@ class ScraperContraloriaReglamentos:
         Extrae los reglamentos de la tabla HTML
         """
         reglamentos = []
+        # Múltiples formatos de fecha para comparación
         fecha_objetivo = fecha.strftime('%d/%m/%Y')
+        # Formato sin ceros a la izquierda (1/9/2025 en lugar de 01/09/2025)
+        fecha_sin_ceros = f"{fecha.day}/{fecha.month}/{fecha.year}"
+        # Formato con ceros garantizados
+        fecha_con_ceros = f"{fecha.day:02d}/{fecha.month:02d}/{fecha.year}"
+        
+        logger.info(f"Buscando reglamentos con fechas: {fecha_con_ceros}, {fecha_sin_ceros}")
         
         # Buscar la tabla principal (debería ser la primera con muchas filas)
         tablas = soup.find_all('table')
@@ -108,7 +117,9 @@ class ScraperContraloriaReglamentos:
         
         for i, fila in enumerate(filas[1:], 1):  # Saltar header
             try:
-                reglamento = self._extraer_info_reglamento(fila, fecha_objetivo)
+                # Pasar todos los formatos de fecha posibles
+                fechas_objetivo = [fecha_con_ceros, fecha_sin_ceros, fecha_objetivo]
+                reglamento = self._extraer_info_reglamento(fila, fechas_objetivo)
                 if reglamento:
                     reglamentos.append(reglamento)
                     logger.info(f"Reglamento encontrado: {reglamento.get('numero', 'N/A')}")
@@ -122,7 +133,7 @@ class ScraperContraloriaReglamentos:
         
         return reglamentos
     
-    def _extraer_info_reglamento(self, fila, fecha_objetivo: str) -> Optional[Dict]:
+    def _extraer_info_reglamento(self, fila, fechas_objetivo: list) -> Optional[Dict]:
         """
         Extrae información de un reglamento desde una fila de tabla
         Estructura esperada: [Expandir][Número][Año][Ministerio][Subsecretaría][Materia][Fecha][Estado][Descarga]
@@ -172,8 +183,31 @@ class ScraperContraloriaReglamentos:
                 estado_text = celdas[7].get_text(strip=True)
                 reglamento['estado'] = estado_text
             
-            # Solo incluir si es exactamente la fecha objetivo (día inmediatamente anterior)
-            if fecha_text != fecha_objetivo:
+            # Verificar si la fecha coincide con alguno de los formatos objetivo
+            fecha_coincide = False
+            
+            # Log para debugging
+            if fecha_text and any(c.isdigit() for c in fecha_text):
+                logger.debug(f"Comparando fecha del reglamento '{fecha_text}' con objetivos: {fechas_objetivo}")
+            
+            for fecha_obj in fechas_objetivo:
+                if fecha_text == fecha_obj:
+                    fecha_coincide = True
+                    logger.info(f"✅ Fecha coincide exactamente: {fecha_text} == {fecha_obj}")
+                    break
+                # También probar sin espacios y con diferentes separadores
+                fecha_normalizada = fecha_text.replace(' ', '').replace('-', '/').replace('.', '/')
+                fecha_obj_normalizada = fecha_obj.replace(' ', '').replace('-', '/').replace('.', '/')
+                if fecha_normalizada == fecha_obj_normalizada:
+                    fecha_coincide = True
+                    logger.info(f"✅ Fecha coincide (normalizada): {fecha_text} -> {fecha_normalizada} == {fecha_obj_normalizada}")
+                    break
+            
+            # Solo incluir si coincide con la fecha objetivo
+            if not fecha_coincide:
+                # Log solo si parece ser una fecha válida
+                if fecha_text and '/' in fecha_text:
+                    logger.debug(f"❌ Fecha no coincide: '{fecha_text}' no es ninguna de {fechas_objetivo}")
                 return None
             
             # Es exactamente la fecha que buscamos

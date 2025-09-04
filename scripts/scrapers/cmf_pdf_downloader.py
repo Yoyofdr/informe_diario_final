@@ -98,7 +98,7 @@ class CMFPDFDownloader:
             response = self.session.get(
                 url, 
                 headers=headers,
-                timeout=60,
+                timeout=30,  # Reducir timeout para fallar más rápido
                 allow_redirects=True,
                 stream=True
             )
@@ -224,6 +224,16 @@ class CMFPDFDownloader:
         """Verifica si el contenido es un PDF válido"""
         if not content or len(content) < 100:
             return False
+        
+        # Verificar que no sea HTML (error común)
+        if b'<html' in content[:1000].lower() or b'<!doctype' in content[:1000].lower():
+            logger.warning("Contenido es HTML, no PDF")
+            return False
+        
+        # Verificar tamaño máximo (20MB para evitar problemas de memoria)
+        if len(content) > 20 * 1024 * 1024:
+            logger.warning(f"PDF demasiado grande: {len(content) / 1024 / 1024:.1f}MB")
+            # Aún así intentar procesarlo pero con advertencia
         
         # Verificar header de PDF
         if content[:4] == b'%PDF':

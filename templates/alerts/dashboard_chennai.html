@@ -256,7 +256,7 @@
         <div class="row justify-content-center">
             <div class="col-lg-8 col-md-10 col-12">
                 <div class="card p-4 mb-4">
-                    <h2 class="mb-3">Hola{% if user.first_name %}, {{ user.first_name }}{% endif %}{% if organizacion %} de {{ organizacion.nombre }}{% endif %}</h2>
+                    <h2 class="mb-3">Hola{% if user.first_name %}, {{ user.first_name }}{% endif %}</h2>
                     <p class="mb-2"><strong>Estado:</strong> {{ estado }}</p>
                     {% if organizacion %}
                     <p class="mb-2"><strong>Organización:</strong> {{ organizacion.nombre }}</p>

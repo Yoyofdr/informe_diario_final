@@ -1,0 +1,35 @@
+[
+  {
+    "fecha": "2025-09-01",
+    "timestamp": "2025-09-04T10:25:19.956187",
+    "stats": {
+      "total": 20,
+      "exitosos": 19,
+      "fallidos": 1,
+      "timeout": 0,
+      "texto_corrupto": 0
+    }
+  },
+  {
+    "fecha": "2025-09-02",
+    "timestamp": "2025-09-04T10:25:19.956415",
+    "stats": {
+      "total": 22,
+      "exitosos": 18,
+      "fallidos": 2,
+      "timeout": 1,
+      "texto_corrupto": 1
+    }
+  },
+  {
+    "fecha": "2025-09-03",
+    "timestamp": "2025-09-04T10:25:19.956633",
+    "stats": {
+      "total": 21,
+      "exitosos": 21,
+      "fallidos": 0,
+      "timeout": 0,
+      "texto_corrupto": 0
+    }
+  }
+]

@@ -10,15 +10,21 @@ load_dotenv()
 def extraer_informacion_relevante_pdf(texto_pdf):
     """
     Extrae la información más relevante del PDF para generar un mejor resumen
+    Mejorado para capturar mejor la información de hechos esenciales
     """
     if not texto_pdf or len(texto_pdf) < 100:
         return ""
     
+    # Limpiar texto primero
+    import re
+    texto_limpio = re.sub(r'\s+', ' ', texto_pdf)  # Normalizar espacios
+    
     # Buscar secciones clave en el PDF
     lineas = texto_pdf.split('\n')
     info_relevante = []
+    lineas_agregadas = set()  # Para evitar duplicados
     
-    # Palabras clave que indican información importante
+    # Palabras clave ampliadas y mejoradas
     palabras_clave = [
         'acuerdo', 'aprobó', 'decidió', 'resolvió', 'monto', 'precio',
         'millones', 'UF', '$', 'fecha', 'plazo', 'condiciones',
@@ -28,20 +34,61 @@ def extraer_informacion_relevante_pdf(texto_pdf):
         'crédito', 'inversión', 'proyecto', 'renuncia', 'nombramiento',
         'gerente', 'director', 'cambio', 'modificación', 'aumento',
         'disminución', 'distribución', 'pago', 'vencimiento', 'tasa',
-        'interés', 'colocación', 'suscripción', 'oferta', 'licitación'
+        'interés', 'colocación', 'suscripción', 'oferta', 'licitación',
+        # Nuevas palabras clave para mejor captura
+        'informo', 'comunico', 'anuncio', 'notifica', 'presenta',
+        'porcentaje', '%', 'ejercicio', 'período', 'trimestre',
+        'resultado', 'ingreso', 'gasto', 'activo', 'pasivo',
+        'patrimonio', 'acción', 'título', 'valor', 'bolsa',
+        'superintendencia', 'cmf', 'comisión', 'mercado', 'financiero'
     ]
     
-    for i, linea in enumerate(lineas[:200]):  # Revisar las primeras 200 líneas
-        linea_lower = linea.lower()
-        if any(palabra in linea_lower for palabra in palabras_clave):
-            # Incluir contexto (línea anterior y siguiente si existen)
-            if i > 0:
-                info_relevante.append(lineas[i-1])
-            info_relevante.append(linea)
-            if i < len(lineas) - 1:
-                info_relevante.append(lineas[i+1])
+    # Buscar también el cuerpo principal del mensaje
+    inicio_cuerpo = False
+    for i, linea in enumerate(lineas):
+        linea_stripped = linea.strip()
+        
+        # Detectar inicio del cuerpo del mensaje
+        if any(frase in linea.lower() for frase in ['de mi consideración', 'de nuestra consideración', 'presente', 'ref:']):
+            inicio_cuerpo = True
+        
+        # Si estamos en el cuerpo, capturar las líneas importantes
+        if inicio_cuerpo and i < 300:  # Limitar a las primeras 300 líneas
+            if len(linea_stripped) > 20:  # Ignorar líneas muy cortas
+                linea_lower = linea.lower()
+                # Agregar líneas con palabras clave
+                if any(palabra in linea_lower for palabra in palabras_clave):
+                    # Incluir contexto ampliado (2 líneas antes y después)
+                    for j in range(max(0, i-2), min(len(lineas), i+3)):
+                        if j not in lineas_agregadas and len(lineas[j].strip()) > 10:
+                            info_relevante.append(lineas[j])
+                            lineas_agregadas.add(j)
+        
+        # También capturar líneas que empiezan con números o viñetas (típico de listas)
+        elif re.match(r'^[\d\-•·]\s*\)', linea_stripped) or re.match(r'^\d+\.', linea_stripped):
+            if i not in lineas_agregadas:
+                info_relevante.append(linea)
+                lineas_agregadas.add(i)
     
-    # Limitar a 4000 caracteres de información relevante
+    # Si no encontramos mucha información relevante, tomar el cuerpo principal
+    if len(info_relevante) < 5:
+        # Buscar el texto después del saludo hasta antes de la despedida
+        texto_cuerpo = []
+        en_cuerpo = False
+        for linea in lineas:
+            if 'consideración' in linea.lower() or 'presente' in linea.lower():
+                en_cuerpo = True
+                continue
+            if en_cuerpo:
+                if any(despedida in linea.lower() for despedida in ['atentamente', 'cordialmente', 'saludos', 'sin otro particular']):
+                    break
+                if len(linea.strip()) > 10:
+                    texto_cuerpo.append(linea)
+        
+        if texto_cuerpo:
+            return '\n'.join(texto_cuerpo[:50])[:4000]  # Máximo 50 líneas o 4000 chars
+    
+    # Retornar la información relevante encontrada
     texto_relevante = '\n'.join(info_relevante)[:4000]
     return texto_relevante if texto_relevante else texto_pdf[:4000]
 
@@ -76,33 +123,31 @@ def generar_resumen_cmf_openai(entidad, materia, texto_pdf=None):
             return f"{entidad} comunicó {materia}. Documento sin información detallada disponible."
         
         # Preparar el contexto con información más específica
-        contexto = f"Empresa: {entidad}\nTipo de hecho: {materia}\n\nInformación clave del documento:\n{info_relevante}"
+        contexto = f"Empresa: {entidad}\nTipo de hecho: {materia}\n\nContenido del documento:\n{info_relevante}"
         
-        # Prompt mejorado para obtener información más específica
-        prompt = f"""Eres un analista financiero senior especializado en el mercado chileno. Analiza este hecho esencial y genera un resumen ESPECÍFICO Y DETALLADO.
+        # Prompt mejorado y simplificado para mejor comprensión
+        prompt = f"""Analiza este hecho esencial de la CMF chilena y genera un resumen profesional.
 
 {contexto}
 
-GENERA UN RESUMEN QUE INCLUYA:
-1. La acción ESPECÍFICA tomada (con montos, fechas o porcentajes SOLO si están disponibles en el documento)
-2. El impacto CONCRETO para los accionistas/inversionistas
-3. Cualquier dato numérico relevante que aparezca en el documento
+Instrucciones:
+1. Lee cuidadosamente el contenido del documento proporcionado
+2. Identifica la información más importante (montos, fechas, nombres, decisiones)
+3. Genera un resumen claro y específico
 
-REGLAS CRÍTICAS - PROHIBIDO INVENTAR:
-- SOLO menciona información que aparezca EXPLÍCITAMENTE en el documento proporcionado
-- Si hay montos en el documento, inclúyelos
-- Si hay fechas específicas en el documento, menciónalas
-- Si hay nombres o porcentajes en el documento, especifícalos
-- Si NO hay datos específicos, describe la acción sin inventar números
-- NUNCA inventes montos, fechas, nombres o porcentajes que no estén en el texto
-- NO uses frases genéricas como "comunicó información" o "presentó documentos"
-- NO incluyas emojis ni caracteres especiales
-- Si el documento no tiene información clara, indica que "no se especifican detalles en el documento"
-- NUNCA inventes nombres como "Juan Pérez" o "María González"
-- NUNCA digas "no tengo acceso" o "lamentablemente"
-- Máximo 3 líneas
+Formato del resumen:
+- Comienza con: "{entidad} [verbo de acción] ..."
+- Verbos sugeridos: anunció, aprobó, informó, comunicó, acordó, designó, convocó
+- Incluye datos específicos SI están en el documento (montos, fechas, nombres)
+- Si no hay detalles específicos, describe la acción general
+- Máximo 2-3 oraciones
 
-Responde SOLO con el resumen basado ÚNICAMENTE en la información proporcionada."""
+Ejemplos de buenos resúmenes:
+- "EMPRESA X aprobó el pago de dividendo definitivo de $45 por acción con cargo a utilidades 2024. El pago se realizará el 15 de mayo a accionistas inscritos."
+- "EMPRESA Y designó a Pedro Pérez como nuevo gerente general en reemplazo de Juan González. El cambio será efectivo desde el 1 de abril."
+- "EMPRESA Z acordó la emisión de bonos por UF 2.000.000 a 10 años plazo con tasa de 3,5% anual."
+
+IMPORTANTE: Solo usa información que aparezca en el documento. No inventes datos."""
 
         headers = {
             "Authorization": f"Bearer {api_key}",
@@ -150,20 +195,7 @@ Responde SOLO con el resumen basado ÚNICAMENTE en la información proporcionada
             resumen_lower = resumen.lower()
             for frase in frases_prohibidas:
                 if frase in resumen_lower:
-                    # En lugar de mensaje genérico, usar el texto directo
-                    if texto_pdf and len(texto_pdf) > 100:
-                        # Extraer las primeras palabras legibles
-                        palabras_legibles = []
-                        for palabra in texto_pdf.split():
-                            if palabra.isalnum() or any(c.isalpha() for c in palabra):
-                                palabras_legibles.append(palabra)
-                            if len(palabras_legibles) >= 30:
-                                break
-                        
-                        if palabras_legibles:
-                            extracto = ' '.join(palabras_legibles)
-                            return f"{entidad} - {materia}: {extracto[:150]}..."
-                    
+                    # Crear resumen descriptivo profesional sin texto crudo
                     return f"{entidad} informó sobre {materia}. Consultar documento original en CMF para detalles completos."
             
             # Detectar patrones de invención
@@ -284,20 +316,7 @@ Responde SOLO con el resumen basado ÚNICAMENTE en la información proporcionada
             resumen_lower = resumen.lower()
             for frase in frases_prohibidas:
                 if frase in resumen_lower:
-                    # En lugar de mensaje genérico, usar el texto directo
-                    if texto_pdf and len(texto_pdf) > 100:
-                        # Extraer las primeras palabras legibles
-                        palabras_legibles = []
-                        for palabra in texto_pdf.split():
-                            if palabra.isalnum() or any(c.isalpha() for c in palabra):
-                                palabras_legibles.append(palabra)
-                            if len(palabras_legibles) >= 30:
-                                break
-                        
-                        if palabras_legibles:
-                            extracto = ' '.join(palabras_legibles)
-                            return f"{entidad} - {materia}: {extracto[:150]}..."
-                    
+                    # Crear resumen descriptivo profesional sin texto crudo
                     return f"{entidad} informó sobre {materia}. Consultar documento original en CMF para detalles completos."
             
             # Detectar patrones de invención

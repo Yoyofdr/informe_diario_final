@@ -265,6 +265,8 @@ def obtener_hechos_cmf_dia(fecha):
             materia = hecho.get('materia', hecho.get('titulo', ''))
             url_pdf = hecho.get('url_pdf', '')
             
+            logger.info(f"🔄 Iniciando procesamiento de {entidad[:30]}...")
+            
             # Si no hay URL de PDF, intentar construirla basado en patrones conocidos
             if not url_pdf:
                 # Intentar generar URL basada en fecha y número
@@ -310,7 +312,7 @@ def obtener_hechos_cmf_dia(fecha):
                     pdf_cache.put(url_pdf, pdf_content)
                 else:
                     # Si no se pudo descargar el PDF, intentar con URLs alternativas
-                    logger.warning(f"No se pudo descargar PDF para {entidad}, intentando alternativas...")
+                    logger.warning(f"⚠️ No se pudo descargar PDF para {entidad}, intentando alternativas...")
                     
                     alternative_urls = cmf_pdf_downloader.get_alternative_urls(url_pdf)
                     for alt_url in alternative_urls:
@@ -428,8 +430,8 @@ def obtener_hechos_cmf_dia(fecha):
                                         break
                                 
                                 if len(palabras_utiles) > 10:
-                                    extracto = ' '.join(palabras_utiles)
-                                    resumen_directo = f"{entidad} - {materia}: {extracto[:200]}..."
+                                    # No usar texto crudo, crear resumen descriptivo profesional
+                                    resumen_directo = f"{entidad} comunicó {materia}. Consultar documento original en CMF para detalles específicos."
                                 else:
                                     resumen_directo = f"{entidad} informó sobre {materia}. El contenido del documento requiere análisis adicional."
                             else:
@@ -455,7 +457,8 @@ def obtener_hechos_cmf_dia(fecha):
         logger.info(f"Procesando {len(hechos_filtrados)} hechos CMF en paralelo...")
         
         hechos_procesados = []
-        with ThreadPoolExecutor(max_workers=5) as executor:
+        # Reducir workers para PDFs escaneados que requieren OCR
+        with ThreadPoolExecutor(max_workers=3) as executor:
             # Enviar todos los trabajos al pool
             futures = {executor.submit(procesar_hecho_cmf, hecho): hecho 
                       for hecho in hechos_filtrados}
@@ -463,15 +466,46 @@ def obtener_hechos_cmf_dia(fecha):
             # Recoger resultados conforme se completan
             for future in as_completed(futures):
                 try:
-                    resultado = future.result(timeout=120)  # Timeout global de 2 minutos por hecho
+                    # Aumentar timeout para PDFs que requieren OCR
+                    resultado = future.result(timeout=180)  # Timeout de 3 minutos por hecho
                     # Solo incluir hechos que fueron procesados exitosamente (no None)
                     if resultado is not None:
                         hechos_procesados.append(resultado)
+                        logger.info(f"✅ Procesado exitosamente: {resultado.get('entidad', '')[:30]}")
                 except Exception as e:
                     hecho_original = futures[future]
-                    logger.error(f"Error procesando {hecho_original.get('entidad', 'desconocido')}: {e}")
+                    entidad = hecho_original.get('entidad', 'desconocido')
+                    materia = hecho_original.get('materia', 'sin materia')
+                    logger.error(f"❌ Error procesando {entidad}: {str(e)[:100]}")
+                    # Incluir hecho con resumen genérico cuando falla el procesamiento
+                    hecho_error = hecho_original.copy()
+                    hecho_error['resumen'] = f"{entidad} comunicó {materia}. [Error al procesar - consultar documento original en CMF]"
+                    hechos_procesados.append(hecho_error)
         
         logger.info(f"✅ Procesamiento de hechos CMF completado: {len(hechos_procesados)} de {len(hechos_filtrados)} incluidos")
+        
+        # Registrar estadísticas para monitoreo
+        try:
+            from scripts.monitoring.cmf_monitor import log_cmf_stats
+            
+            # Contar estadísticas
+            exitosos = len([h for h in hechos_procesados if h.get('resumen') and '[Error' not in h.get('resumen', '')])
+            fallidos = len(hechos_filtrados) - len(hechos_procesados)
+            texto_corrupto = len([h for h in hechos_procesados if '[Error al procesar' in h.get('resumen', '')])
+            
+            health = log_cmf_stats(
+                fecha=fecha_anterior_str,
+                total=len(hechos_filtrados),
+                exitosos=exitosos,
+                fallidos=fallidos,
+                texto_corrupto=texto_corrupto
+            )
+            
+            # Alertar si hay problemas
+            if health.get('status') == 'crítico':
+                logger.error(f"🚨 ALERTA: Sistema CMF en estado CRÍTICO - Tasa de éxito: {health.get('success_rate', 0)*100:.1f}%")
+        except Exception as e:
+            logger.debug(f"No se pudo registrar monitoreo: {e}")
         
         return hechos_procesados
         
@@ -527,14 +561,29 @@ def generar_informe_oficial(fecha=None):
     scraper_proyectos = None
     try:
         scraper_proyectos = ScraperProyectosLeyIntegrado()
-        proyectos_ley = scraper_proyectos.obtener_proyectos_dia_anterior()
-        # Enriquecer con detalles y resúmenes
-        logger.info(f"Enriqueciendo {len(proyectos_ley[:5])} proyectos con detalles...")
-        for i, proyecto in enumerate(proyectos_ley[:5], 1):  # Limitar a 5 proyectos
-            logger.info(f"Procesando proyecto {i}/{min(5, len(proyectos_ley))}: {proyecto.get('titulo', 'Sin título')[:50]}...")
-            proyecto_enriquecido = scraper_proyectos.obtener_detalle_proyecto(proyecto)
-            # Actualizar el proyecto en la lista
-            proyectos_ley[proyectos_ley.index(proyecto)] = proyecto_enriquecido
+        # Pasar la fecha del informe para que busque proyectos del día anterior correcto
+        proyectos_ley = scraper_proyectos.obtener_proyectos_dia_anterior(fecha_informe=fecha)
+        
+        # Deduplicar por número de boletín antes de enriquecer
+        proyectos_unicos = []
+        boletines_vistos = set()
+        for proyecto in proyectos_ley:
+            boletin = proyecto.get('boletin', '')
+            if boletin and boletin not in boletines_vistos:
+                proyectos_unicos.append(proyecto)
+                boletines_vistos.add(boletin)
+            elif not boletin:  # Si no tiene boletín, incluirlo pero con cuidado
+                # Verificar por título para evitar duplicados
+                titulo = proyecto.get('titulo', '')
+                if titulo and not any(p.get('titulo') == titulo for p in proyectos_unicos):
+                    proyectos_unicos.append(proyecto)
+        
+        proyectos_ley = proyectos_unicos
+        logger.info(f"Proyectos únicos después de deduplicación: {len(proyectos_ley)}")
+        
+        # Enriquecer con detalles y resúmenes (ya no hay que volver a llamar obtener_detalle_proyecto)
+        # porque ya se hizo en el scraper
+        logger.info(f"Total de proyectos de ley encontrados: {len(proyectos_ley)}")
     except Exception as e:
         logger.error(f"Error obteniendo proyectos de ley: {e}")
         proyectos_ley = []

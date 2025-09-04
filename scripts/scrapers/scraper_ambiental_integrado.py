@@ -45,21 +45,47 @@ except ImportError:
     logger.warning("⚠️ Telemetría no disponible")
     telemetria = None
 
-# Importar extractor de resúmenes SEA
+# Importar extractor robusto de resúmenes con Selenium (para producción)
+sea_resumen_extractor_selenium = None
 try:
-    from .sea_resumen_extractor import sea_resumen_extractor
-    logger.info("✅ Importado extractor de resúmenes SEA")
+    from .sea_resumen_extractor_robusto import get_extractor
+    sea_resumen_extractor_selenium = get_extractor()
+    logger.info("✅ Importado extractor ROBUSTO de resúmenes SEA con Selenium")
 except ImportError:
     try:
-        from scripts.scrapers.sea_resumen_extractor import sea_resumen_extractor
-        logger.info("✅ Importado extractor de resúmenes SEA (absoluto)")
+        from scripts.scrapers.sea_resumen_extractor_robusto import get_extractor
+        sea_resumen_extractor_selenium = get_extractor()
+        logger.info("✅ Importado extractor ROBUSTO de resúmenes SEA (absoluto)")
     except ImportError:
         try:
-            from sea_resumen_extractor import sea_resumen_extractor
-            logger.info("✅ Importado extractor de resúmenes SEA (directo)")
+            from sea_resumen_extractor_robusto import get_extractor
+            sea_resumen_extractor_selenium = get_extractor()
+            logger.info("✅ Importado extractor ROBUSTO de resúmenes SEA (directo)")
         except ImportError:
-            logger.warning("⚠️ Extractor de resúmenes SEA no disponible")
-            sea_resumen_extractor = None
+            # Fallback al extractor anterior
+            try:
+                from .sea_resumen_extractor_selenium import sea_resumen_extractor_selenium
+                logger.info("✅ Importado extractor de resúmenes SEA con Selenium (versión anterior)")
+            except ImportError:
+                logger.warning("⚠️ Extractor con Selenium no disponible")
+                sea_resumen_extractor_selenium = None
+
+# Importar generador de resúmenes SEA (fallback sin conexión externa)
+sea_resumen_generador = None
+try:
+    from .sea_resumen_generador import sea_resumen_generador
+    logger.info("✅ Importado generador de resúmenes SEA (fallback)")
+except ImportError:
+    try:
+        from scripts.scrapers.sea_resumen_generador import sea_resumen_generador
+        logger.info("✅ Importado generador de resúmenes SEA (fallback - absoluto)")
+    except ImportError:
+        try:
+            from sea_resumen_generador import sea_resumen_generador
+            logger.info("✅ Importado generador de resúmenes SEA (fallback - directo)")
+        except ImportError:
+            logger.warning("⚠️ Generador de resúmenes SEA no disponible")
+            sea_resumen_generador = None
 
 class ScraperAmbiental:
     def __init__(self):
@@ -208,50 +234,65 @@ class ScraperAmbiental:
             for proyecto in datos_ambientales['proyectos_sea']:
                 # Solo incluir si tiene título (es un proyecto real)
                 if proyecto.get('titulo'):
-                    # Intentar obtener resumen si tenemos URL y el extractor está disponible
-                    if not proyecto.get('resumen') and proyecto.get('url') and sea_resumen_extractor:
-                        try:
-                            # Extraer ID del expediente de la URL
-                            id_expediente = sea_resumen_extractor.obtener_id_de_url(proyecto['url'])
-                            if id_expediente:
-                                logger.info(f"🔍 Obteniendo resumen para proyecto {proyecto['titulo'][:30]}...")
-                                info_extra = sea_resumen_extractor.extraer_resumen_proyecto(id_expediente)
-                                
-                                # Agregar resumen y otros datos si los encontramos
-                                if info_extra.get('resumen'):
-                                    # Limitar el resumen a máximo 400 caracteres
-                                    resumen_completo = info_extra['resumen']
-                                    if len(resumen_completo) > 400:
-                                        # Cortar en la última oración completa antes de 400 caracteres
-                                        resumen_corto = resumen_completo[:400]
-                                        ultimo_punto = resumen_corto.rfind('.')
-                                        if ultimo_punto > 200:  # Si hay un punto después del caracter 200
-                                            proyecto['resumen'] = resumen_corto[:ultimo_punto + 1]
-                                        else:
-                                            proyecto['resumen'] = resumen_corto[:397] + '...'
-                                    else:
-                                        proyecto['resumen'] = resumen_completo
-                                    logger.info(f"✅ Resumen obtenido ({len(proyecto['resumen'])} caracteres)")
-                                
-                                # Agregar inversión si la encontramos
-                                if info_extra.get('inversion') and not proyecto.get('inversion'):
-                                    proyecto['inversion'] = info_extra['inversion']
-                                
-                                # Agregar ubicación más detallada si la encontramos
-                                if info_extra.get('ubicacion') and not proyecto.get('region'):
-                                    proyecto['region'] = info_extra['ubicacion']
-                        except Exception as e:
-                            logger.warning(f"⚠️ No se pudo obtener resumen para {proyecto['titulo'][:30]}: {e}")
+                    resumen_extraido = False
                     
-                    # Si no hay resumen, crear uno básico con la información disponible
+                    # PRIMERO: Intentar extraer resumen real del SEA con Selenium (en producción)
+                    if proyecto.get('url') and sea_resumen_extractor_selenium:
+                        try:
+                            id_expediente = sea_resumen_extractor_selenium.obtener_id_de_url(proyecto['url'])
+                            if id_expediente:
+                                logger.info(f"🔍 Intentando extraer resumen real del SEA para {proyecto['titulo'][:30]}...")
+                                resultado_sea = sea_resumen_extractor_selenium.extraer_resumen_completo(id_expediente)
+                                
+                                if resultado_sea.get('resumen'):
+                                    proyecto['resumen'] = resultado_sea['resumen']
+                                    resumen_extraido = True
+                                    logger.info(f"✅ Resumen real extraído del SEA ({len(proyecto['resumen'])} caracteres)")
+                                    
+                                    # Agregar otros datos si los encontramos
+                                    if resultado_sea.get('titular') and not proyecto.get('empresa'):
+                                        proyecto['empresa'] = resultado_sea['titular']
+                                    if resultado_sea.get('ubicacion') and not proyecto.get('ubicacion'):
+                                        proyecto['ubicacion'] = resultado_sea['ubicacion']
+                                    if resultado_sea.get('inversion') and not proyecto.get('inversion'):
+                                        proyecto['inversion'] = resultado_sea['inversion']
+                                else:
+                                    logger.info(f"⚠️ No se pudo extraer resumen del SEA")
+                        except Exception as e:
+                            logger.warning(f"⚠️ Error extrayendo resumen del SEA: {e}")
+                    
+                    # SEGUNDO: Si no se extrajo resumen del SEA, mejorar con el generador
+                    if not resumen_extraido and sea_resumen_generador:
+                        try:
+                            # Generar un resumen mejorado basado en la información disponible
+                            resumen_mejorado = sea_resumen_generador.mejorar_resumen(proyecto)
+                            if resumen_mejorado:
+                                proyecto['resumen'] = resumen_mejorado
+                                logger.info(f"📝 Resumen mejorado con generador para {proyecto['titulo'][:30]}")
+                        except Exception as e:
+                            logger.warning(f"⚠️ No se pudo mejorar resumen: {e}")
+                    
+                    # Si no hay resumen, crear uno básico
                     if not proyecto.get('resumen'):
-                        resumen_basico = f"{proyecto.get('tipo', 'DIA')} presentado"
-                        if proyecto.get('titular'):
-                            resumen_basico += f" por {proyecto['titular']}"
+                        # Crear resumen básico con la información disponible
+                        titulo_lower = proyecto.get('titulo', '').lower()
+                        
+                        if 'fotovoltaico' in titulo_lower or 'solar' in titulo_lower:
+                            resumen_basico = f"Proyecto de generación de energía solar fotovoltaica"
+                        elif 'eólico' in titulo_lower:
+                            resumen_basico = f"Proyecto de generación de energía eólica"
+                        else:
+                            resumen_basico = f"{proyecto.get('tipo', 'Proyecto')} presentado"
+                        
+                        if proyecto.get('empresa') or proyecto.get('titular'):
+                            resumen_basico += f" por {proyecto.get('empresa') or proyecto.get('titular')}"
                         if proyecto.get('region'):
                             resumen_basico += f" en {proyecto['region']}"
+                        if proyecto.get('comuna'):
+                            resumen_basico += f", comuna de {proyecto['comuna']}"
                         if proyecto.get('inversion'):
-                            resumen_basico += f". Inversión: {proyecto['inversion']}"
+                            resumen_basico += f". Inversión estimada: {proyecto['inversion']}"
+                        
                         proyecto['resumen'] = resumen_basico
                     
                     # Agregar inversión como campo separado si está en el resumen

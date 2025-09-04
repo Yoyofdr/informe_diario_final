@@ -59,7 +59,7 @@ class SEAResumenExtractor:
     
     def _extraer_con_requests(self, id_expediente: str) -> Dict[str, str]:
         """
-        Intenta extraer información usando requests
+        Intenta extraer información usando requests - Mejorado para mejor extracción
         """
         resultado = {
             'resumen': '',
@@ -68,16 +68,17 @@ class SEAResumenExtractor:
             'titular': ''
         }
         
-        # URLs a probar - la URL del expediente funciona mejor
+        # URLs a probar - incluir más endpoints
         urls = [
             f"{self.base_url}/expediente/expediente.php?id_expediente={id_expediente}",
             f"{self.base_url}/expediente/ficha/fichaPrincipal.php?modo=ficha&id_expediente={id_expediente}",
-            f"{self.base_url}/expediente/expedientesEvaluacion.php?id_expediente={id_expediente}"
+            f"{self.base_url}/expediente/expedientesEvaluacion.php?id_expediente={id_expediente}",
+            f"{self.base_url}/documentos/documento.php?idDocumento={id_expediente}"  # Nueva URL
         ]
         
         for url in urls:
             try:
-                response = self.session.get(url, timeout=10)
+                response = self.session.get(url, timeout=15, verify=False)  # Más tiempo y sin verificar SSL
                 if response.status_code != 200:
                     continue
                 
@@ -91,43 +92,50 @@ class SEAResumenExtractor:
                 texto = soup.get_text()
                 lineas = [linea.strip() for linea in texto.splitlines() if linea.strip()]
                 
-                # Buscar información en el texto
+                # Buscar información en el texto - MEJORADO
                 for i, linea in enumerate(lineas):
                     linea_lower = linea.lower()
                     
-                    # Buscar descripción del proyecto
-                    if 'descripción del proyecto' in linea_lower:
+                    # Buscar descripción del proyecto con más variaciones
+                    if any(desc in linea_lower for desc in ['descripción del proyecto', 'descripcion proyecto', 
+                                                             'objetivo del proyecto', 'resumen ejecutivo',
+                                                             'descripción general', 'el proyecto consiste']):
                         # Capturar las siguientes líneas hasta encontrar otra sección
                         descripcion_lineas = []
-                        for j in range(i+1, min(i+20, len(lineas))):
+                        for j in range(i+1, min(i+30, len(lineas))):  # Más líneas
                             siguiente = lineas[j]
                             # Detener si encontramos otra sección
-                            if any(seccion in siguiente.lower() for seccion in ['estado actual', 'titular', 'ubicación', 'menu']):
+                            if any(seccion in siguiente.lower() for seccion in ['estado actual', 'titular', 'ubicación', 'menu', 'tabla']):
                                 break
-                            descripcion_lineas.append(siguiente)
+                            if len(siguiente.strip()) > 10:  # Solo líneas con contenido
+                                descripcion_lineas.append(siguiente)
                         
                         if descripcion_lineas:
-                            # Unir las líneas y tomar solo las primeras oraciones importantes
+                            # Unir las líneas y tomar las oraciones importantes
                             texto_completo = ' '.join(descripcion_lineas)
-                            # Buscar las primeras 2-3 oraciones que describan el proyecto
-                            oraciones = texto_completo.split('.')
-                            resumen_corto = []
-                            caracteres = 0
+                            # Limpiar espacios múltiples
+                            texto_completo = ' '.join(texto_completo.split())
                             
-                            for oracion in oraciones:
-                                oracion = oracion.strip()
-                                if oracion and caracteres + len(oracion) < 400:
-                                    resumen_corto.append(oracion)
-                                    caracteres += len(oracion)
-                                    # Detenerse después de capturar la esencia del proyecto
-                                    if any(palabra in oracion.lower() for palabra in ['consiste', 'contempla', 'incluye', 'capacidad', 'superficie', 'potencia']):
-                                        if caracteres > 150:  # Ya tenemos suficiente información
-                                            break
-                            
-                            if resumen_corto:
-                                resultado['resumen'] = '. '.join(resumen_corto) + '.'
+                            # Si es muy largo, buscar las primeras 2-3 oraciones clave
+                            if len(texto_completo) > 400:
+                                oraciones = texto_completo.split('.')
+                                resumen_corto = []
+                                caracteres = 0
+                                
+                                for oracion in oraciones:
+                                    oracion = oracion.strip()
+                                    if oracion and caracteres + len(oracion) < 400:
+                                        resumen_corto.append(oracion)
+                                        caracteres += len(oracion)
+                                        # Detenerse después de capturar la esencia
+                                        if any(palabra in oracion.lower() for palabra in ['consiste', 'contempla', 'incluye', 'construcción', 'operación', 'extracción']):
+                                            if caracteres > 150:  # Ya tenemos suficiente
+                                                break
+                                
+                                if resumen_corto:
+                                    resultado['resumen'] = '. '.join(resumen_corto) + '.'
                             else:
-                                resultado['resumen'] = texto_completo[:400]
+                                resultado['resumen'] = texto_completo
                     
                     # Buscar monto de inversión
                     elif 'monto de inversión' in linea_lower or 'inversión' in linea_lower:

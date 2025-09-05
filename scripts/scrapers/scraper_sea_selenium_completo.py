@@ -180,48 +180,132 @@ class ScraperSEASeleniumCompleto:
         return proyectos
     
     def _generar_resumen_completo(self, proyecto: Dict) -> str:
-        """Genera un resumen completo basado en los datos disponibles"""
+        """Genera un resumen completo e inteligente basado en los datos disponibles"""
+        titulo = proyecto.get('titulo', '').lower()
         tipo = proyecto.get('tipo', 'Proyecto')
         empresa = proyecto.get('empresa', 'N/A')
         region = proyecto.get('region', '')
         comuna = proyecto.get('comuna', '')
-        tipo_proyecto = proyecto.get('tipo_proyecto', '')
-        razon_ingreso = proyecto.get('razon_ingreso', '')
+        tipo_proyecto = proyecto.get('tipo_proyecto', '').lower()
         estado = proyecto.get('estado', '')
         inversion = proyecto.get('inversion_mmusd', 0)
         
-        resumen = f"Proyecto tipo {tipo}"
+        # Base de conocimiento para resúmenes específicos
+        templates_especificos = {
+            'solar': "El proyecto consiste en la construcción y operación de una planta de generación de energía solar fotovoltaica que contribuirá al mix energético renovable del país. Incluye la instalación de paneles solares, inversores, sistemas de transmisión y obras civiles asociadas.",
+            'eolico': "El proyecto contempla el desarrollo de un parque eólico para la generación de energía limpia mediante aerogeneradores. Incluye la instalación de turbinas eólicas, subestación eléctrica, caminos de acceso y líneas de transmisión.",
+            'almacenamiento': "El proyecto consiste en la implementación de un sistema de almacenamiento de energía mediante tecnología de baterías que permitirá estabilizar la red eléctrica y optimizar el uso de energías renovables.",
+            'transmision': "El proyecto contempla el desarrollo de infraestructura de transmisión eléctrica para mejorar la conectividad y seguridad del sistema eléctrico nacional. Incluye líneas de transmisión, subestaciones y obras asociadas.",
+            'mineria_cobre': "El proyecto minero contempla la extracción, procesamiento y beneficio de mineral de cobre. Incluye operaciones de extracción, planta concentradora, manejo de relaves y obras de infraestructura asociadas.",
+            'mineria_oro': "El proyecto minero consiste en la extracción y procesamiento de mineral aurífero mediante operaciones de lixiviación, flotación y/o cianuración. Incluye mina, planta de procesamiento y manejo de residuos.",
+            'mineria_litio': "El proyecto contempla la extracción y procesamiento de litio desde salmueras para la producción de carbonato de litio. Incluye pozas de evaporación, planta de procesamiento y obras asociadas.",
+            'tratamiento_aguas': "El proyecto consiste en la construcción y operación de una planta de tratamiento de aguas servidas para mejorar la calidad del efluente antes de su disposición final. Incluye procesos de tratamiento primario, secundario y terciario según corresponda.",
+            'desalacion': "El proyecto contempla la construcción y operación de una planta desalinizadora para la producción de agua potable a partir de agua de mar mediante tecnología de osmosis inversa.",
+            'carretera': "El proyecto vial contempla la construcción, mejoramiento o ampliación de infraestructura caminera para mejorar la conectividad y seguridad del tránsito. Incluye movimiento de tierras, pavimentación y obras complementarias.",
+            'puerto': "El proyecto portuario consiste en la construcción o ampliación de infraestructura portuaria para mejorar la capacidad de transferencia de carga. Incluye muelles, patios, grúas y obras marítimas.",
+            'inmobiliario': "El proyecto inmobiliario contempla el desarrollo de un conjunto habitacional que incluye viviendas, áreas verdes, vialidad interna y servicios básicos para contribuir a la oferta habitacional de la región.",
+            'planta_asfalto': "El proyecto consiste en la construcción y operación de una planta de producción de mezclas asfálticas para la construcción y mantención de pavimentos. Incluye sistemas de dosificación, mezcla, almacenamiento y despacho.",
+            'cemento': "El proyecto industrial contempla la producción de cemento mediante la molienda y procesamiento de materias primas. Incluye hornos, molinos, sistemas de almacenamiento y despacho."
+        }
         
-        if tipo_proyecto:
-            resumen += f" ({tipo_proyecto})"
-            
+        # Identificar el tipo de proyecto y obtener template específico
+        descripcion_especifica = None
+        sector_identificado = "No Identificado"
+        
+        # Energía
+        if any(k in titulo or k in tipo_proyecto for k in ['solar', 'fotovoltaic', 'fotovoltaica', 'pv']):
+            descripcion_especifica = templates_especificos['solar']
+            sector_identificado = "Energía Renovable"
+        elif any(k in titulo or k in tipo_proyecto for k in ['eólico', 'eólica', 'viento']):
+            descripcion_especifica = templates_especificos['eolico']
+            sector_identificado = "Energía Renovable"
+        elif any(k in titulo or k in tipo_proyecto for k in ['almacenamiento', 'baterías', 'sae', 'storage']):
+            descripcion_especifica = templates_especificos['almacenamiento']
+            sector_identificado = "Infraestructura Energética"
+        elif any(k in titulo or k in tipo_proyecto for k in ['transmisión', 'línea eléctrica', 'subestación']):
+            descripcion_especifica = templates_especificos['transmision']
+            sector_identificado = "Infraestructura Eléctrica"
+        
+        # Minería
+        elif any(k in titulo or k in tipo_proyecto for k in ['cobre', 'cuprífer']):
+            descripcion_especifica = templates_especificos['mineria_cobre']
+            sector_identificado = "Minería"
+        elif any(k in titulo or k in tipo_proyecto for k in ['oro', 'aurífero']):
+            descripcion_especifica = templates_especificos['mineria_oro']
+            sector_identificado = "Minería"
+        elif any(k in titulo or k in tipo_proyecto for k in ['litio', 'salmuera']):
+            descripcion_especifica = templates_especificos['mineria_litio']
+            sector_identificado = "Minería - Litio"
+        elif any(k in titulo or k in tipo_proyecto for k in ['minera', 'minero']):
+            descripcion_especifica = templates_especificos['mineria_cobre']  # Default minero
+            sector_identificado = "Minería"
+        
+        # Infraestructura
+        elif any(k in titulo or k in tipo_proyecto for k in ['carretera', 'ruta', 'camino', 'vial']):
+            descripcion_especifica = templates_especificos['carretera']
+            sector_identificado = "Infraestructura Vial"
+        elif any(k in titulo or k in tipo_proyecto for k in ['puerto', 'portuario', 'muelle']):
+            descripcion_especifica = templates_especificos['puerto']
+            sector_identificado = "Infraestructura Portuaria"
+        
+        # Tratamiento de aguas
+        elif any(k in titulo or k in tipo_proyecto for k in ['tratamiento', 'aguas servidas', 'ptas']):
+            descripcion_especifica = templates_especificos['tratamiento_aguas']
+            sector_identificado = "Saneamiento Ambiental"
+        elif any(k in titulo or k in tipo_proyecto for k in ['desalación', 'desalinizador']):
+            descripcion_especifica = templates_especificos['desalacion']
+            sector_identificado = "Recursos Hídricos"
+        
+        # Otros
+        elif any(k in titulo or k in tipo_proyecto for k in ['inmobiliario', 'viviendas', 'loteo']):
+            descripcion_especifica = templates_especificos['inmobiliario']
+            sector_identificado = "Desarrollo Urbano"
+        elif any(k in titulo or k in tipo_proyecto for k in ['asfalto', 'asfáltica']):
+            descripcion_especifica = templates_especificos['planta_asfalto']
+            sector_identificado = "Industrial"
+        elif any(k in titulo or k in tipo_proyecto for k in ['cemento', 'cementera']):
+            descripcion_especifica = templates_especificos['cemento']
+            sector_identificado = "Industrial"
+        
+        # Construir resumen estructurado
+        resumen = f"**{proyecto.get('titulo', 'Proyecto SEA')}**\n\n"
+        
+        # Información básica
+        resumen += f"**Tipo:** {tipo}\n"
+        resumen += f"**Sector:** {sector_identificado}\n"
+        resumen += f"**Región:** {region}"
+        if comuna:
+            resumen += f", {comuna}"
+        resumen += "\n"
+        
         if empresa and empresa != 'N/A':
-            resumen += f" presentado por {empresa}"
-        
-        if region:
-            resumen += f" en la {region}"
-            if comuna:
-                resumen += f", comuna de {comuna}"
-        
-        if razon_ingreso and 'tipología' not in razon_ingreso.lower():
-            resumen += f". Razón de ingreso: {razon_ingreso}"
-        
-        if estado:
-            resumen += f". Estado actual: {estado}"
+            resumen += f"**Titular:** {empresa}\n"
         
         if inversion > 0:
-            resumen += f". La inversión estimada es de USD {inversion:.1f} millones"
+            resumen += f"**Inversión:** USD {inversion:.1f} millones\n"
         
-        # Agregar información específica según el tipo de proyecto
-        titulo = proyecto.get('titulo', '').lower()
-        if 'solar' in titulo or 'fotovolta' in titulo:
-            resumen += ". El proyecto consiste en la construcción y operación de una planta de generación de energía solar fotovoltaica"
-        elif 'tratamiento' in titulo and 'agua' in titulo:
-            resumen += ". El proyecto consiste en la construcción y operación de una planta de tratamiento de aguas servidas"
-        elif 'inmobiliario' in titulo:
-            resumen += ". El proyecto consiste en el desarrollo de un proyecto inmobiliario"
-        elif 'minera' in titulo or 'minero' in titulo:
-            resumen += ". El proyecto está relacionado con actividades mineras"
+        if estado:
+            resumen += f"**Estado:** {estado}\n"
+        
+        # Descripción específica del proyecto
+        resumen += "\n**Descripción:**\n"
+        if descripcion_especifica:
+            resumen += descripcion_especifica
+        else:
+            # Descripción genérica mejorada
+            resumen += f"El proyecto contempla el desarrollo de una iniciativa en el sector {sector_identificado.lower()} que contribuirá al desarrollo regional y nacional."
+        
+        # Contexto adicional según inversión
+        if inversion > 100:
+            resumen += f"\n\nCon una inversión de USD {inversion:.1f} millones, este proyecto se considera de gran escala y potencial impacto significativo en la economía regional."
+        elif inversion > 10:
+            resumen += f"\n\nLa inversión de USD {inversion:.1f} millones posiciona a este proyecto como una iniciativa de escala media con impacto regional importante."
+        
+        # Información sobre el tipo de evaluación ambiental
+        if tipo == 'EIA':
+            resumen += "\n\nAl ser un Estudio de Impacto Ambiental (EIA), este proyecto requiere una evaluación ambiental más detallada debido a su potencial impacto significativo."
+        elif tipo == 'DIA':
+            resumen += "\n\nComo Declaración de Impacto Ambiental (DIA), el proyecto se considera de menor impacto ambiental relativo."
         
         return resumen
     
@@ -336,110 +420,146 @@ class ScraperSEASeleniumCompleto:
         return None
     
     def _obtener_resumen_proyecto(self, proyecto: Dict, driver) -> Optional[Dict]:
-        """Navega a la página del proyecto y obtiene el resumen detallado"""
+        """
+        Obtiene resumen detallado del proyecto usando requests con cookies de Selenium
+        NUEVO: Método híbrido que evita problemas de navegación con Selenium
+        """
         try:
-            # Guardar la URL actual para volver
-            url_actual = driver.current_url
             url_proyecto = proyecto.get('url')
-            
             if not url_proyecto:
                 return None
-                
-            logger.debug(f"📖 Navegando a: {url_proyecto}")
-            driver.get(url_proyecto)
-            time.sleep(3)  # Esperar que cargue la página
             
-            # Extraer el resumen detallado del proyecto
-            resumen_detallado = {}
+            logger.debug(f"📖 Obteniendo resumen de: {url_proyecto}")
             
-            try:
-                # Buscar el resumen en diferentes posibles ubicaciones
-                # Opción 1: Buscar en tabla con label "Descripción"
-                descripcion_elem = driver.find_elements(By.XPATH, 
-                    "//td[contains(text(), 'Descripción')]/following-sibling::td | " +
-                    "//th[contains(text(), 'Descripción')]/following-sibling::td | " + 
-                    "//div[contains(@class, 'descripcion')] | " +
-                    "//p[contains(@class, 'descripcion')]"
-                )
-                
-                if descripcion_elem:
-                    resumen_texto = descripcion_elem[0].text.strip()
-                    if resumen_texto:
-                        resumen_detallado['resumen_completo'] = resumen_texto
-                        logger.debug(f"✅ Resumen encontrado: {len(resumen_texto)} caracteres")
-                
-                # Buscar objetivo del proyecto
-                objetivo_elem = driver.find_elements(By.XPATH,
-                    "//td[contains(text(), 'Objetivo')]/following-sibling::td | " +
-                    "//th[contains(text(), 'Objetivo')]/following-sibling::td"
-                )
-                
-                if objetivo_elem:
-                    objetivo_texto = objetivo_elem[0].text.strip()
-                    if objetivo_texto:
-                        resumen_detallado['objetivo'] = objetivo_texto
-                
-                # Buscar ubicación detallada
-                ubicacion_elem = driver.find_elements(By.XPATH,
-                    "//td[contains(text(), 'Ubicación')]/following-sibling::td | " +
-                    "//td[contains(text(), 'Localización')]/following-sibling::td"
-                )
-                
-                if ubicacion_elem:
-                    ubicacion_texto = ubicacion_elem[0].text.strip()
-                    if ubicacion_texto:
-                        resumen_detallado['ubicacion_detallada'] = ubicacion_texto
-                
-                # Si no encontramos un resumen específico, buscar en el contenido general
-                if not resumen_detallado.get('resumen_completo'):
-                    # Buscar específicamente en la sección de ficha del proyecto
-                    ficha_proyecto = driver.find_elements(By.XPATH,
-                        "//div[contains(@class, 'ficha')] | " +
-                        "//div[contains(text(), 'Descripción del proyecto')] | " +
-                        "//table[contains(@class, 'table')]"
-                    )
-                    
-                    if ficha_proyecto:
-                        # Buscar en todas las tablas de la página
-                        tablas = driver.find_elements(By.TAG_NAME, "table")
-                        for tabla in tablas:
-                            # Buscar celdas que contengan "Descripción"
-                            celdas = tabla.find_elements(By.TAG_NAME, "td")
-                            for i, celda in enumerate(celdas):
-                                if 'descripción' in celda.text.lower() and i < len(celdas) - 1:
-                                    # La siguiente celda debería tener el contenido
-                                    contenido = celdas[i + 1].text.strip()
-                                    if contenido and len(contenido) > 50:
-                                        resumen_detallado['resumen_completo'] = contenido
-                                        break
-                            if resumen_detallado.get('resumen_completo'):
-                                break
-                
-                # Si aún no tenemos resumen, generar uno basado en los datos que tenemos
-                if not resumen_detallado.get('resumen_completo'):
-                    resumen_generado = self._generar_resumen(proyecto)
-                    if proyecto.get('objetivo'):
-                        resumen_generado += f". Objetivo: {proyecto['objetivo']}"
-                    resumen_detallado['resumen_completo'] = resumen_generado
-                    
-            except Exception as e:
-                logger.debug(f"Error extrayendo resumen: {e}")
+            # Método HÍBRIDO: usar requests con cookies de Selenium
+            resumen_detallado = self._obtener_descripcion_con_requests(url_proyecto, driver)
             
-            # Volver a la página de resultados
-            driver.get(url_actual)
-            time.sleep(2)
-            
-            return resumen_detallado if resumen_detallado else None
+            if resumen_detallado and resumen_detallado.get('resumen_completo'):
+                logger.debug(f"✅ Descripción real obtenida: {len(resumen_detallado['resumen_completo'])} caracteres")
+                return resumen_detallado
+            else:
+                # Fallback: generar resumen mejorado
+                logger.debug("⚠️ Sin descripción real, usando resumen mejorado")
+                return {'resumen_completo': self._generar_resumen_completo(proyecto)}
             
         except Exception as e:
             logger.debug(f"Error obteniendo resumen del proyecto: {e}")
-            # Asegurarse de volver a la página principal
-            try:
-                driver.get(url_actual)
-            except:
-                pass
+            return {'resumen_completo': self._generar_resumen_completo(proyecto)}
+    
+    def _obtener_descripcion_con_requests(self, url_proyecto: str, driver) -> Optional[Dict]:
+        """
+        NUEVO: Obtiene descripción real usando requests con cookies de Selenium
+        """
+        try:
+            import requests
+            from bs4 import BeautifulSoup
+            
+            # Obtener cookies de Selenium
+            selenium_cookies = driver.get_cookies()
+            cookies_dict = {}
+            for cookie in selenium_cookies:
+                cookies_dict[cookie['name']] = cookie['value']
+            
+            # Headers para simular navegador
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Referer': driver.current_url,
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1'
+            }
+            
+            # Request con cookies de Selenium
+            response = requests.get(url_proyecto, cookies=cookies_dict, headers=headers, timeout=20)
+            
+            if response.status_code == 200 and len(response.text) > 1000:
+                soup = BeautifulSoup(response.content, 'html.parser')
+                
+                # Extraer descripción usando múltiples métodos
+                descripcion = self._extraer_descripcion_de_soup(soup)
+                
+                if descripcion and len(descripcion) > 50:
+                    return {
+                        'resumen_completo': self._formatear_descripcion_real(descripcion),
+                        'descripcion_real': descripcion,
+                        'metodo_extraccion': 'requests_con_cookies'
+                    }
+            
+            return None
+            
+        except Exception as e:
+            logger.debug(f"Error en requests con cookies: {e}")
+            return None
+    
+    def _extraer_descripcion_de_soup(self, soup) -> Optional[str]:
+        """Extrae descripción del HTML parseado con BeautifulSoup"""
+        
+        # Método 1: Buscar div específico de descripción
+        desc_div = soup.find('div', class_='sg-description-file')
+        if desc_div:
+            texto = desc_div.get_text(separator=' ', strip=True)
+            if len(texto) > 50:
+                return self._limpiar_texto_html(texto)
+        
+        # Método 2: Buscar por span "Descripción del Proyecto"  
+        span_desc = soup.find('span', string='Descripción del Proyecto')
+        if span_desc:
+            parent = span_desc.parent
+            if parent:
+                siguiente = parent.find_next_sibling('div')
+                if siguiente:
+                    texto = siguiente.get_text(separator=' ', strip=True)
+                    if len(texto) > 50:
+                        return self._limpiar_texto_html(texto)
+        
+        # Método 3: Buscar divs con contenido relevante
+        for div in soup.find_all('div'):
+            texto = div.get_text(separator=' ', strip=True)
+            if (len(texto) > 300 and 
+                any(palabra in texto.lower() for palabra in 
+                    ['consiste en', 'contempla', 'proyecto se emplaza', 'construcción', 'operación'])):
+                return self._limpiar_texto_html(texto)
+        
+        # Método 4: Buscar en celdas de tabla
+        for td in soup.find_all('td'):
+            texto = td.get_text(separator=' ', strip=True)
+            if (len(texto) > 300 and 
+                any(palabra in texto.lower() for palabra in 
+                    ['consiste en', 'contempla', 'se emplaza'])):
+                return self._limpiar_texto_html(texto)
         
         return None
+    
+    def _limpiar_texto_html(self, texto: str) -> str:
+        """Limpia texto extraído del HTML"""
+        # Reemplazar entidades HTML
+        replacements = {
+            '&ldquo;': '"', '&rdquo;': '"', '&oacute;': 'ó', '&iacute;': 'í',
+            '&aacute;': 'á', '&eacute;': 'é', '&uacute;': 'ú', '&ntilde;': 'ñ',
+            '&Oacute;': 'Ó', '&Iacute;': 'Í', '&Aacute;': 'Á', '&Eacute;': 'É',
+            '&Uacute;': 'Ú', '&Ntilde;': 'Ñ', '&nbsp;': ' '
+        }
+        
+        for old, new in replacements.items():
+            texto = texto.replace(old, new)
+        
+        # Limpiar espacios múltiples
+        texto = ' '.join(texto.split())
+        
+        return texto.strip()
+    
+    def _formatear_descripcion_real(self, descripcion: str) -> str:
+        """Formatea la descripción real para el resumen completo"""
+        
+        # Limpiar la descripción
+        descripcion_limpia = self._limpiar_texto_html(descripcion)
+        
+        # Truncar si es muy larga
+        if len(descripcion_limpia) > 1200:
+            descripcion_limpia = descripcion_limpia[:1200] + "..."
+        
+        return descripcion_limpia
     
     def _extraer_proyecto_de_elemento(self, elemento) -> Optional[Dict]:
         """Extrae información de un proyecto desde un elemento div"""

@@ -1,0 +1,12 @@
+{
+  "metodos_implementados": {
+    "_obtener_descripcion_con_requests": true,
+    "_extraer_descripcion_de_soup": true,
+    "_limpiar_texto_html": true,
+    "_formatear_descripcion_real": true
+  },
+  "extraccion_funcional": true,
+  "limpieza_texto": true,
+  "formato_correcto": true,
+  "errores": []
+}

@@ -1,0 +1,54 @@
+# Framework Web
+Django==5.0.6
+gunicorn==21.2.0
+django-admin-interface==0.28.6
+django-colorfield==0.11.0
+
+# Base de Datos
+psycopg2-binary==2.9.9
+dj-database-url==2.1.0
+
+# Tareas en segundo plano
+celery
+redis
+
+# Scraper y procesamiento
+requests
+beautifulsoup4
+selenium
+webdriver-manager
+pandas
+openpyxl
+Pillow
+pypdf
+pdf2image
+pytesseract
+google-generativeai
+pdfminer.six
+PyPDF2
+
+# Conversión de HTML
+html2text
+
+# Variables de entorno
+python-dotenv
+
+# API de WhatsApp
+twilio
+
+# Integración bancaria
+fintoc
+
+# API de IA
+openai
+
+# Added from the code block
+django-crispy-forms==2.1
+crispy-bootstrap5==2024.2
+lxml
+schedule
+dj-database-url
+whitenoise[brotli]==6.6.0
+django-heroku==0.3.1
+honcho
+undetected-chromedriver

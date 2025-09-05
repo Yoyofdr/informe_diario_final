@@ -1,5 +1,6 @@
 """
 Evaluador de relevancia basado en IA para publicaciones del Diario Oficial
+Solo usa OpenAI - versión optimizada sin APIs no usadas
 """
 import os
 import requests
@@ -11,37 +12,9 @@ class EvaluadorRelevancia:
     def __init__(self):
         load_dotenv()
         
-        # Intentar con OpenAI primero (más potente y confiable)
+        # Solo OpenAI - eliminamos Groq, DeepSeek y Gemini
         self.openai_api_key = os.environ.get('OPENAI_API_KEY')
         self.use_openai = bool(self.openai_api_key)
-        
-        # Si no hay OpenAI, intentar con Groq (30 req/min gratis)
-        if not self.use_openai:
-            self.groq_api_key = os.environ.get('GROQ_API_KEY')
-            self.use_groq = bool(self.groq_api_key)
-        else:
-            self.use_groq = False
-        
-        # Si no hay OpenAI ni Groq, intentar con DeepSeek
-        if not self.use_openai and not self.use_groq:
-            self.deepseek_api_key = os.environ.get('DEEPSEEK_API_KEY')
-            # Temporalmente deshabilitado porque no tiene saldo
-            self.use_deepseek = False  # bool(self.deepseek_api_key)
-        else:
-            self.use_deepseek = False
-        
-        # Si no hay ninguno anterior, intentar con Gemini
-        if not self.use_openai and not self.use_groq and not self.use_deepseek:
-            try:
-                import google.generativeai as genai
-                api_key = os.environ.get('GEMINI_API_KEY')
-                if api_key:
-                    genai.configure(api_key=api_key)
-                    self.model = genai.GenerativeModel('gemini-1.5-flash')
-                else:
-                    self.model = None
-            except ImportError:
-                self.model = None
     
     def evaluar_relevancia(self, titulo, texto_pdf=None):
         """
@@ -51,18 +24,6 @@ class EvaluadorRelevancia:
         # Si hay OpenAI configurado, usarlo primero
         if self.use_openai:
             return self._evaluar_con_openai(titulo, texto_pdf)
-        
-        # Si no hay OpenAI pero sí Groq, usarlo
-        if self.use_groq:
-            return self._evaluar_con_groq(titulo, texto_pdf)
-        
-        # Si no hay Groq pero sí DeepSeek, usarlo
-        if self.use_deepseek:
-            return self._evaluar_con_deepseek(titulo, texto_pdf)
-        
-        # Si no hay DeepSeek pero sí Gemini, usarlo
-        if hasattr(self, 'model') and self.model:
-            return self._evaluar_con_gemini(titulo, texto_pdf)
         
         # Si no hay IA disponible, usar reglas
         return self._evaluar_con_reglas(titulo)
@@ -149,253 +110,10 @@ RAZÓN: [Explicación en una línea]"""
                 return es_relevante, razon
             else:
                 print(f"[OpenAI] Error {response.status_code}: {response.text}")
-                # Fallback a Groq si falla OpenAI
-                if self.use_groq:
-                    return self._evaluar_con_groq(titulo, texto_pdf)
                 return self._evaluar_con_reglas(titulo)
                 
         except Exception as e:
             print(f"[OpenAI] Error: {str(e)}")
-            # Fallback a Groq si falla OpenAI
-            if self.use_groq:
-                return self._evaluar_con_groq(titulo, texto_pdf)
-            return self._evaluar_con_reglas(titulo)
-    
-    def _evaluar_con_groq(self, titulo, texto_pdf=None):
-        """Evalúa relevancia usando Groq API"""
-        try:
-            # Preparar el contexto
-            contexto = f"Título: {titulo}"
-            if texto_pdf and len(texto_pdf) > 100:
-                contexto += f"\n\nPrimeras líneas del documento:\n{texto_pdf[:1500]}"
-            
-            prompt = f"""Eres un experto en análisis de normativas chilenas. Evalúa si la siguiente publicación del Diario Oficial es relevante para incluir en un informe diario que será leído por empresas y ciudadanos.
-
-Una publicación es RELEVANTE si cumple TODOS estos criterios:
-- Tiene alcance nacional o afecta a múltiples regiones
-- Impacta a un sector económico completo o múltiples empresas
-- Y además cumple alguno de estos:
-  1. Crea o modifica leyes, decretos supremos o políticas públicas importantes
-  2. Establece nuevos procedimientos o requisitos de cumplimiento obligatorio
-  3. Modifica significativamente tarifas, precios o impuestos (no ajustes rutinarios)
-  4. Establece medidas de emergencia nacionales
-  5. Define estrategias nacionales de desarrollo
-  6. Abre procesos de consulta ciudadana nacional
-  7. Convoca a licitaciones públicas de gran envergadura (>1000 UF)
-  8. Actualiza o establece programas de regulación ambiental o normas de emisión
-  9. Define nuevos estándares ambientales o modifica los existentes
-  10. Es emitido por el SII (Servicio de Impuestos Internos) - SIEMPRE relevante
-  11. Es emitido por la CMF y afecta empresas IPSA o mercados regulados
-
-Una publicación NO es relevante si:
-1. Es un nombramiento o designación individual
-2. Es una rectificación o fe de erratas
-3. Afecta solo a una persona, empresa o localidad específica
-4. Es un permiso o concesión individual
-5. Es de alcance muy local o específico
-6. Son ajustes rutinarios de precios (combustibles, kerosene)
-7. Son medidas fitosanitarias locales o regionales
-8. Afecta solo a beneficiarios de programas específicos
-9. Es una resolución de alcance limitado a una región o comuna
-
-{contexto}
-
-Responde SOLO con:
-RELEVANTE: [SÍ/NO]
-RAZÓN: [Explicación en una línea]"""
-
-            # Llamar a Groq API
-            headers = {
-                "Authorization": f"Bearer {self.groq_api_key}",
-                "Content-Type": "application/json"
-            }
-            
-            data = {
-                "model": "mixtral-8x7b-32768",
-                "messages": [
-                    {"role": "system", "content": "Eres un experto en análisis de normativas chilenas."},
-                    {"role": "user", "content": prompt}
-                ],
-                "temperature": 0.3,
-                "max_tokens": 150
-            }
-            
-            response = requests.post(
-                "https://api.groq.com/openai/v1/chat/completions",
-                headers=headers,
-                json=data,
-                timeout=30
-            )
-            
-            if response.status_code == 200:
-                result = response.json()
-                respuesta = result['choices'][0]['message']['content'].strip()
-                
-                # Parsear respuesta
-                es_relevante = "RELEVANTE: SÍ" in respuesta
-                
-                # Extraer razón
-                if "RAZÓN:" in respuesta:
-                    razon = respuesta.split("RAZÓN:")[-1].strip()
-                else:
-                    razon = "Evaluado por Groq AI"
-                
-                return es_relevante, razon
-            else:
-                print(f"[Groq] Error {response.status_code}: {response.text}")
-                return self._evaluar_con_reglas(titulo)
-                
-        except Exception as e:
-            print(f"[Groq] Error: {str(e)}")
-            return self._evaluar_con_reglas(titulo)
-    
-    def _evaluar_con_deepseek(self, titulo, texto_pdf=None):
-        """Evalúa relevancia usando DeepSeek API"""
-        try:
-            # Preparar el contexto
-            contexto = f"Título: {titulo}"
-            if texto_pdf and len(texto_pdf) > 100:
-                contexto += f"\n\nPrimeras líneas del documento:\n{texto_pdf[:1500]}"
-            
-            prompt = f"""Eres un experto en análisis de normativas chilenas. Evalúa si la siguiente publicación del Diario Oficial es relevante para incluir en un informe diario que será leído por empresas y ciudadanos.
-
-Una publicación es RELEVANTE si cumple TODOS estos criterios:
-- Tiene alcance nacional o afecta a múltiples regiones
-- Impacta a un sector económico completo o múltiples empresas
-- Y además cumple alguno de estos:
-  1. Crea o modifica leyes, decretos supremos o políticas públicas importantes
-  2. Establece nuevos procedimientos o requisitos de cumplimiento obligatorio
-  3. Modifica significativamente tarifas, precios o impuestos (no ajustes rutinarios)
-  4. Establece medidas de emergencia nacionales
-  5. Define estrategias nacionales de desarrollo
-  6. Abre procesos de consulta ciudadana nacional
-  7. Convoca a licitaciones públicas de gran envergadura (>1000 UF)
-  8. Actualiza o establece programas de regulación ambiental o normas de emisión
-  9. Define nuevos estándares ambientales o modifica los existentes
-  10. Es emitido por el SII (Servicio de Impuestos Internos) - SIEMPRE relevante
-  11. Es emitido por la CMF y afecta empresas IPSA o mercados regulados
-
-Una publicación NO es relevante si:
-1. Es un nombramiento o designación individual
-2. Es una rectificación o fe de erratas
-3. Afecta solo a una persona, empresa o localidad específica
-4. Es un permiso o concesión individual
-5. Es de alcance muy local o específico
-6. Son ajustes rutinarios de precios (combustibles, kerosene)
-7. Son medidas fitosanitarias locales o regionales
-8. Afecta solo a beneficiarios de programas específicos
-9. Es una resolución de alcance limitado a una región o comuna
-
-{contexto}
-
-Responde SOLO con:
-RELEVANTE: [SÍ/NO]
-RAZÓN: [Explicación en una línea]"""
-
-            # Llamar a DeepSeek API
-            headers = {
-                "Authorization": f"Bearer {self.deepseek_api_key}",
-                "Content-Type": "application/json"
-            }
-            
-            data = {
-                "model": "deepseek-chat",
-                "messages": [
-                    {"role": "system", "content": "Eres un experto en análisis de normativas chilenas."},
-                    {"role": "user", "content": prompt}
-                ],
-                "temperature": 0.3,
-                "max_tokens": 150
-            }
-            
-            response = requests.post(
-                "https://api.deepseek.com/v1/chat/completions",
-                headers=headers,
-                json=data,
-                timeout=30
-            )
-            
-            if response.status_code == 200:
-                result = response.json()
-                respuesta = result['choices'][0]['message']['content'].strip()
-                
-                # Parsear respuesta
-                es_relevante = "RELEVANTE: SÍ" in respuesta
-                
-                # Extraer razón
-                if "RAZÓN:" in respuesta:
-                    razon = respuesta.split("RAZÓN:")[-1].strip()
-                else:
-                    razon = "Evaluado por DeepSeek"
-                
-                return es_relevante, razon
-            else:
-                print(f"[DeepSeek] Error {response.status_code}: {response.text}")
-                return self._evaluar_con_reglas(titulo)
-                
-        except Exception as e:
-            print(f"[DeepSeek] Error: {str(e)}")
-            return self._evaluar_con_reglas(titulo)
-    
-    def _evaluar_con_gemini(self, titulo, texto_pdf=None):
-        """Evalúa relevancia usando Gemini (método original)"""
-        try:
-            contexto = f"Título: {titulo}"
-            if texto_pdf and len(texto_pdf) > 100:
-                contexto += f"\n\nPrimeras líneas del documento:\n{texto_pdf[:1500]}"
-            
-            prompt = f"""Eres un experto en análisis de normativas chilenas. Evalúa si la siguiente publicación del Diario Oficial es relevante para incluir en un informe diario que será leído por empresas y ciudadanos.
-
-Una publicación es RELEVANTE si cumple TODOS estos criterios:
-- Tiene alcance nacional o afecta a múltiples regiones
-- Impacta a un sector económico completo o múltiples empresas
-- Y además cumple alguno de estos:
-  1. Crea o modifica leyes, decretos supremos o políticas públicas importantes
-  2. Establece nuevos procedimientos o requisitos de cumplimiento obligatorio
-  3. Modifica significativamente tarifas, precios o impuestos (no ajustes rutinarios)
-  4. Establece medidas de emergencia nacionales
-  5. Define estrategias nacionales de desarrollo
-  6. Abre procesos de consulta ciudadana nacional
-  7. Convoca a licitaciones públicas de gran envergadura (>1000 UF)
-  8. Actualiza o establece programas de regulación ambiental o normas de emisión
-  9. Define nuevos estándares ambientales o modifica los existentes
-  10. Es emitido por el SII (Servicio de Impuestos Internos) - SIEMPRE relevante
-  11. Es emitido por la CMF y afecta empresas IPSA o mercados regulados
-
-Una publicación NO es relevante si:
-1. Es un nombramiento o designación individual
-2. Es una rectificación o fe de erratas
-3. Afecta solo a una persona, empresa o localidad específica
-4. Es un permiso o concesión individual
-5. Es de alcance muy local o específico
-6. Son ajustes rutinarios de precios (combustibles, kerosene)
-7. Son medidas fitosanitarias locales o regionales
-8. Afecta solo a beneficiarios de programas específicos
-9. Es una resolución de alcance limitado a una región o comuna
-
-{contexto}
-
-Responde SOLO con:
-RELEVANTE: [SÍ/NO]
-RAZÓN: [Explicación en una línea]"""
-
-            response = self.model.generate_content(prompt)
-            respuesta = response.text.strip()
-            
-            # Parsear respuesta
-            es_relevante = "RELEVANTE: SÍ" in respuesta
-            
-            # Extraer razón
-            if "RAZÓN:" in respuesta:
-                razon = respuesta.split("RAZÓN:")[-1].strip()
-            else:
-                razon = "Evaluado por IA"
-            
-            return es_relevante, razon
-            
-        except Exception as e:
-            print(f"[IA] Error evaluando relevancia: {str(e)}")
-            # Fallback a reglas si falla la IA
             return self._evaluar_con_reglas(titulo)
     
     def _evaluar_con_reglas(self, titulo):

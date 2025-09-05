@@ -23,7 +23,6 @@ Pillow
 pypdf
 pdf2image
 pytesseract
-google-generativeai
 pdfminer.six
 PyPDF2
 

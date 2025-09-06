@@ -9,7 +9,6 @@ import pytesseract
 import PyPDF2
 import os
 import json
-import google.generativeai as genai
 from dotenv import load_dotenv
 import time
 import undetected_chromedriver as uc
@@ -88,51 +87,7 @@ def extraer_texto_pdf_mixto(url_pdf):
         print(f"[WARNING] Error extrayendo texto del PDF {url_pdf}: {str(e)}")
         return ""
 
-def resumen_con_gemini(texto, titulo=None):
-    from dotenv import load_dotenv
-    load_dotenv()
-    api_key = os.environ.get('GEMINI_API_KEY')
-    if not api_key or not texto or len(texto) < 40:
-        # print('[Gemini] No hay API key o el texto es muy corto.')
-        return None
-    try:
-        # Limitar el texto al primer párrafo relevante (hasta el primer salto doble de línea o 800 caracteres)
-        primer_parrafo = texto.split('\n\n')[0]
-        if len(primer_parrafo) < 40:
-            primer_parrafo = texto[:1200]
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        prompt = (
-            "Resume este documento oficial chileno de forma muy concisa.\n\n"
-            "INSTRUCCIONES CRÍTICAS:\n"
-            "1. MÁXIMO 2 ORACIONES (60-80 palabras total).\n"
-            "2. NO REPITAS información del título (no digas 'El Decreto N° X' o 'La Resolución N° Y').\n"
-            "3. Comienza directamente con la acción o efecto principal.\n"
-            "4. Incluye SOLO:\n"
-            "   - Qué establece o modifica (sin repetir el número)\n"
-            "   - A quién afecta específicamente\n"
-            "   - Fecha/plazo clave si existe\n"
-            "5. Usa lenguaje directo, sin introducciones.\n\n"
-            f"Título del documento: {titulo}\n"
-            f"Texto: {primer_parrafo}"
-        )
-        # print('\n[Gemini] Texto enviado a Gemini:\n', primer_parrafo[:1000], '\n---')
-        response = model.generate_content(prompt)
-        # print('[Gemini] Respuesta cruda:', response.text)
-        resumen = response.text.strip()
-        
-        # Limpiar el resumen de posibles saltos de línea o espacios extras
-        resumen = ' '.join(resumen.split())
-        
-        # Asegurar que termine en punto
-        if resumen and not resumen.endswith('.'):
-            resumen += '.'
-        
-        return resumen if resumen else "No se pudo generar un resumen del documento."
-    except Exception as e:
-        # print('[Gemini] Error:', e)
-        pass
-    return None
+# Función resumen_con_gemini eliminada - no se usa google-generativeai
 
 def resumen_con_openai(texto, titulo=None):
     """Genera resúmenes usando OpenAI API"""
@@ -253,11 +208,6 @@ def resumen_con_huggingface(texto, titulo=None):
 def generar_resumen_desde_texto(texto, titulo=None):
     # Intentar primero con OpenAI
     resumen_ia = resumen_con_openai(texto, titulo)
-    if resumen_ia:
-        return resumen_ia
-    
-    # Si falla OpenAI, intentar con Gemini
-    resumen_ia = resumen_con_gemini(texto, titulo)
     if resumen_ia:
         return resumen_ia
     

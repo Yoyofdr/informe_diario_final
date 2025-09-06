@@ -337,17 +337,7 @@ Usa lenguaje financiero profesional pero claro."""
             
         except Exception as e:
             self.stdout.write(self.style.WARNING(f'Error generando resumen con IA: {str(e)}'))
-            # Fallback a Gemini si está configurado
-            try:
-                import google.generativeai as genai
-                api_key = os.environ.get('GEMINI_API_KEY')
-                if api_key:
-                    genai.configure(api_key=api_key)
-                    model = genai.GenerativeModel('gemini-1.5-flash')
-                    response = model.generate_content(prompt)
-                    return response.text.strip()
-            except:
-                pass
+            # Fallback a Gemini eliminado - no se usa google-generativeai
             return None
 
     def calcular_relevancia_hecho(self, hecho):

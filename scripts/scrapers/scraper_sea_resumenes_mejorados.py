@@ -327,8 +327,7 @@ class ScraperSEAResumenesMejorados:
     
     def _generar_resumen_inteligente(self, proyecto: Dict) -> str:
         """
-        Genera un resumen CONCISO con información esencial al inicio
-        MAX 3 líneas: Tipo/Ubicación/Inversión, Descripción breve, Titular
+        Genera un resumen de 5-6 líneas con información completa pero concisa
         """
         titulo = proyecto.get('titulo', '')
         empresa = proyecto.get('empresa', '')
@@ -336,75 +335,99 @@ class ScraperSEAResumenesMejorados:
         comuna = proyecto.get('comuna', '')
         tipo_presentacion = proyecto.get('tipo', '')
         inversion = proyecto.get('inversion_mmusd', 0)
+        tipo_proyecto = proyecto.get('tipo_proyecto', '')
         
-        # Identificar el tipo de proyecto de forma más específica
+        # Identificar el tipo de proyecto y generar descripción
         titulo_lower = titulo.lower()
         
-        # Determinar sector y descripción ultra-breve
+        # Generar descripción basada en el tipo
         if 'fotovoltaic' in titulo_lower or 'solar' in titulo_lower:
-            sector = 'Solar'
             potencia = self._extraer_potencia(titulo)
-            descripcion = f"Planta fotovoltaica{potencia}"
+            descripcion_base = f"Planta fotovoltaica{potencia}"
+            detalles = "con paneles solares de última generación, inversores y subestación eléctrica"
         elif 'eólico' in titulo_lower or 'wind' in titulo_lower:
-            sector = 'Eólico'
             potencia = self._extraer_potencia(titulo)
-            descripcion = f"Parque eólico{potencia}"
+            descripcion_base = f"Parque eólico{potencia}"
+            detalles = "con aerogeneradores de alta eficiencia y obras civiles asociadas"
         elif 'minero' in titulo_lower or 'minería' in titulo_lower or 'mina' in titulo_lower:
-            sector = 'Minería'
-            descripcion = "Proyecto minero"
+            descripcion_base = "Proyecto minero"
+            detalles = "que incluye extracción, procesamiento y transporte de minerales"
         elif 'inmobiliario' in titulo_lower or 'habitacional' in titulo_lower:
-            sector = 'Inmobiliario'
             unidades = self._extraer_unidades(titulo)
-            descripcion = f"Desarrollo habitacional{unidades}"
+            descripcion_base = f"Desarrollo habitacional{unidades}"
+            detalles = "con áreas verdes, equipamiento y estacionamientos"
         elif 'acuícola' in titulo_lower or 'piscicultura' in titulo_lower or 'salmón' in titulo_lower:
-            sector = 'Acuicultura'
-            descripcion = "Centro de cultivo marino"
+            descripcion_base = "Centro de cultivo marino"
+            detalles = "para producción acuícola con instalaciones de apoyo"
         elif 'transmisión' in titulo_lower or 'línea' in titulo_lower:
-            sector = 'Transmisión'
             kv = self._extraer_kv(titulo)
-            descripcion = f"Línea eléctrica{kv}"
+            descripcion_base = f"Línea de transmisión eléctrica{kv}"
+            detalles = "con torres, conductores y subestaciones de conexión"
         elif 'puerto' in titulo_lower or 'portuario' in titulo_lower:
-            sector = 'Portuario'
-            descripcion = "Terminal portuario"
+            descripcion_base = "Terminal portuario"
+            detalles = "con infraestructura de carga, descarga y almacenamiento"
         elif 'agrícola' in titulo_lower or 'agro' in titulo_lower:
-            sector = 'Agroindustrial'
-            descripcion = "Proyecto agroindustrial"
-        elif 'forestal' in titulo_lower or 'celulosa' in titulo_lower:
-            sector = 'Forestal'
-            descripcion = "Proyecto forestal"
-        elif 'hidro' in titulo_lower or 'hidroeléctric' in titulo_lower:
-            sector = 'Hidroeléctrico'
-            potencia = self._extraer_potencia(titulo)
-            descripcion = f"Central hidroeléctrica{potencia}"
+            descripcion_base = "Proyecto agroindustrial"
+            detalles = "para procesamiento y/o producción agrícola"
         else:
-            sector = tipo_presentacion
-            descripcion = "Proyecto industrial"
+            descripcion_base = "Proyecto industrial"
+            detalles = "con instalaciones productivas y obras complementarias"
         
-        # FORMATO ULTRA-CONCISO (3 líneas máximo)
+        # Construir resumen de 5-6 líneas
         lineas = []
         
-        # Línea 1: Sector | Ubicación | Inversión
+        # Línea 1: Título del proyecto
+        lineas.append(f"**{titulo}**")
+        
+        # Línea 2: Ubicación e inversión
         ubicacion = f"{region}, {comuna}" if comuna else region
-        linea1 = f"**{sector}** | {ubicacion}"
+        linea_ubicacion = f"📍 {ubicacion}"
         if inversion > 0:
-            linea1 += f" | **USD {inversion:.1f}MM**"
-        lineas.append(linea1)
+            linea_ubicacion += f" | Inversión: **USD {inversion:.1f} millones**"
+        lineas.append(linea_ubicacion)
         
-        # Línea 2: Descripción + Titular
-        linea2 = descripcion
+        # Línea 3: Titular
         if empresa:
-            # Acortar nombre de empresa si es muy largo
-            empresa_corta = empresa.split(' S.A.')[0].split(' SpA')[0].split(' Ltda')[0]
-            if len(empresa_corta) > 30:
-                empresa_corta = empresa_corta[:30] + "..."
-            linea2 += f" ({empresa_corta})"
-        lineas.append(linea2)
+            empresa_limpia = empresa.split(' S.A.')[0].split(' SpA')[0].split(' Ltda')[0]
+            lineas.append(f"Titular: {empresa_limpia}")
         
-        # Línea 3: Solo título si es muy diferente y corto
-        if len(titulo) < 80 and descripcion.lower() not in titulo.lower():
-            lineas.append(f"_{titulo}_")
+        # Líneas 4-6: Descripción del proyecto (más detallada)
+        descripcion_completa = f"{descripcion_base} {detalles}."
         
-        return "\n".join(lineas)
+        # Agregar más detalles contextuales
+        if 'solar' in titulo_lower or 'fotovoltaic' in titulo_lower:
+            descripcion_completa += " Incluye obras civiles, sistemas de monitoreo y conexión al Sistema Eléctrico Nacional."
+        elif 'eólico' in titulo_lower:
+            descripcion_completa += " Contempla caminos de acceso, plataformas de montaje y obras de conexión eléctrica."
+        elif 'minero' in titulo_lower or 'minería' in titulo_lower:
+            descripcion_completa += " Considera manejo de residuos, sistemas de agua y medidas de mitigación ambiental."
+        elif 'inmobiliario' in titulo_lower:
+            descripcion_completa += " Proyecto incluye urbanización completa, servicios básicos y accesos viales."
+        else:
+            descripcion_completa += " Incluye obras complementarias y medidas de mitigación ambiental."
+        
+        if tipo_presentacion:
+            descripcion_completa += f" Evaluación ambiental mediante {tipo_presentacion}."
+        
+        # Dividir descripción en 2-3 líneas para mejor legibilidad
+        palabras = descripcion_completa.split()
+        if len(palabras) > 30:
+            tercio = len(palabras) // 3
+            lineas.append(' '.join(palabras[:tercio]))
+            lineas.append(' '.join(palabras[tercio:tercio*2]))
+            lineas.append(' '.join(palabras[tercio*2:]))
+        elif len(palabras) > 20:
+            mitad = len(palabras) // 2
+            lineas.append(' '.join(palabras[:mitad]))
+            lineas.append(' '.join(palabras[mitad:]))
+        else:
+            lineas.append(descripcion_completa)
+        
+        # Línea 7: Tipo de proyecto si está disponible y es relevante
+        if tipo_proyecto and tipo_proyecto not in titulo and len(lineas) < 7:
+            lineas.append(f"Categoría: {tipo_proyecto}")
+        
+        return "\n".join(lineas[:7])  # Limitar a 7 líneas máximo
     
     def _extraer_potencia(self, titulo: str) -> str:
         """Extrae la potencia de un proyecto energético"""
@@ -432,65 +455,76 @@ class ScraperSEAResumenesMejorados:
     
     def _formatear_resumen_conciso(self, proyecto: Dict, resumen_real: str) -> str:
         """
-        Formatea el resumen real del SEA en versión ultra-concisa
-        MAX 3-4 líneas con la información esencial
+        Formatea el resumen real del SEA en 5-6 líneas con información completa
         """
         region = proyecto.get('region', '')
         comuna = proyecto.get('comuna', '')
         empresa = proyecto.get('empresa', '')
         inversion = proyecto.get('inversion_mmusd', 0)
         titulo = proyecto.get('titulo', '')
-        
-        # Identificar sector del proyecto
-        titulo_lower = titulo.lower()
-        if 'fotovoltaic' in titulo_lower or 'solar' in titulo_lower:
-            sector = 'Solar'
-        elif 'eólico' in titulo_lower or 'wind' in titulo_lower:
-            sector = 'Eólico'
-        elif 'minero' in titulo_lower or 'minería' in titulo_lower:
-            sector = 'Minería'
-        elif 'inmobiliario' in titulo_lower or 'habitacional' in titulo_lower:
-            sector = 'Inmobiliario'
-        elif 'acuícola' in titulo_lower or 'piscicultura' in titulo_lower:
-            sector = 'Acuicultura'
-        elif 'transmisión' in titulo_lower or 'línea' in titulo_lower:
-            sector = 'Transmisión'
-        else:
-            sector = 'Industrial'
+        tipo_presentacion = proyecto.get('tipo', '')
         
         lineas = []
         
-        # Línea 1: Info esencial
+        # Línea 1: Título del proyecto
+        lineas.append(f"**{titulo}**")
+        
+        # Línea 2: Ubicación e inversión
         ubicacion = f"{region}, {comuna}" if comuna else region
-        linea1 = f"**{sector}** | {ubicacion}"
+        linea_ubicacion = f"📍 {ubicacion}"
         if inversion > 0:
-            linea1 += f" | **USD {inversion:.1f}MM**"
-        lineas.append(linea1)
+            linea_ubicacion += f" | Inversión: **USD {inversion:.1f} millones**"
+        lineas.append(linea_ubicacion)
         
-        # Línea 2: Empresa
+        # Línea 3: Empresa titular
         if empresa:
-            empresa_corta = empresa.split(' S.A.')[0].split(' SpA')[0].split(' Ltda')[0]
-            if len(empresa_corta) > 30:
-                empresa_corta = empresa_corta[:30] + "..."
-            lineas.append(f"Titular: {empresa_corta}")
+            empresa_limpia = empresa.split(' S.A.')[0].split(' SpA')[0].split(' Ltda')[0]
+            lineas.append(f"Titular: {empresa_limpia}")
         
-        # Línea 3-4: Resumen del proyecto (primeras 100-150 palabras del resumen real)
+        # Líneas 4-7: Resumen del proyecto (primeras 200-250 palabras del resumen real)
         if resumen_real:
             # Limpiar y acortar el resumen real
             resumen_limpio = resumen_real.strip()
-            # Tomar solo las primeras 100 palabras aproximadamente
-            palabras = resumen_limpio.split()
-            if len(palabras) > 100:
-                resumen_corto = ' '.join(palabras[:100]) + "..."
-            else:
-                resumen_corto = resumen_limpio
-            
             # Eliminar saltos de línea múltiples
-            resumen_corto = ' '.join(resumen_corto.split())
+            resumen_limpio = ' '.join(resumen_limpio.split())
             
-            lineas.append(resumen_corto)
+            # Tomar aproximadamente 200-250 palabras para más detalle
+            palabras = resumen_limpio.split()
+            if len(palabras) > 250:
+                resumen_ajustado = ' '.join(palabras[:250]) + "..."
+            else:
+                resumen_ajustado = resumen_limpio
+            
+            # Dividir el resumen en 3-4 líneas para mejor legibilidad
+            palabras_resumen = resumen_ajustado.split()
+            num_palabras = len(palabras_resumen)
+            
+            if num_palabras > 60:
+                # Dividir en 3-4 líneas aproximadamente iguales
+                cuarto = num_palabras // 4
+                lineas.append(' '.join(palabras_resumen[:cuarto]))
+                lineas.append(' '.join(palabras_resumen[cuarto:cuarto*2]))
+                lineas.append(' '.join(palabras_resumen[cuarto*2:cuarto*3]))
+                lineas.append(' '.join(palabras_resumen[cuarto*3:]))
+            elif num_palabras > 40:
+                # Dividir en 3 líneas
+                tercio = num_palabras // 3
+                lineas.append(' '.join(palabras_resumen[:tercio]))
+                lineas.append(' '.join(palabras_resumen[tercio:tercio*2]))
+                lineas.append(' '.join(palabras_resumen[tercio*2:]))
+            elif num_palabras > 20:
+                # Dividir en 2 líneas
+                mitad = num_palabras // 2
+                lineas.append(' '.join(palabras_resumen[:mitad]))
+                lineas.append(' '.join(palabras_resumen[mitad:]))
+            else:
+                lineas.append(resumen_ajustado)
         
-        return "\n".join(lineas)
+        # Agregar tipo de evaluación si hay espacio
+        if len(lineas) < 7 and tipo_presentacion:
+            lineas.append(f"Evaluación: {tipo_presentacion}")
+        
+        return "\n".join(lineas[:7])  # Limitar a 7 líneas máximo
     
     def _calcular_relevancia_mejorada(self, proyecto: Dict) -> float:
         """

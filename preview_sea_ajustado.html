@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Vista Previa - Resúmenes SEA Ajustados</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+        }
+        .proyecto {
+            background: #f8f9fa;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 5px;
+            line-height: 1.6;
+        }
+        .proyecto-titulo {
+            font-weight: bold;
+            color: #212529;
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+        .proyecto-ubicacion {
+            color: #495057;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+        .proyecto-titular {
+            color: #6c757d;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        .proyecto-descripcion {
+            color: #495057;
+            font-size: 13px;
+            line-height: 1.5;
+            text-align: justify;
+        }
+        .proyecto-categoria {
+            color: #868e96;
+            font-size: 12px;
+            font-style: italic;
+            margin-top: 8px;
+        }
+        .stats {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .comparacion {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        .ejemplo-formato {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-line;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Vista Previa: Resúmenes Ambientales Ajustados</h1>
+        <p><strong>Fecha del informe:</strong> 06/09/2025</p>
+        
+        <div class="stats">
+            <strong>✅ Ajustes implementados según tu feedback:</strong>
+            <ul>
+                <li>Eliminadas las etiquetas de sector (Solar, Eólico, etc.)</li>
+                <li>Resúmenes extendidos a 5-6 líneas para mayor detalle</li>
+                <li>Formato más equilibrado entre concisión e información</li>
+                <li>Mantiene la información esencial visible de inmediato</li>
+            </ul>
+        </div>
+
+        <h2>📋 FORMATO ACTUALIZADO (5-6 líneas)</h2>
+        
+        <div class="proyecto">
+            <div class="proyecto-titulo">Parque Solar Atacama</div>
+            <div class="proyecto-ubicacion">📍 Atacama, Copiapó | Inversión: <strong>USD 120.0 millones</strong></div>
+            <div class="proyecto-titular">Titular: Enel Green Power Chile</div>
+            <div class="proyecto-descripcion">
+                Planta fotovoltaica de 150 MW con paneles solares de última generación, inversores y subestación eléctrica.
+                Evaluación ambiental mediante EIA. El proyecto incluye sistema de almacenamiento BESS de 50 MW para 
+                estabilización de la red y conexión a la SE Cardones mediante línea de transmisión de 220 kV de 15 km.
+            </div>
+            <div class="proyecto-categoria">Categoría: Proyectos de Generación de Energía</div>
+        </div>
+
+        <div class="proyecto">
+            <div class="proyecto-titulo">Parque Eólico Biobío</div>
+            <div class="proyecto-ubicacion">📍 Biobío, Mulchén | Inversión: <strong>USD 180.0 millones</strong></div>
+            <div class="proyecto-titular">Titular: Mainstream Renewable Power</div>
+            <div class="proyecto-descripcion">
+                Parque eólico de 120 MW con aerogeneradores de alta eficiencia y obras civiles asociadas. 
+                Evaluación ambiental mediante EIA. Contempla la instalación de 24 aerogeneradores de 5 MW cada uno, 
+                con torres de 120 metros de altura y rotores de 162 metros de diámetro. Incluye construcción de 
+                caminos de acceso, plataformas de montaje y subestación elevadora 33/220 kV.
+            </div>
+        </div>
+
+        <div class="proyecto">
+            <div class="proyecto-titulo">Extensión Mina Escondida Fase III</div>
+            <div class="proyecto-ubicacion">📍 Antofagasta, Calama | Inversión: <strong>USD 450.0 millones</strong></div>
+            <div class="proyecto-titular">Titular: Minera Escondida Limitada</div>
+            <div class="proyecto-descripcion">
+                Proyecto minero que incluye extracción, procesamiento y transporte de minerales. Evaluación ambiental 
+                mediante EIA. Extensión de vida útil del rajo principal mediante profundización en 200 metros adicionales. 
+                Aumento de capacidad de procesamiento a 180,000 toneladas por día con nueva planta de flotación, 
+                espesadores y reubicación de instalaciones auxiliares.
+            </div>
+            <div class="proyecto-categoria">Categoría: Proyectos Mineros</div>
+        </div>
+
+        <div class="proyecto">
+            <div class="proyecto-titulo">Conjunto Habitacional Las Condes</div>
+            <div class="proyecto-ubicacion">📍 RM, Las Condes | Inversión: <strong>USD 35.0 millones</strong></div>
+            <div class="proyecto-titular">Titular: Inmobiliaria Almagro</div>
+            <div class="proyecto-descripcion">
+                Desarrollo habitacional (850 unidades) con áreas verdes, equipamiento y estacionamientos. 
+                Evaluación ambiental mediante DIA. Construcción de 4 torres de 22 pisos con superficie total 
+                construida de 95,000 m². Incluye 1,200 estacionamientos subterráneos, áreas comerciales en 
+                primer piso y 8,000 m² de áreas verdes con equipamiento recreacional.
+            </div>
+        </div>
+
+        <div class="proyecto">
+            <div class="proyecto-titulo">Línea de Transmisión Polpaico - Alto Jahuel 500 kV</div>
+            <div class="proyecto-ubicacion">📍 Valparaíso - RM | Inversión: <strong>USD 85.0 millones</strong></div>
+            <div class="proyecto-titular">Titular: Transelec</div>
+            <div class="proyecto-descripcion">
+                Línea de transmisión eléctrica 500 kV con torres, conductores y subestaciones de conexión. 
+                Evaluación ambiental mediante DIA. Trazado de 120 km con 280 torres de acero galvanizado. 
+                El proyecto mejorará la confiabilidad del Sistema Eléctrico Nacional y aumentará la capacidad 
+                de transmisión en 1,500 MVA entre las zonas centro y metropolitana.
+            </div>
+        </div>
+
+        <h2>📊 Comparación de formatos</h2>
+        
+        <div class="comparacion">
+            <div>
+                <h3>Formato muy corto (3 líneas)</h3>
+                <div class="ejemplo-formato">❌ Muy condensado
+❌ Falta información importante
+❌ No se entiende el alcance del proyecto</div>
+            </div>
+            <div>
+                <h3>Formato actual (5-6 líneas)</h3>
+                <div class="ejemplo-formato">✅ Balance óptimo
+✅ Información completa pero concisa
+✅ Fácil de leer y entender
+✅ Datos técnicos relevantes incluidos</div>
+            </div>
+        </div>
+
+        <h2>📈 Estructura del formato actual</h2>
+        <ol>
+            <li><strong>Línea 1:</strong> Título completo del proyecto</li>
+            <li><strong>Línea 2:</strong> Ubicación e inversión total</li>
+            <li><strong>Línea 3:</strong> Empresa titular</li>
+            <li><strong>Líneas 4-5:</strong> Descripción técnica y alcance del proyecto</li>
+            <li><strong>Línea 6 (opcional):</strong> Categoría o tipo de evaluación</li>
+        </ol>
+
+        <div class="stats" style="margin-top: 30px; background: #d4edda;">
+            <strong>✅ Resultado final:</strong>
+            <ul>
+                <li>Sin etiquetas de sector que distraen</li>
+                <li>Información técnica suficiente para entender el proyecto</li>
+                <li>Formato profesional y ejecutivo</li>
+                <li>5-6 líneas: ni muy corto ni muy largo</li>
+                <li>Toda la información relevante para toma de decisiones</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

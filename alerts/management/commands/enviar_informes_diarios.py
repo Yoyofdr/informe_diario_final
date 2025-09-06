@@ -13,6 +13,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         try:
+            # Verificar si es domingo (6 = domingo en weekday())
+            if datetime.now().weekday() == 6:
+                self.stdout.write(self.style.WARNING("⚠️ Es domingo - No se envían informes los domingos"))
+                return
+            
             # Importar el módulo del generador de informes
             import importlib.util
             script_path = os.path.join(BASE_DIR, 'scripts', 'generators', 'generar_informe_oficial_integrado_mejorado.py')

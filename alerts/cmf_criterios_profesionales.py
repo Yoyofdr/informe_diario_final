@@ -552,7 +552,6 @@ def filtrar_hechos_profesional(hechos, max_hechos=12):
     - Incluir SIEMPRE (relevancia >= 7):
       * Todas las empresas IPSA (sin importar la materia)
       * Todas las empresas de la lista de 500 empresas importantes (sin importar la materia)
-      * Cambios en la administración
       * Compra/venta de acciones
       * División, fusión o constitución de sociedades
       * Búsqueda de inversionistas o socios estratégicos
@@ -561,6 +560,7 @@ def filtrar_hechos_profesional(hechos, max_hechos=12):
       * Todos los fondos de inversión
       * Colocación de valores (bonos, acciones, etc.)
       * Todas las compañías de seguros
+      * Cambios en la administración (directorios, gerencias, ejecutivos)
       * Hechos con relevancia < 7
     """
     # Primero, filtrar hechos relacionados con fondos, colocación de valores y compañías de seguros
@@ -602,7 +602,20 @@ def filtrar_hechos_profesional(hechos, max_hechos=12):
                                 for palabra in ['poliza', 'póliza', 'siniestro', 'prima', 'reaseguro',
                                               'cobertura de seguro', 'contrato de seguro'])
         
-        if not es_fondo and not es_colocacion and not es_seguro and not es_materia_seguros:
+        # Excluir cambios en la administración
+        es_cambio_administracion = any(palabra in titulo or palabra in materia
+                                      for palabra in ['cambio en la administración', 'cambio en la administracion',
+                                                     'cambios en la administración', 'cambios en la administracion',
+                                                     'cambio de directorio', 'nuevo directorio',
+                                                     'renuncia director', 'renuncia gerente',
+                                                     'nombramiento director', 'nombramiento gerente',
+                                                     'designación director', 'designacion director',
+                                                     'elección de directorio', 'eleccion de directorio',
+                                                     'renovación del directorio', 'renovacion del directorio',
+                                                     'cambio de gerente general', 'nuevo gerente general',
+                                                     'cambio en el directorio', 'cambios en el directorio'])
+        
+        if not es_fondo and not es_colocacion and not es_seguro and not es_materia_seguros and not es_cambio_administracion:
             hechos_filtrados.append(hecho)
         else:
             if es_fondo:
@@ -611,6 +624,8 @@ def filtrar_hechos_profesional(hechos, max_hechos=12):
                 print(f"  → Excluido (colocación de valores): {hecho.get('entidad', '')} - {hecho.get('titulo', '')[:50]}...")
             elif es_seguro or es_materia_seguros:
                 print(f"  → Excluido (compañía de seguros): {hecho.get('entidad', '')} - {hecho.get('titulo', '')[:50]}...")
+            elif es_cambio_administracion:
+                print(f"  → Excluido (cambio en administración): {hecho.get('entidad', '')} - {hecho.get('titulo', '')[:50]}...")
     
     # Calcular relevancia para cada hecho que no es fondo ni colocación
     hechos_evaluados = []

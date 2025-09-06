@@ -293,8 +293,27 @@ class ScraperSEAResumenesMejorados:
                 except Exception as e:
                     logger.debug(f"Error extrayendo datos de celdas: {e}")
             
-            # Generar resumen mejorado
-            proyecto['resumen_completo'] = self._generar_resumen_inteligente(proyecto)
+            # Intentar extraer el resumen real del SEA
+            resumen_real = None
+            if proyecto.get('id'):
+                try:
+                    # Importar el extractor de resúmenes del SEA
+                    from sea_resumen_extractor import sea_resumen_extractor
+                    resultado_extraccion = sea_resumen_extractor.extraer_resumen_proyecto(proyecto['id'])
+                    if resultado_extraccion and resultado_extraccion.get('resumen'):
+                        resumen_real = resultado_extraccion['resumen']
+                        logger.info(f"✅ Resumen real extraído del SEA para proyecto {proyecto['id']}")
+                except Exception as e:
+                    logger.debug(f"No se pudo extraer resumen real: {e}")
+            
+            # Si tenemos resumen real, generar versión concisa
+            if resumen_real:
+                # Crear resumen conciso basado en el resumen real
+                proyecto['resumen_completo'] = self._formatear_resumen_conciso(proyecto, resumen_real)
+            else:
+                # Fallback: generar resumen con la información disponible
+                proyecto['resumen_completo'] = self._generar_resumen_inteligente(proyecto)
+            
             proyecto['relevancia'] = self._calcular_relevancia_mejorada(proyecto)
             proyecto['sector_identificado'] = self._identificar_sector(proyecto)
             proyecto['impacto_estimado'] = self._estimar_impacto(proyecto)
@@ -308,72 +327,170 @@ class ScraperSEAResumenesMejorados:
     
     def _generar_resumen_inteligente(self, proyecto: Dict) -> str:
         """
-        Genera un resumen inteligente basado en el tipo de proyecto identificado
+        Genera un resumen CONCISO con información esencial al inicio
+        MAX 3 líneas: Tipo/Ubicación/Inversión, Descripción breve, Titular
         """
-        titulo = proyecto.get('titulo', '').lower()
-        tipo_proyecto = proyecto.get('tipo_proyecto', '').lower()
+        titulo = proyecto.get('titulo', '')
         empresa = proyecto.get('empresa', '')
         region = proyecto.get('region', '')
         comuna = proyecto.get('comuna', '')
         tipo_presentacion = proyecto.get('tipo', '')
         inversion = proyecto.get('inversion_mmusd', 0)
-        estado = proyecto.get('estado', '')
         
-        # Identificar el tipo de proyecto
-        template_usado = None
-        sector = 'No Identificado'
+        # Identificar el tipo de proyecto de forma más específica
+        titulo_lower = titulo.lower()
         
-        for tipo_key, tipo_info in self.tipos_proyecto.items():
-            if any(keyword in titulo or keyword in tipo_proyecto for keyword in tipo_info['keywords']):
-                template_usado = tipo_info['template']
-                sector = tipo_info['sector']
-                break
+        # Determinar sector y descripción ultra-breve
+        if 'fotovoltaic' in titulo_lower or 'solar' in titulo_lower:
+            sector = 'Solar'
+            potencia = self._extraer_potencia(titulo)
+            descripcion = f"Planta fotovoltaica{potencia}"
+        elif 'eólico' in titulo_lower or 'wind' in titulo_lower:
+            sector = 'Eólico'
+            potencia = self._extraer_potencia(titulo)
+            descripcion = f"Parque eólico{potencia}"
+        elif 'minero' in titulo_lower or 'minería' in titulo_lower or 'mina' in titulo_lower:
+            sector = 'Minería'
+            descripcion = "Proyecto minero"
+        elif 'inmobiliario' in titulo_lower or 'habitacional' in titulo_lower:
+            sector = 'Inmobiliario'
+            unidades = self._extraer_unidades(titulo)
+            descripcion = f"Desarrollo habitacional{unidades}"
+        elif 'acuícola' in titulo_lower or 'piscicultura' in titulo_lower or 'salmón' in titulo_lower:
+            sector = 'Acuicultura'
+            descripcion = "Centro de cultivo marino"
+        elif 'transmisión' in titulo_lower or 'línea' in titulo_lower:
+            sector = 'Transmisión'
+            kv = self._extraer_kv(titulo)
+            descripcion = f"Línea eléctrica{kv}"
+        elif 'puerto' in titulo_lower or 'portuario' in titulo_lower:
+            sector = 'Portuario'
+            descripcion = "Terminal portuario"
+        elif 'agrícola' in titulo_lower or 'agro' in titulo_lower:
+            sector = 'Agroindustrial'
+            descripcion = "Proyecto agroindustrial"
+        elif 'forestal' in titulo_lower or 'celulosa' in titulo_lower:
+            sector = 'Forestal'
+            descripcion = "Proyecto forestal"
+        elif 'hidro' in titulo_lower or 'hidroeléctric' in titulo_lower:
+            sector = 'Hidroeléctrico'
+            potencia = self._extraer_potencia(titulo)
+            descripcion = f"Central hidroeléctrica{potencia}"
+        else:
+            sector = tipo_presentacion
+            descripcion = "Proyecto industrial"
         
-        # Si no encontramos un template específico, usar uno genérico
-        if not template_usado:
-            template_usado = "El proyecto contempla el desarrollo de una iniciativa en el sector correspondiente que contribuirá al desarrollo regional y nacional."
+        # FORMATO ULTRA-CONCISO (3 líneas máximo)
+        lineas = []
         
-        # Construir el resumen
-        resumen = f"**{proyecto.get('titulo', 'Proyecto SEA')}**\n\n"
-        
-        # Información básica
-        resumen += f"**Tipo:** {tipo_presentacion}\n"
-        resumen += f"**Sector:** {sector}\n"
-        resumen += f"**Región:** {region}"
-        if comuna:
-            resumen += f", {comuna}"
-        resumen += "\n"
-        
-        if empresa:
-            resumen += f"**Titular:** {empresa}\n"
-        
+        # Línea 1: Sector | Ubicación | Inversión
+        ubicacion = f"{region}, {comuna}" if comuna else region
+        linea1 = f"**{sector}** | {ubicacion}"
         if inversion > 0:
-            resumen += f"**Inversión:** USD {inversion:.1f} millones\n"
+            linea1 += f" | **USD {inversion:.1f}MM**"
+        lineas.append(linea1)
         
-        if estado:
-            resumen += f"**Estado:** {estado}\n"
+        # Línea 2: Descripción + Titular
+        linea2 = descripcion
+        if empresa:
+            # Acortar nombre de empresa si es muy largo
+            empresa_corta = empresa.split(' S.A.')[0].split(' SpA')[0].split(' Ltda')[0]
+            if len(empresa_corta) > 30:
+                empresa_corta = empresa_corta[:30] + "..."
+            linea2 += f" ({empresa_corta})"
+        lineas.append(linea2)
         
-        resumen += "\n**Descripción:**\n"
-        resumen += template_usado
+        # Línea 3: Solo título si es muy diferente y corto
+        if len(titulo) < 80 and descripcion.lower() not in titulo.lower():
+            lineas.append(f"_{titulo}_")
         
-        # Agregar contexto regional si disponible
-        contexto_regional = self.contexto_regiones.get(region)
-        if contexto_regional:
-            resumen += f"\n\nEl proyecto se desarrolla en la región de {region}, {contexto_regional}."
+        return "\n".join(lineas)
+    
+    def _extraer_potencia(self, titulo: str) -> str:
+        """Extrae la potencia de un proyecto energético"""
+        import re
+        match = re.search(r'(\d+(?:[,.]?\d+)?\s*MW)', titulo, re.IGNORECASE)
+        if match:
+            return f" de {match.group(1)}"
+        return ""
+    
+    def _extraer_unidades(self, titulo: str) -> str:
+        """Extrae el número de unidades de un proyecto inmobiliario"""
+        import re
+        match = re.search(r'(\d+)\s*(vivienda|unidad|departamento|casa)', titulo, re.IGNORECASE)
+        if match:
+            return f" ({match.group(1)} unidades)"
+        return ""
+    
+    def _extraer_kv(self, titulo: str) -> str:
+        """Extrae el voltaje de una línea de transmisión"""
+        import re
+        match = re.search(r'(\d+\s*kV)', titulo, re.IGNORECASE)
+        if match:
+            return f" {match.group(1)}"
+        return ""
+    
+    def _formatear_resumen_conciso(self, proyecto: Dict, resumen_real: str) -> str:
+        """
+        Formatea el resumen real del SEA en versión ultra-concisa
+        MAX 3-4 líneas con la información esencial
+        """
+        region = proyecto.get('region', '')
+        comuna = proyecto.get('comuna', '')
+        empresa = proyecto.get('empresa', '')
+        inversion = proyecto.get('inversion_mmusd', 0)
+        titulo = proyecto.get('titulo', '')
         
-        # Agregar información sobre el impacto según la inversión
-        if inversion > 100:
-            resumen += f"\n\nCon una inversión de USD {inversion:.1f} millones, este proyecto se considera de gran escala y potencial impacto significativo en la economía regional."
-        elif inversion > 10:
-            resumen += f"\n\nLa inversión de USD {inversion:.1f} millones posiciona a este proyecto como una iniciativa de escala media con impacto regional importante."
+        # Identificar sector del proyecto
+        titulo_lower = titulo.lower()
+        if 'fotovoltaic' in titulo_lower or 'solar' in titulo_lower:
+            sector = 'Solar'
+        elif 'eólico' in titulo_lower or 'wind' in titulo_lower:
+            sector = 'Eólico'
+        elif 'minero' in titulo_lower or 'minería' in titulo_lower:
+            sector = 'Minería'
+        elif 'inmobiliario' in titulo_lower or 'habitacional' in titulo_lower:
+            sector = 'Inmobiliario'
+        elif 'acuícola' in titulo_lower or 'piscicultura' in titulo_lower:
+            sector = 'Acuicultura'
+        elif 'transmisión' in titulo_lower or 'línea' in titulo_lower:
+            sector = 'Transmisión'
+        else:
+            sector = 'Industrial'
         
-        # Información sobre el tipo de evaluación
-        if tipo_presentacion == 'EIA':
-            resumen += "\n\nAl ser un Estudio de Impacto Ambiental (EIA), este proyecto requiere una evaluación ambiental más detallada debido a su potencial impacto significativo."
-        elif tipo_presentacion == 'DIA':
-            resumen += "\n\nComo Declaración de Impacto Ambiental (DIA), el proyecto se considera de menor impacto ambiental relativo."
+        lineas = []
         
-        return resumen
+        # Línea 1: Info esencial
+        ubicacion = f"{region}, {comuna}" if comuna else region
+        linea1 = f"**{sector}** | {ubicacion}"
+        if inversion > 0:
+            linea1 += f" | **USD {inversion:.1f}MM**"
+        lineas.append(linea1)
+        
+        # Línea 2: Empresa
+        if empresa:
+            empresa_corta = empresa.split(' S.A.')[0].split(' SpA')[0].split(' Ltda')[0]
+            if len(empresa_corta) > 30:
+                empresa_corta = empresa_corta[:30] + "..."
+            lineas.append(f"Titular: {empresa_corta}")
+        
+        # Línea 3-4: Resumen del proyecto (primeras 100-150 palabras del resumen real)
+        if resumen_real:
+            # Limpiar y acortar el resumen real
+            resumen_limpio = resumen_real.strip()
+            # Tomar solo las primeras 100 palabras aproximadamente
+            palabras = resumen_limpio.split()
+            if len(palabras) > 100:
+                resumen_corto = ' '.join(palabras[:100]) + "..."
+            else:
+                resumen_corto = resumen_limpio
+            
+            # Eliminar saltos de línea múltiples
+            resumen_corto = ' '.join(resumen_corto.split())
+            
+            lineas.append(resumen_corto)
+        
+        return "\n".join(lineas)
     
     def _calcular_relevancia_mejorada(self, proyecto: Dict) -> float:
         """

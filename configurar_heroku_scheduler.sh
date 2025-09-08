@@ -27,7 +27,7 @@ heroku run "heroku jobs:cancel --app $APP_NAME" --app $APP_NAME 2>/dev/null || e
 echo ""
 echo "📋 Paso 3: Configurar la tarea diaria..."
 echo "Comando a configurar: python manage.py enviar_informes_diarios"
-echo "Horario: 13:00 UTC (9:00 AM Chile) - Lunes a Sábado"
+echo "Horario: 12:30 UTC (8:30 AM Chile) - Lunes a Sábado"
 
 # Crear el job en Heroku Scheduler
 heroku addons:open scheduler --app $APP_NAME &
@@ -40,8 +40,8 @@ echo "2. Haz clic en 'Create job'"
 echo "3. Configura:"
 echo "   - Command: python manage.py enviar_informes_diarios"
 echo "   - Frequency: Daily"
-echo "   - Time: 13:00 UTC"
-echo "   - Description: Envío diario de informes (9 AM Chile)"
+echo "   - Time: 12:30 UTC"
+echo "   - Description: Envío diario de informes (8:30 AM Chile)"
 echo ""
 echo "📊 AHORRO ESTIMADO: $25-50/mes → $0"
 echo ""

@@ -16,7 +16,7 @@ python scripts/generators/generar_informe_oficial_integrado_mejorado.py "21-07-2
 
 ### Informe Automático
 
-El sistema envía informes automáticamente todos los días a las 9:00 AM (hora de Chile).
+El sistema envía informes automáticamente todos los días a las 8:30 AM (hora de Chile).
 
 Para ejecutar el envío manual:
 

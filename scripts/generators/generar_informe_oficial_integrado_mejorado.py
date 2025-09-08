@@ -895,7 +895,7 @@ def generar_html_informe(fecha, resultado_diario, hechos_cmf, publicaciones_sii=
                                             <li style="margin-bottom: 8px;"><strong>DT:</strong> Dictámenes y ordinarios laborales</li>
                                         </ul>
                                         <p style="margin: 0; font-size: 14px; color: #047857;">
-                                            A partir de mañana, recibirás este informe todos los días hábiles a las 9:00 AM.
+                                            A partir de mañana, recibirás este informe todos los días hábiles a las 8:30 AM.
                                         </p>
                                     </td>
                                 </tr>

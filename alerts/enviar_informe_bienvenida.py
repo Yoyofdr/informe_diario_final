@@ -129,7 +129,7 @@ def enviar_informe_bienvenida(email_destinatario, nombre_destinatario, fecha_fin
                             </p>
                             
                             <p style="margin: 0 0 20px 0; font-size: 16px; color: #475569; line-height: 1.6;">
-                                Recibirás tu primer informe diario mañana a las 9:00 AM con toda la información relevante de:
+                                Recibirás tu primer informe diario mañana a las 8:30 AM con toda la información relevante de:
                             </p>
                             
                             <ul style="margin: 0 0 25px 0; padding-left: 20px; font-size: 15px; color: #475569; line-height: 1.8;">

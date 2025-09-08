@@ -74,7 +74,7 @@ def register(request):
                     nombre_completo = user.username
                 
                 enviar_informe_bienvenida(user.email, nombre_completo)
-                messages.success(request, 'Te hemos enviado el informe de hoy. Continuarás recibiéndolo diariamente a las 9:00 AM.')
+                messages.success(request, 'Te hemos enviado el informe de hoy. Continuarás recibiéndolo diariamente a las 8:30 AM.')
             except Exception as e:
                 print(f"Error enviando informe de bienvenida: {e}")
                 # No mostrar error al usuario para no afectar la experiencia de registro

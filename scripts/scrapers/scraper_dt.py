@@ -195,22 +195,13 @@ class ScraperDT:
                     logger.debug(f"Error procesando elemento: {e}")
                     continue
             
-            # Priorizar documentos del día anterior
+            # Solo retornar documentos del día anterior
             if documentos_del_dia:
                 logger.info(f"Documentos DT del {fecha_busqueda.strftime('%d/%m/%Y')}: {len(documentos_del_dia)}")
                 return documentos_del_dia[:5]  # Máximo 5 documentos
             
-            # Si no hay documentos del día anterior, buscar los más recientes
-            # pero indicar que no son del día
-            if documentos:
-                logger.info(f"No se encontraron documentos DT del {fecha_busqueda.strftime('%d/%m/%Y')}. Mostrando {min(5, len(documentos))} documentos recientes.")
-                # Marcar como recientes pero no del día
-                for doc in documentos[:5]:
-                    if doc['fecha'] != "Sin fecha":
-                        doc['descripcion'] = f"[{doc['fecha']}] {doc['descripcion']}"
-                return documentos[:5]
-            
-            logger.info(f"No se encontraron documentos DT")
+            # Si no hay documentos del día anterior, retornar lista vacía
+            logger.info(f"No se encontraron documentos DT del {fecha_busqueda.strftime('%d/%m/%Y')}")
             return []
             
         except Exception as e:

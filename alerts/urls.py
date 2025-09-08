@@ -28,6 +28,7 @@ urlpatterns = [
     # path('password_change/done/', auth_views.PasswordChangeDoneView.as_view(template_name='alerts/password_change_done.html'), name='password_change_done'),
     path('admin-panel/', views.admin_panel, name='admin_panel'),  # Panel de administración para superusuarios
     path('logout/', views.logout_view, name='logout'),
+    path('editar-dias-prueba/<int:destinatario_id>/', views.editar_dias_prueba, name='editar_dias_prueba'),
     
     # Fintoc integration URLs - DESACTIVADAS TEMPORALMENTE
     # Descomentar estas líneas cuando se active la funcionalidad de cuentas bancarias

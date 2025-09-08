@@ -360,8 +360,10 @@
                                         <th>Nombre</th>
                                         <th>Email</th>
                                         <th>Organización</th>
-                                        <th>Teléfono</th>
-                                        <th width="100">Acciones</th>
+                                        <th>Estado</th>
+                                        <th>Días Trial</th>
+                                        <th>Vence</th>
+                                        <th width="150">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -372,15 +374,52 @@
                                         <td>
                                             <span class="badge bg-light text-dark">{{ dest.organizacion.nombre }}</span>
                                         </td>
-                                        <td>{{ dest.telefono|default:"-" }}</td>
                                         <td>
-                                            <form method="post" class="d-inline" onsubmit="return confirm('¿Eliminar el destinatario {{ dest.email }}?');">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="dest_id" value="{{ dest.id }}">
-                                                <button type="submit" name="eliminar_destinatario" class="btn btn-danger-soft btn-sm">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </form>
+                                            {% if dest.es_pagado %}
+                                                <span class="badge bg-success">Pagado</span>
+                                            {% elif dest.trial_activo %}
+                                                <span class="badge bg-info">Trial</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Expirado</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if dest.es_pagado %}
+                                                <span class="text-success">∞</span>
+                                            {% else %}
+                                                {% with dias=dest.dias_restantes_trial %}
+                                                    {% if dias > 7 %}
+                                                        <span class="text-success">{{ dias }}</span>
+                                                    {% elif dias > 3 %}
+                                                        <span class="text-warning">{{ dias }}</span>
+                                                    {% else %}
+                                                        <span class="text-danger">{{ dias }}</span>
+                                                    {% endif %}
+                                                {% endwith %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if dest.es_pagado %}
+                                                -
+                                            {% elif dest.fecha_fin_trial %}
+                                                <small>{{ dest.fecha_fin_trial|date:"d/m" }}</small>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-1">
+                                                <a href="{% url 'alerts:editar_dias_prueba' dest.id %}" class="btn btn-primary-soft btn-sm" title="Editar días">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <form method="post" class="d-inline" onsubmit="return confirm('¿Eliminar el destinatario {{ dest.email }}?');">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="dest_id" value="{{ dest.id }}">
+                                                    <button type="submit" name="eliminar_destinatario" class="btn btn-danger-soft btn-sm" title="Eliminar">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
                                     {% endfor %}

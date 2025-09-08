@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Días de Prueba - {{ destinatario.nombre }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bs-body-font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f3f4f6;
+            min-height: 100vh;
+        }
+        
+        .navbar {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: #4c1d95;
+            text-decoration: none;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .btn-custom {
+            border-radius: 8px;
+            padding: 0.625rem 1.25rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: none;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: #6366f1;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5558e3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+        
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #d97706;
+            transform: translateY(-1px);
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+        
+        .alert-info {
+            background: #dbeafe;
+            border: 1px solid #93c5fd;
+            color: #1e40af;
+            border-radius: 12px;
+        }
+        
+        .alert-warning {
+            background: #fed7aa;
+            border: 1px solid #fdba74;
+            color: #9a3412;
+            border-radius: 12px;
+        }
+        
+        .alert-success {
+            background: #bbf7d0;
+            border: 1px solid #86efac;
+            color: #14532d;
+            border-radius: 12px;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            padding: 0.625rem 0.875rem;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #111827;
+        }
+        
+        h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 1rem;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+        
+        .status-active {
+            background: #dcfce7;
+            color: #15803d;
+        }
+        
+        .status-expired {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .status-paid {
+            background: #e0e7ff;
+            color: #4c1d95;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'alerts:dashboard' %}">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10 col-12">
+                <!-- Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Info Card -->
+                <div class="card p-4 mb-4">
+                    <h2 class="mb-4">Editar Período de Prueba</h2>
+                    
+                    <div class="stats-card">
+                        <h4><i class="bi bi-person-circle"></i> {{ destinatario.nombre }}</h4>
+                        <p class="mb-2"><strong>Email:</strong> {{ destinatario.email }}</p>
+                        <p class="mb-2"><strong>Organización:</strong> {{ destinatario.organizacion.nombre }}</p>
+                        <p class="mb-2">
+                            <strong>Estado:</strong>
+                            {% if destinatario.es_pagado %}
+                                <span class="status-badge status-paid">Cliente Pagado</span>
+                            {% elif trial_activo %}
+                                <span class="status-badge status-active">Trial Activo</span>
+                            {% else %}
+                                <span class="status-badge status-expired">Trial Expirado</span>
+                            {% endif %}
+                        </p>
+                        <p class="mb-2"><strong>Días restantes de prueba:</strong> {{ dias_restantes }} días</p>
+                        <p class="mb-2"><strong>Fecha inicio trial:</strong> {{ destinatario.fecha_inicio_trial|date:"d/m/Y" }}</p>
+                        <p class="mb-0"><strong>Fecha fin trial:</strong> 
+                            {% if destinatario.fecha_fin_trial %}
+                                {{ destinatario.fecha_fin_trial|date:"d/m/Y" }}
+                            {% else %}
+                                No establecida
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <!-- Opciones de edición -->
+                    <div class="mt-4">
+                        <h4>Opciones de Edición</h4>
+                        
+                        <!-- Extender días -->
+                        <div class="card p-3 mb-3">
+                            <h5 class="mb-3">Extender período de prueba</h5>
+                            <form method="post" class="d-flex align-items-end">
+                                {% csrf_token %}
+                                <input type="hidden" name="accion" value="extender">
+                                <div class="me-3">
+                                    <label for="dias_extra" class="form-label">Días adicionales:</label>
+                                    <input type="number" class="form-control" id="dias_extra" name="dias_extra" 
+                                           min="1" max="365" value="7" style="width: 120px;">
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-custom">
+                                    <i class="bi bi-plus-circle"></i> Agregar días
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Establecer fecha específica -->
+                        <div class="card p-3 mb-3">
+                            <h5 class="mb-3">Establecer fecha específica</h5>
+                            <form method="post" class="d-flex align-items-end">
+                                {% csrf_token %}
+                                <input type="hidden" name="accion" value="establecer">
+                                <div class="me-3">
+                                    <label for="nueva_fecha" class="form-label">Nueva fecha de fin:</label>
+                                    <input type="date" class="form-control" id="nueva_fecha" name="nueva_fecha" 
+                                           value="{{ fecha_sugerida|date:'Y-m-d' }}" style="width: 200px;">
+                                </div>
+                                <button type="submit" class="btn btn-warning btn-custom">
+                                    <i class="bi bi-calendar-check"></i> Establecer fecha
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Marcar como pagado -->
+                        <div class="card p-3 mb-3">
+                            <h5 class="mb-3">Estado de pago</h5>
+                            <form method="post" style="display: inline;">
+                                {% csrf_token %}
+                                {% if destinatario.es_pagado %}
+                                    <input type="hidden" name="accion" value="quitar_pagado">
+                                    <button type="submit" class="btn btn-danger btn-custom">
+                                        <i class="bi bi-x-circle"></i> Quitar estado pagado
+                                    </button>
+                                {% else %}
+                                    <input type="hidden" name="accion" value="marcar_pagado">
+                                    <button type="submit" class="btn btn-success btn-custom">
+                                        <i class="bi bi-check-circle"></i> Marcar como pagado
+                                    </button>
+                                {% endif %}
+                            </form>
+                        </div>
+
+                        <!-- Reiniciar trial -->
+                        <div class="card p-3 mb-3">
+                            <h5 class="mb-3">Reiniciar período de prueba</h5>
+                            <p class="text-muted">Esto reiniciará el período de prueba a 14 días desde hoy.</p>
+                            <form method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="accion" value="reiniciar">
+                                <button type="submit" class="btn btn-primary btn-custom" 
+                                        onclick="return confirm('¿Estás seguro de reiniciar el período de prueba?')">
+                                    <i class="bi bi-arrow-clockwise"></i> Reiniciar trial (14 días)
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Botón volver -->
+                    <div class="mt-4">
+                        <a href="{% url 'alerts:admin_panel' %}" class="btn btn-secondary btn-custom">
+                            <i class="bi bi-arrow-left"></i> Volver al panel de administración
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

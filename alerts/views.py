@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .forms import CustomUserCreationForm, DestinatarioForm, RegistroEmpresaAdminForm, EmailAuthenticationForm, RegistroPruebaForm
@@ -7,7 +7,7 @@ from collections import defaultdict
 from django.utils import timezone
 from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
 import json
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.contrib.auth.models import User
 import os
 import requests
@@ -521,4 +521,66 @@ def logout_view(request):
     print(f"[LOGOUT] Usuario {request.user} cerrando sesión")
     auth_logout(request)
     print("[LOGOUT] Sesión cerrada, mostrando página de confirmación")
-    return render(request, 'alerts/logout_success.html') 
+    return render(request, 'alerts/logout_success.html')
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def editar_dias_prueba(request, destinatario_id):
+    """
+    Vista exclusiva para superadministradores para editar los días de prueba de un destinatario
+    """
+    destinatario = get_object_or_404(Destinatario, id=destinatario_id)
+    
+    if request.method == 'POST':
+        accion = request.POST.get('accion')
+        
+        if accion == 'extender':
+            dias_extra = int(request.POST.get('dias_extra', 0))
+            if dias_extra > 0:
+                # Extender fecha de fin de trial
+                if not destinatario.fecha_fin_trial:
+                    destinatario.fecha_fin_trial = timezone.now() + timedelta(days=dias_extra)
+                else:
+                    destinatario.fecha_fin_trial += timedelta(days=dias_extra)
+                destinatario.save()
+                messages.success(request, f'Se han agregado {dias_extra} días al período de prueba de {destinatario.nombre}.')
+        
+        elif accion == 'establecer':
+            nueva_fecha = request.POST.get('nueva_fecha')
+            if nueva_fecha:
+                # Convertir string a datetime
+                fecha_dt = datetime.strptime(nueva_fecha, '%Y-%m-%d')
+                fecha_aware = timezone.make_aware(fecha_dt.replace(hour=23, minute=59, second=59))
+                destinatario.fecha_fin_trial = fecha_aware
+                destinatario.save()
+                messages.success(request, f'Fecha de fin de prueba actualizada para {destinatario.nombre}.')
+        
+        elif accion == 'marcar_pagado':
+            destinatario.es_pagado = True
+            destinatario.save()
+            messages.success(request, f'{destinatario.nombre} ha sido marcado como cliente pagado.')
+        
+        elif accion == 'quitar_pagado':
+            destinatario.es_pagado = False
+            destinatario.save()
+            messages.success(request, f'{destinatario.nombre} ya no está marcado como cliente pagado.')
+        
+        elif accion == 'reiniciar':
+            destinatario.fecha_inicio_trial = timezone.now()
+            destinatario.fecha_fin_trial = timezone.now() + timedelta(days=14)
+            destinatario.es_pagado = False
+            destinatario.save()
+            messages.success(request, f'Período de prueba reiniciado para {destinatario.nombre} (14 días desde hoy).')
+        
+        return redirect('alerts:admin_panel')
+    
+    # Calcular fecha sugerida para el input de fecha
+    fecha_sugerida = (destinatario.fecha_fin_trial.date() if destinatario.fecha_fin_trial else 
+                      (timezone.now() + timedelta(days=14)).date())
+    
+    return render(request, 'alerts/editar_dias_prueba.html', {
+        'destinatario': destinatario,
+        'fecha_sugerida': fecha_sugerida,
+        'dias_restantes': destinatario.dias_restantes_trial(),
+        'trial_activo': destinatario.trial_activo()
+    }) 

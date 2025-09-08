@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Scraper mejorado para obtener dictámenes y ordinarios de la Dirección del Trabajo
-Versión que no depende de fechas exactas y toma los documentos más recientes
+Scraper para obtener dictámenes y ordinarios de la Dirección del Trabajo del día anterior
+Similar al scraper del SII - busca documentos publicados el día anterior
 """
 
 import requests
@@ -14,6 +14,12 @@ import re
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Mapeo de meses en español a números
+MESES_ES = {
+    'enero': 1, 'febrero': 2, 'marzo': 3, 'abril': 4, 'mayo': 5, 'junio': 6,
+    'julio': 7, 'agosto': 8, 'septiembre': 9, 'octubre': 10, 'noviembre': 11, 'diciembre': 12
+}
+
 class ScraperDT:
     def __init__(self):
         self.base_url = "https://www.dt.gob.cl"
@@ -22,16 +28,53 @@ class ScraperDT:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
     
-    def obtener_documentos_dt(self, fecha_especifica=None):
+    def convertir_fecha_dt(self, fecha_str):
         """
-        Obtiene los documentos más recientes de la DT
-        Toma los primeros 5 documentos que encuentra, sin importar la fecha
-        
-        Args:
-            fecha_especifica: Se mantiene por compatibilidad pero no se usa
+        Convierte diferentes formatos de fecha a datetime
         """
         try:
-            logger.info(f"Obteniendo documentos más recientes de DT...")
+            # Formato DD/MM/YYYY o DD-MM-YYYY
+            if '/' in fecha_str:
+                return datetime.strptime(fecha_str, '%d/%m/%Y')
+            elif '-' in fecha_str:
+                return datetime.strptime(fecha_str, '%d-%m-%Y')
+            # Formato DD de Mes de YYYY
+            elif ' de ' in fecha_str.lower():
+                fecha_str = fecha_str.lower().strip()
+                partes = fecha_str.split(' de ')
+                if len(partes) == 3:
+                    dia = int(partes[0])
+                    mes_str = partes[1]
+                    anio = int(partes[2])
+                    mes = MESES_ES.get(mes_str)
+                    if mes:
+                        return datetime(anio, mes, dia)
+            return None
+        except:
+            return None
+    
+    def obtener_documentos_dt(self, fecha_especifica=None):
+        """
+        Obtiene los documentos de la DT publicados el día anterior
+        
+        Args:
+            fecha_especifica: Fecha del informe (se buscarán documentos del día anterior)
+        """
+        try:
+            # Calcular fecha del día anterior
+            if fecha_especifica:
+                if isinstance(fecha_especifica, str):
+                    try:
+                        fecha_informe = datetime.strptime(fecha_especifica, '%d-%m-%Y')
+                    except:
+                        fecha_informe = datetime.strptime(fecha_especifica, '%Y-%m-%d')
+                else:
+                    fecha_informe = fecha_especifica
+            else:
+                fecha_informe = datetime.now()
+            
+            fecha_busqueda = fecha_informe - timedelta(days=1)
+            logger.info(f"Buscando documentos DT del día anterior ({fecha_busqueda.strftime('%d/%m/%Y')})...")
             
             response = requests.get(self.url_legislacion, headers=self.headers, timeout=30)
             response.raise_for_status()
@@ -39,6 +82,7 @@ class ScraperDT:
             soup = BeautifulSoup(response.text, 'html.parser')
             
             documentos = []
+            documentos_del_dia = []
             
             # Buscar todos los elementos que contengan ORD.N° o DICTAMEN
             patrones = [
@@ -52,8 +96,8 @@ class ScraperDT:
                 elementos = soup.find_all(string=re.compile(patron, re.IGNORECASE))
                 elementos_encontrados.extend(elementos)
             
-            # Procesar cada elemento encontrado (máximo 10 para encontrar 5 buenos)
-            for elemento in elementos_encontrados[:10]:
+            # Procesar cada elemento encontrado
+            for elemento in elementos_encontrados[:50]:
                 try:
                     # Extraer el número
                     numero_match = re.search(r'(ORD\.?\s*N[°º]\s*\d+(/\d+)?|DICTAMEN\s*N[°º]\s*\d+|DIC\.?\s*N[°º]\s*\d+)', 
@@ -83,13 +127,22 @@ class ScraperDT:
                     for parte in [numero, 'Dictamen destacado']:
                         descripcion = descripcion.replace(parte, '')
                     
-                    # Buscar fecha en el texto (aunque puede estar mal)
+                    # Buscar fecha en el texto
                     fecha_doc = ""
+                    fecha_doc_obj = None
                     fecha_match = re.search(r'\d{1,2}[/-]\d{1,2}[/-]\d{4}', texto_completo)
                     if fecha_match:
                         fecha_doc = fecha_match.group()
+                        fecha_doc_obj = self.convertir_fecha_dt(fecha_doc)
                         # Eliminar la fecha de la descripción
                         descripcion = descripcion.replace(fecha_doc, '')
+                    
+                    # Verificar si es del día que buscamos
+                    es_del_dia = False
+                    if fecha_doc_obj:
+                        # Comparar solo fecha (sin hora)
+                        if fecha_doc_obj.date() == fecha_busqueda.date():
+                            es_del_dia = True
                     
                     # Limpiar descripción
                     descripcion = ' '.join(descripcion.split())
@@ -122,63 +175,43 @@ class ScraperDT:
                     # Limpiar el número (normalizar formato)
                     numero = numero.replace('  ', ' ').strip()
                     
+                    # Crear documento
+                    documento = {
+                        'tipo': tipo,
+                        'numero': numero,
+                        'descripcion': descripcion,
+                        'fecha': fecha_doc if fecha_doc else "Sin fecha",
+                        'url': url
+                    }
+                    
                     # Agregar documento si no está duplicado
                     if not any(d['numero'] == numero for d in documentos):
-                        documentos.append({
-                            'tipo': tipo,
-                            'numero': numero,
-                            'descripcion': descripcion,
-                            'fecha': fecha_doc if fecha_doc else "Reciente",
-                            'url': url
-                        })
-                    
-                    # Si ya tenemos 5 documentos, parar
-                    if len(documentos) >= 5:
-                        break
+                        if es_del_dia:
+                            documentos_del_dia.append(documento)
+                        else:
+                            documentos.append(documento)
                     
                 except Exception as e:
                     logger.debug(f"Error procesando elemento: {e}")
                     continue
             
-            # Si no encontramos suficientes, intentar buscar en la estructura de la página
-            if len(documentos) < 5:
-                # Buscar en elementos con clase específica o estructura conocida
-                articulos = soup.find_all(['article', 'li'], limit=20)
-                for articulo in articulos:
-                    texto = articulo.get_text(separator=' ', strip=True)
-                    # Buscar patrón de ORD o DICTAMEN
-                    if re.search(r'ORD\.?\s*N[°º]\s*\d+|DICTAMEN', texto, re.IGNORECASE):
-                        # Procesar similar al anterior
-                        numero_match = re.search(r'(ORD\.?\s*N[°º]\s*\d+(/\d+)?|DICTAMEN\s*N[°º]\s*\d+)', texto, re.IGNORECASE)
-                        if numero_match and not any(d['numero'] == numero_match.group() for d in documentos):
-                            numero = numero_match.group()
-                            descripcion = texto.replace(numero, '').strip()
-                            
-                            # Buscar fecha
-                            fecha_doc = ""
-                            fecha_match = re.search(r'\d{1,2}[/-]\d{1,2}[/-]\d{4}', texto)
-                            if fecha_match:
-                                fecha_doc = fecha_match.group()
-                                descripcion = descripcion.replace(fecha_doc, '')
-                            
-                            # Limpiar y limitar descripción
-                            descripcion = ' '.join(descripcion.split())[:150]
-                            if not descripcion:
-                                descripcion = "Documento laboral de la DT"
-                            
-                            documentos.append({
-                                'tipo': 'Dictamen' if 'dictamen' in numero.lower() else 'Ordinario',
-                                'numero': numero,
-                                'descripcion': descripcion,
-                                'fecha': fecha_doc if fecha_doc else "Reciente",
-                                'url': self.url_legislacion
-                            })
-                            
-                            if len(documentos) >= 5:
-                                break
+            # Priorizar documentos del día anterior
+            if documentos_del_dia:
+                logger.info(f"Documentos DT del {fecha_busqueda.strftime('%d/%m/%Y')}: {len(documentos_del_dia)}")
+                return documentos_del_dia[:5]  # Máximo 5 documentos
             
-            logger.info(f"Total documentos DT encontrados: {len(documentos)}")
-            return documentos[:5]  # Máximo 5 documentos
+            # Si no hay documentos del día anterior, buscar los más recientes
+            # pero indicar que no son del día
+            if documentos:
+                logger.info(f"No se encontraron documentos DT del {fecha_busqueda.strftime('%d/%m/%Y')}. Mostrando {min(5, len(documentos))} documentos recientes.")
+                # Marcar como recientes pero no del día
+                for doc in documentos[:5]:
+                    if doc['fecha'] != "Sin fecha":
+                        doc['descripcion'] = f"[{doc['fecha']}] {doc['descripcion']}"
+                return documentos[:5]
+            
+            logger.info(f"No se encontraron documentos DT")
+            return []
             
         except Exception as e:
             logger.error(f"Error obteniendo documentos DT: {str(e)}")
@@ -198,8 +231,16 @@ def main():
     scraper = ScraperDT()
     documentos = scraper.obtener_documentos_dt(fecha)
     
+    # Calcular fecha del día anterior para mostrar
+    try:
+        fecha_informe = datetime.strptime(fecha, '%d-%m-%Y')
+    except:
+        fecha_informe = datetime.now()
+    fecha_busqueda = fecha_informe - timedelta(days=1)
+    
     print("\n" + "="*60)
     print(f"DOCUMENTOS DE LA DIRECCIÓN DEL TRABAJO")
+    print(f"Buscando documentos del: {fecha_busqueda.strftime('%d/%m/%Y')}")
     print("="*60)
     
     if documentos:

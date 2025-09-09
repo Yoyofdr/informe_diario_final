@@ -6,7 +6,6 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from alerts.models import Organizacion, Destinatario
 from alerts.validators import validar_rut_estricto
-from alerts.enviar_informe_bienvenida import enviar_informe_bienvenida
 import logging
 
 logger = logging.getLogger(__name__)
@@ -61,17 +60,9 @@ def handle_signup(
                 organizacion=org
             )
             
-            # Enviar correo de bienvenida con información del trial
-            try:
-                enviar_informe_bienvenida(
-                    email_destinatario=email,
-                    nombre_destinatario=f"{nombre} {apellido}".strip(),
-                    fecha_fin_trial=destinatario.fecha_fin_trial
-                )
-                logger.info(f"Correo de bienvenida enviado a {email} con trial hasta {destinatario.fecha_fin_trial}")
-            except Exception as e:
-                logger.error(f"Error enviando correo de bienvenida: {e}")
-                # No fallar el registro si el email falla
+            # El email de bienvenida se envía desde la vista (views.py)
+            # para evitar duplicados y mantener separación de responsabilidades
+            logger.info(f"Destinatario creado: {email} con trial hasta {destinatario.fecha_fin_trial}")
             
             return org
         
@@ -96,17 +87,9 @@ def handle_signup(
                 organizacion=org
             )
             
-            # Enviar correo de bienvenida con información del trial
-            try:
-                enviar_informe_bienvenida(
-                    email_destinatario=email,
-                    nombre_destinatario=f"{nombre} {apellido}".strip(),
-                    fecha_fin_trial=destinatario.fecha_fin_trial
-                )
-                logger.info(f"Correo de bienvenida enviado a {email} con trial hasta {destinatario.fecha_fin_trial}")
-            except Exception as e:
-                logger.error(f"Error enviando correo de bienvenida: {e}")
-                # No fallar el registro si el email falla
+            # El email de bienvenida se envía desde la vista (views.py)
+            # para evitar duplicados y mantener separación de responsabilidades
+            logger.info(f"Destinatario agregado a organización existente: {email} con trial hasta {destinatario.fecha_fin_trial}")
             
             return org
         
@@ -127,17 +110,9 @@ def handle_signup(
             organizacion=org
         )
         
-        # Enviar correo de bienvenida con información del trial
-        try:
-            enviar_informe_bienvenida(
-                email_destinatario=email,
-                nombre_destinatario=f"{nombre} {apellido}".strip(),
-                fecha_fin_trial=destinatario.fecha_fin_trial
-            )
-            logger.info(f"Correo de bienvenida enviado a {email} con trial hasta {destinatario.fecha_fin_trial}")
-        except Exception as e:
-            logger.error(f"Error enviando correo de bienvenida: {e}")
-            # No fallar el registro si el email falla
+        # El email de bienvenida se envía desde la vista (views.py)
+        # para evitar duplicados y mantener separación de responsabilidades
+        logger.info(f"Nueva organización creada con destinatario: {email} con trial hasta {destinatario.fecha_fin_trial}")
         
         return org
 

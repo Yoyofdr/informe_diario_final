@@ -87,6 +87,14 @@ except ImportError:
             logger.warning("⚠️ Generador de resúmenes SEA no disponible")
             sea_resumen_generador = None
 
+# Importar generador de resúmenes con IA para SEA
+try:
+    from alerts.sea_resumenes_ai import generar_resumen_sea
+    logger.info("✅ Importado generador de resúmenes SEA con IA")
+except ImportError:
+    logger.warning("⚠️ Generador de resúmenes SEA con IA no disponible")
+    generar_resumen_sea = None
+
 class ScraperAmbiental:
     def __init__(self):
         """Inicializa el scraper ambiental integrado"""
@@ -261,12 +269,29 @@ class ScraperAmbiental:
                         except Exception as e:
                             logger.warning(f"⚠️ Error extrayendo resumen del SEA: {e}")
                     
-                    # SEGUNDO: Si no se extrajo resumen del SEA, mejorar con el generador
-                    if not resumen_extraido and sea_resumen_generador:
+                    # SEGUNDO: Generar resumen ejecutivo con IA si tenemos resumen original
+                    if proyecto.get('resumen') and generar_resumen_sea:
+                        try:
+                            logger.info(f"🤖 Generando resumen ejecutivo con IA para {proyecto['titulo'][:30]}...")
+                            resumen_ia = generar_resumen_sea(
+                                titulo=proyecto.get('titulo', ''),
+                                resumen_original=proyecto.get('resumen', ''),
+                                empresa=proyecto.get('empresa', proyecto.get('titular', '')),
+                                region=proyecto.get('region', ''),
+                                inversion=proyecto.get('inversion', '')
+                            )
+                            if resumen_ia:
+                                proyecto['resumen'] = resumen_ia
+                                logger.info(f"✅ Resumen ejecutivo generado con IA ({len(resumen_ia)} caracteres)")
+                        except Exception as e:
+                            logger.warning(f"⚠️ Error generando resumen con IA: {e}")
+                    
+                    # TERCERO: Si no hay resumen o no se pudo generar con IA, mejorar con el generador
+                    if (not proyecto.get('resumen') or not resumen_extraido) and sea_resumen_generador:
                         try:
                             # Generar un resumen mejorado basado en la información disponible
                             resumen_mejorado = sea_resumen_generador.mejorar_resumen(proyecto)
-                            if resumen_mejorado:
+                            if resumen_mejorado and not proyecto.get('resumen'):
                                 proyecto['resumen'] = resumen_mejorado
                                 logger.info(f"📝 Resumen mejorado con generador para {proyecto['titulo'][:30]}")
                         except Exception as e:

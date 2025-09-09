@@ -183,10 +183,23 @@ def enviar_informe_bienvenida(email_destinatario, nombre_destinatario, fecha_fin
             return False
         
         # Enviar email
+        from email import utils as email_utils
+        
         msg = MIMEMultipart('alternative')
         msg['Subject'] = subject  # Usar el subject que se determinó arriba
         msg['From'] = smtp_user
         msg['To'] = email_destinatario
+        
+        # IMPORTANTE: Agregar headers para mejor entregabilidad (igual que el informe diario)
+        msg['Date'] = email_utils.formatdate(localtime=True)
+        msg['Message-ID'] = email_utils.make_msgid(domain="informediariochile.cl")
+        msg['MIME-Version'] = '1.0'
+        
+        # Headers opcionales pero recomendados para mejor reputación
+        msg['List-Unsubscribe'] = f'<https://informediariochile.cl/unsubscribe?email={email_destinatario}>'
+        msg['List-Unsubscribe-Post'] = 'List-Unsubscribe=One-Click'
+        msg['X-Mailer'] = 'Informe Diario Chile v1.0'
+        msg['X-Priority'] = '3'  # Normal priority
         
         html_part = MIMEText(html_content, 'html')
         msg.attach(html_part)

@@ -274,6 +274,7 @@ def registro_empresa_admin(request):
                     Destinatario.objects.create(
                         nombre=f"{user.first_name} {user.last_name}",
                         email=email,
+                        telefono=telefono,  # Agregar el teléfono capturado del formulario
                         organizacion=org
                     )
                     

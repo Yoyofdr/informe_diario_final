@@ -64,31 +64,59 @@ MESES_ES = {
 def convertir_fecha_sii_a_datetime(fecha_str):
     """
     Convierte fecha del formato 'dd de Mes de YYYY' a datetime
+    Maneja múltiples formatos posibles del SII
     
     Args:
-        fecha_str (str): Fecha en formato 'dd de Mes de YYYY'
+        fecha_str (str): Fecha en formato 'dd de Mes de YYYY' o variaciones
     
     Returns:
         datetime: Objeto datetime o None si no se puede convertir
     """
     try:
-        # Ejemplo: "18 de Julio de 2025"
-        fecha_str = fecha_str.lower().strip()
+        if not fecha_str:
+            return None
+            
+        # Normalizar: quitar espacios extra, convertir a minúsculas
+        fecha_str = ' '.join(fecha_str.lower().strip().split())
+        
+        # Manejar diferentes separadores: "de", "del"
+        fecha_str = fecha_str.replace(' del ', ' de ')
+        
+        # Dividir por ' de '
         partes = fecha_str.split(' de ')
         
         if len(partes) != 3:
+            # Intentar con otros formatos posibles
+            # Formato: "18-julio-2025" o "18/07/2025"
+            if '-' in fecha_str or '/' in fecha_str:
+                separador = '-' if '-' in fecha_str else '/'
+                partes_alt = fecha_str.split(separador)
+                if len(partes_alt) == 3:
+                    dia = int(partes_alt[0])
+                    # Si el mes es numérico
+                    if partes_alt[1].isdigit():
+                        mes = int(partes_alt[1])
+                    else:
+                        mes = MESES_ES.get(partes_alt[1])
+                    anio = int(partes_alt[2])
+                    if mes:
+                        return datetime(anio, mes, dia)
             return None
             
-        dia = int(partes[0])
-        mes_str = partes[1]
-        anio = int(partes[2])
+        # Formato estándar: "dd de Mes de YYYY"
+        dia_str = partes[0].strip().lstrip('0')  # Quitar ceros a la izquierda
+        dia = int(dia_str) if dia_str else 0
+        
+        mes_str = partes[1].strip()
+        anio = int(partes[2].strip())
         
         mes = MESES_ES.get(mes_str)
         if not mes:
             return None
             
         return datetime(anio, mes, dia)
-    except (ValueError, IndexError):
+    except (ValueError, IndexError, AttributeError) as e:
+        print(f"[SII] Error convirtiendo fecha '{fecha_str}': {e}")
         return None
 
 def es_fecha_del_dia_anterior(fecha_str, fecha_referencia):
@@ -193,10 +221,16 @@ def obtener_circulares_sii(year=None):
         f"{BASE_URL_SII}/normativa_legislacion/index_normativa_legislacion.html"
     ]
     
+    # Agregar logging para debugging
+    errores_urls = []
+    
     for url in urls_posibles:
         try:
-            response = requests.get(url, timeout=30)
+            response = requests.get(url, timeout=30, headers={
+                'User-Agent': 'Mozilla/5.0 (compatible; InformeDiarioBot/1.0)'
+            })
             if response.status_code == 404:
+                errores_urls.append(f"URL no encontrada: {url}")
                 continue  # Probar siguiente URL
             response.raise_for_status()
             
@@ -482,20 +516,42 @@ def obtener_novedades_tributarias_sii(fecha_referencia=None, dias_atras=7):
     }
     
     try:
-        year = datetime.now().year
-        
         # Convertir string a datetime si es necesario
         if fecha_referencia and isinstance(fecha_referencia, str):
             fecha_referencia = datetime.strptime(fecha_referencia, "%d-%m-%Y")
         
-        # Obtener circulares
-        circulares = obtener_circulares_sii(year)
+        # Siempre usar el año actual para buscar novedades recientes
+        # Solo interesan las novedades del año en curso
+        year = datetime.now().year
         
-        # Obtener resoluciones exentas
-        resoluciones = obtener_resoluciones_exentas_sii(year)
+        try:
+            # Obtener circulares con manejo de errores
+            circulares = obtener_circulares_sii(year)
+            if not circulares:
+                circulares = []
+                print(f"[SII] No se encontraron circulares para {year}")
+        except Exception as e:
+            print(f"[SII] Error obteniendo circulares: {e}")
+            circulares = []
         
-        # Obtener jurisprudencia administrativa
-        jurisprudencia = obtener_jurisprudencia_administrativa_sii(year)
+        try:
+            # Obtener resoluciones exentas con manejo de errores
+            resoluciones = obtener_resoluciones_exentas_sii(year)
+            if not resoluciones:
+                resoluciones = []
+                print(f"[SII] No se encontraron resoluciones para {year}")
+        except Exception as e:
+            print(f"[SII] Error obteniendo resoluciones: {e}")
+            resoluciones = []
+        
+        try:
+            # Obtener jurisprudencia administrativa
+            jurisprudencia = obtener_jurisprudencia_administrativa_sii(year)
+            if not jurisprudencia:
+                jurisprudencia = []
+        except Exception as e:
+            print(f"[SII] Error obteniendo jurisprudencia: {e}")
+            jurisprudencia = []
         
         # Función auxiliar para verificar si un documento es reciente
         def es_documento_reciente(fecha_str, fecha_ref, dias):

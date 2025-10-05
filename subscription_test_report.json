@@ -1,0 +1,74 @@
+{
+  "summary": {
+    "total_tests": 9,
+    "passed": 9,
+    "failed": 0,
+    "success_rate": 100.0,
+    "timestamp": "2025-09-16T01:06:44.627641"
+  },
+  "tests": [
+    {
+      "test_name": "Página de precios carga correctamente",
+      "passed": true,
+      "details": "Status: 200, Title presente: True",
+      "error": "",
+      "timestamp": "2025-09-16T01:06:44.617606"
+    },
+    {
+      "test_name": "Muestra ambos planes",
+      "passed": true,
+      "details": "Individual: True, Organización: True, Cards: 2",
+      "error": "",
+      "timestamp": "2025-09-16T01:06:44.618379"
+    },
+    {
+      "test_name": "Precios correctos",
+      "passed": true,
+      "details": "$3.990: True, $29.990: True, CLP/mes: True",
+      "error": "",
+      "timestamp": "2025-09-16T01:06:44.619731"
+    },
+    {
+      "test_name": "Botones de prueba presentes",
+      "passed": true,
+      "details": "Botones encontrados: 2, Con clases Bootstrap: 2",
+      "error": "",
+      "timestamp": "2025-09-16T01:06:44.620408"
+    },
+    {
+      "test_name": "URLs de prueba correctas",
+      "passed": true,
+      "details": "Individual: True, Organización: True",
+      "error": "",
+      "timestamp": "2025-09-16T01:06:44.621118"
+    },
+    {
+      "test_name": "Descripciones presentes",
+      "passed": true,
+      "details": "Keywords encontradas: 4/4",
+      "error": "",
+      "timestamp": "2025-09-16T01:06:44.621169"
+    },
+    {
+      "test_name": "Diseño responsivo",
+      "passed": true,
+      "details": "Viewport: True, Container: True, Row: True, Col: True",
+      "error": "",
+      "timestamp": "2025-09-16T01:06:44.621869"
+    },
+    {
+      "test_name": "Accesibilidad básica",
+      "passed": true,
+      "details": "Lang: es, Title: True, Headings: 3, Links con href: 2/2",
+      "error": "",
+      "timestamp": "2025-09-16T01:06:44.622622"
+    },
+    {
+      "test_name": "Rutas de trial requieren autenticación",
+      "passed": true,
+      "details": "Individual: True, Organización: True",
+      "error": "",
+      "timestamp": "2025-09-16T01:06:44.627627"
+    }
+  ]
+}

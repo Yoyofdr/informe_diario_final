@@ -1,0 +1,20 @@
+[
+  {
+    "tipo": "DEGRADACION_RENDIMIENTO",
+    "mensaje": "Rendimiento degradado: 0.0% vs promedio 96.4%",
+    "severidad": "alta",
+    "timestamp": "2025-09-15T19:34:09.519417"
+  },
+  {
+    "tipo": "DEGRADACION_RENDIMIENTO",
+    "mensaje": "Rendimiento degradado: 0.0% vs promedio 100.0%",
+    "severidad": "alta",
+    "timestamp": "2025-09-15T19:35:13.945241"
+  },
+  {
+    "tipo": "DEGRADACION_RENDIMIENTO",
+    "mensaje": "Rendimiento degradado: 0.0% vs promedio 100.0%",
+    "severidad": "alta",
+    "timestamp": "2025-09-15T19:36:18.369334"
+  }
+]

@@ -1,0 +1,341 @@
+{% extends 'base_chennai.html' %}
+{% load static %}
+
+{% block title %}Mi Suscripción - Informe Diario Chile{% endblock %}
+
+{% block extra_css %}
+<style>
+    .subscription-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+    
+    .status-badge.active {
+        background: #10b981;
+        color: white;
+    }
+    
+    .status-badge.trial {
+        background: #fbbf24;
+        color: #92400e;
+    }
+    
+    .status-badge.canceled {
+        background: #ef4444;
+        color: white;
+    }
+    
+    .status-badge.past_due {
+        background: #f97316;
+        color: white;
+    }
+    
+    .info-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+    }
+    
+    .info-card h5 {
+        color: #475569;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+    }
+    
+    .info-card .value {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    
+    .payment-history {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .payment-item {
+        padding: 1rem 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .payment-item:last-child {
+        border-bottom: none;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .organization-members {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .member-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+    }
+    
+    .member-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: #64748b;
+    }
+    
+    .warning-box {
+        background: #fef3c7;
+        border: 1px solid #fbbf24;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .warning-box i {
+        color: #f59e0b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Subscription Header -->
+    <div class="subscription-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="h2 mb-3">Mi Suscripción</h1>
+                <div class="mb-3">
+                    <span class="status-badge {{ subscription.status }}">
+                        {{ subscription.get_status_display }}
+                    </span>
+                </div>
+                <h3 class="h4 mb-2">{{ subscription.plan.name }}</h3>
+                <p class="mb-0 opacity-90">${{ subscription.plan.price|floatformat:0 }} CLP/mes</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                {% if subscription.is_trial %}
+                    <div class="text-white">
+                        <h4 class="mb-1">{{ subscription.days_until_trial_end }}</h4>
+                        <p class="mb-0">días de prueba restantes</p>
+                    </div>
+                {% elif subscription.next_payment_date %}
+                    <div class="text-white">
+                        <p class="mb-1 opacity-75">Próximo pago</p>
+                        <h5>{{ subscription.next_payment_date|date:"d/m/Y" }}</h5>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Warnings -->
+    {% if subscription.requires_payment_method %}
+    <div class="warning-box">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <strong>Acción requerida:</strong> Debes agregar un método de pago para continuar usando el servicio después del período de prueba.
+        <a href="{% url 'subscription:add_payment_method' %}" class="btn btn-warning btn-sm ms-3">
+            Agregar método de pago
+        </a>
+    </div>
+    {% endif %}
+    
+    <div class="row">
+        <!-- Plan Details -->
+        <div class="col-lg-8">
+            <!-- Subscription Info -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="info-card">
+                        <h5>Inicio del período</h5>
+                        <div class="value">
+                            {% if subscription.current_period_start %}
+                                {{ subscription.current_period_start|date:"d/m/Y" }}
+                            {% else %}
+                                {{ subscription.trial_start|date:"d/m/Y" }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-card">
+                        <h5>Fin del período</h5>
+                        <div class="value">
+                            {% if subscription.current_period_end %}
+                                {{ subscription.current_period_end|date:"d/m/Y" }}
+                            {% else %}
+                                {{ subscription.trial_end|date:"d/m/Y" }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Organization Members (if applicable) -->
+            {% if organization %}
+            <div class="info-card">
+                <h4 class="h5 mb-3">Miembros de la Organización</h4>
+                <p class="text-muted mb-3">
+                    {{ organization.members.count|add:1 }} de {{ subscription.plan.max_users }} usuarios utilizados
+                </p>
+                
+                <div class="organization-members">
+                    <!-- Owner -->
+                    <div class="member-item">
+                        <div class="d-flex align-items-center">
+                            <div class="member-avatar me-3">
+                                {{ organization.owner.email|slice:":1"|upper }}
+                            </div>
+                            <div>
+                                <div class="fw-semibold">{{ organization.owner.get_full_name|default:organization.owner.email }}</div>
+                                <small class="text-muted">Propietario</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Members -->
+                    {% for member in organization.members.all %}
+                    <div class="member-item">
+                        <div class="d-flex align-items-center">
+                            <div class="member-avatar me-3">
+                                {{ member.email|slice:":1"|upper }}
+                            </div>
+                            <div>
+                                <div class="fw-semibold">{{ member.get_full_name|default:member.email }}</div>
+                                <small class="text-muted">Miembro</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    {% if organization.can_add_member %}
+                    <button class="btn btn-outline-primary btn-sm mt-3">
+                        <i class="fas fa-plus me-2"></i>
+                        Invitar miembro
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Payment History -->
+            <div class="payment-history">
+                <h4 class="h5 mb-3">Historial de Pagos</h4>
+                
+                {% if recent_payments %}
+                    {% for payment in recent_payments %}
+                    <div class="payment-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-semibold">${{ payment.amount|floatformat:0 }} CLP</div>
+                                <small class="text-muted">{{ payment.paid_at|date:"d/m/Y H:i" }}</small>
+                            </div>
+                            <div>
+                                <span class="badge bg-success">Pagado</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No hay pagos registrados aún</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Actions Sidebar -->
+        <div class="col-lg-4">
+            <div class="info-card">
+                <h4 class="h5 mb-3">Acciones</h4>
+                
+                <div class="action-buttons">
+                    {% if not subscription.payment_method_added and subscription.is_trial %}
+                    <a href="{% url 'subscription:add_payment_method' %}" class="btn btn-primary w-100">
+                        <i class="fas fa-credit-card me-2"></i>
+                        Agregar método de pago
+                    </a>
+                    {% endif %}
+                    
+                    <a href="{% url 'subscription:pricing' %}" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-arrow-up me-2"></i>
+                        Cambiar plan
+                    </a>
+                    
+                    <button class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-file-invoice me-2"></i>
+                        Descargar facturas
+                    </button>
+                    
+                    {% if can_cancel %}
+                    <button class="btn btn-outline-danger w-100" onclick="cancelSubscription()">
+                        <i class="fas fa-times-circle me-2"></i>
+                        Cancelar suscripción
+                    </button>
+                    {% endif %}
+                </div>
+                
+                <!-- Help -->
+                <div class="mt-4 pt-4 border-top">
+                    <h5 class="h6 mb-3">¿Necesitas ayuda?</h5>
+                    <p class="small text-muted mb-2">
+                        <i class="fas fa-envelope me-2"></i>
+                        contacto@informediariochile.cl
+                    </p>
+                    <p class="small text-muted">
+                        <i class="fab fa-whatsapp me-2"></i>
+                        +56 9 1234 5678
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function cancelSubscription() {
+    if (confirm('¿Estás seguro de que deseas cancelar tu suscripción? Tendrás acceso hasta el final del período actual.')) {
+        fetch("{% url 'subscription:cancel' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error al cancelar la suscripción. Por favor intenta nuevamente.');
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

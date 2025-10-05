@@ -1,0 +1,352 @@
+{% extends 'base_chennai.html' %}
+{% load static %}
+
+{% block title %}Planes y Precios - Informe Diario Chile{% endblock %}
+
+{% block extra_css %}
+<style>
+    .pricing-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+        height: 100%;
+        position: relative;
+    }
+    
+    .pricing-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+    
+    .pricing-card.recommended {
+        border: 2px solid #2563eb;
+    }
+    
+    .pricing-card.recommended::before {
+        content: "MÁS POPULAR";
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #2563eb;
+        color: white;
+        padding: 4px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    .price-tag {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 1rem 0;
+    }
+    
+    .price-tag small {
+        font-size: 1rem;
+        color: #64748b;
+        font-weight: 400;
+    }
+    
+    .feature-list {
+        list-style: none;
+        padding: 0;
+        margin: 2rem 0;
+    }
+    
+    .feature-list li {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+    }
+    
+    .feature-list li:last-child {
+        border-bottom: none;
+    }
+    
+    .feature-list i {
+        color: #10b981;
+        margin-right: 0.75rem;
+        font-size: 1.25rem;
+    }
+    
+    .btn-pricing {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+    
+    .btn-pricing.btn-primary {
+        background: #2563eb;
+        border: none;
+    }
+    
+    .btn-pricing.btn-primary:hover {
+        background: #1d4ed8;
+        transform: scale(1.02);
+    }
+    
+    .btn-pricing.btn-outline {
+        background: white;
+        border: 2px solid #2563eb;
+        color: #2563eb;
+    }
+    
+    .btn-pricing.btn-outline:hover {
+        background: #2563eb;
+        color: white;
+    }
+    
+    .trial-badge {
+        background: #fef3c7;
+        color: #92400e;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold mb-3">Elige tu Plan</h1>
+        <p class="lead text-muted">
+            Mantente informado con nuestros informes diarios del mercado chileno
+        </p>
+        <div class="trial-badge">
+            <i class="fas fa-gift me-2"></i>
+            14 días de prueba gratis - Se requiere tarjeta
+        </div>
+    </div>
+    
+    <!-- Pricing Cards -->
+    <div class="row justify-content-center g-4">
+        <!-- Plan Individual -->
+        <div class="col-lg-5 col-md-6">
+            <div class="pricing-card">
+                <div class="text-center">
+                    <h3 class="h4 mb-3">Plan Individual</h3>
+                    <p class="text-muted mb-4">
+                        Perfecto para profesionales independientes
+                    </p>
+                    <div class="price-tag">
+                        $3.990
+                        <small>/mes</small>
+                    </div>
+                </div>
+                
+                <ul class="feature-list">
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>Informe diario por email</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>Alertas de hechos esenciales</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>Historial de 30 días</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>Búsqueda avanzada</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>Exportar a PDF</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>Soporte por email</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>1 usuario</span>
+                    </li>
+                </ul>
+                
+                {% if user.is_authenticated %}
+                    {% if user_has_subscription %}
+                        <button class="btn btn-pricing btn-outline" disabled>
+                            Plan Actual
+                        </button>
+                    {% else %}
+                        <form method="post" action="{% url 'subscription:start_trial' 'individual' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-pricing btn-outline">
+                                Comenzar Prueba Gratis
+                            </button>
+                        </form>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'alerts:registro_prueba' %}?plan=individual" class="btn btn-pricing btn-outline">
+                        Comenzar Prueba Gratis
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Plan Organización -->
+        <div class="col-lg-5 col-md-6">
+            <div class="pricing-card recommended">
+                <div class="text-center">
+                    <h3 class="h4 mb-3">Plan Organización</h3>
+                    <p class="text-muted mb-4">
+                        Ideal para equipos y empresas
+                    </p>
+                    <div class="price-tag">
+                        $29.990
+                        <small>/mes</small>
+                    </div>
+                </div>
+                
+                <ul class="feature-list">
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span><strong>Todo del Plan Individual</strong></span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>Hasta 10 usuarios</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>Historial ilimitado</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>Exportar a Excel</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>API para integraciones</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>Dashboard analytics</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>Alertas personalizadas</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>Soporte prioritario</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>Capacitación incluida</span>
+                    </li>
+                </ul>
+                
+                {% if user.is_authenticated %}
+                    {% if user_has_subscription %}
+                        <button class="btn btn-pricing btn-primary" disabled>
+                            Plan Actual
+                        </button>
+                    {% else %}
+                        <form method="post" action="{% url 'subscription:start_trial' 'organizacion' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-pricing btn-primary">
+                                Comenzar Prueba Gratis
+                            </button>
+                        </form>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'alerts:registro_prueba' %}?plan=organizacion" class="btn btn-pricing btn-primary">
+                        Comenzar Prueba Gratis
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- FAQ Section -->
+    <div class="row mt-5 pt-5">
+        <div class="col-lg-8 mx-auto">
+            <h2 class="h3 text-center mb-4">Preguntas Frecuentes</h2>
+            
+            <div class="accordion" id="faqAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                            ¿Cómo funciona el período de prueba?
+                        </button>
+                    </h2>
+                    <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Tienes 14 días gratis para probar todas las funcionalidades. Debes agregar una tarjeta de crédito o débito, pero no se te cobrará hasta que termine el período de prueba. Puedes cancelar en cualquier momento.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                            ¿Qué métodos de pago aceptan?
+                        </button>
+                    </h2>
+                    <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Aceptamos todas las tarjetas de crédito y débito nacionales e internacionales a través de Flow: Visa, Mastercard, American Express, y tarjetas nacionales con Webpay.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                            ¿Puedo cambiar de plan después?
+                        </button>
+                    </h2>
+                    <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Sí, puedes cambiar entre planes en cualquier momento desde tu panel de control. Si pasas de Individual a Organización, pagarás la diferencia prorrateada. Si bajas de plan, el cambio se aplicará en el siguiente ciclo de facturación.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                            ¿Emiten factura?
+                        </button>
+                    </h2>
+                    <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Sí, emitimos factura electrónica para todos los pagos. La recibirás automáticamente en tu correo registrado después de cada cobro mensual.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Contact -->
+    <div class="text-center mt-5 pt-5 border-top">
+        <p class="text-muted mb-3">¿Tienes preguntas? Estamos aquí para ayudarte</p>
+        <div>
+            <a href="mailto:contacto@informediariochile.cl" class="btn btn-outline-primary me-3">
+                <i class="fas fa-envelope me-2"></i>
+                contacto@informediariochile.cl
+            </a>
+            <a href="https://wa.me/56912345678" class="btn btn-outline-success">
+                <i class="fab fa-whatsapp me-2"></i>
+                WhatsApp
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

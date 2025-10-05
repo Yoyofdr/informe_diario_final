@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planes y Precios - Informe Diario Chile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f3f4f6;
+        }
+        .pricing-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            height: 100%;
+        }
+        .price-tag {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <h1 class="text-center mb-5">Planes y Precios</h1>
+        
+        <div class="row g-4">
+            <!-- Plan Individual -->
+            <div class="col-md-6">
+                <div class="pricing-card">
+                    <h3>Plan Individual</h3>
+                    <div class="price-tag">$3.990 <small class="fs-6">CLP/mes</small></div>
+                    <div class="mt-4">
+                        <p class="text-muted">Perfecto para profesionales independientes que necesitan estar informados sobre cambios en la legislación y el mercado chileno.</p>
+                    </div>
+                    <a href="/registro/?plan=individual" class="btn btn-primary w-100 mt-4">
+                        Comenzar Prueba de 7 Días
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Plan Organización -->
+            <div class="col-md-6">
+                <div class="pricing-card">
+                    <h3>Plan Organización</h3>
+                    <div class="price-tag">$29.990 <small class="fs-6">CLP/mes</small></div>
+                    <div class="mt-4">
+                        <p class="text-muted">Ideal para equipos y empresas que necesitan múltiples usuarios y características avanzadas.</p>
+                    </div>
+                    <a href="/registro/?plan=organizacion" class="btn btn-primary w-100 mt-4">
+                        Comenzar Prueba de 7 Días
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

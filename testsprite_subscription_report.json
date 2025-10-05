@@ -1,0 +1,66 @@
+{
+  "summary": {
+    "total": 9,
+    "passed": 0,
+    "failed": 9,
+    "successRate": 0,
+    "timestamp": "2025-09-16T01:41:08.305Z",
+    "tool": "TestSprite/Playwright"
+  },
+  "tests": [
+    {
+      "test": "Página de precios carga correctamente",
+      "passed": false,
+      "details": "Título: Error response",
+      "timestamp": "2025-09-16T01:40:38.195Z"
+    },
+    {
+      "test": "Plan Individual visible",
+      "passed": false,
+      "details": "Plan de $3.990 CLP/mes",
+      "timestamp": "2025-09-16T01:40:38.220Z"
+    },
+    {
+      "test": "Plan Organización visible",
+      "passed": false,
+      "details": "Plan de $29.990 CLP/mes",
+      "timestamp": "2025-09-16T01:40:38.221Z"
+    },
+    {
+      "test": "Precio Plan Individual correcto",
+      "passed": false,
+      "details": "$3.990 CLP/mes",
+      "timestamp": "2025-09-16T01:40:38.222Z"
+    },
+    {
+      "test": "Precio Plan Organización correcto",
+      "passed": false,
+      "details": "$29.990 CLP/mes",
+      "timestamp": "2025-09-16T01:40:38.223Z"
+    },
+    {
+      "test": "Botones de prueba presentes",
+      "passed": false,
+      "details": "0 botones encontrados",
+      "timestamp": "2025-09-16T01:40:38.223Z"
+    },
+    {
+      "test": "Enlaces de registro configurados",
+      "passed": false,
+      "details": "Ambos planes tienen enlaces a registro",
+      "timestamp": "2025-09-16T01:40:38.226Z"
+    },
+    {
+      "test": "Descripciones de planes presentes",
+      "passed": false,
+      "details": "0/5 descripciones encontradas",
+      "timestamp": "2025-09-16T01:40:38.228Z"
+    },
+    {
+      "test": "Ejecución de pruebas",
+      "passed": false,
+      "details": "page.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('a[href=\"/registro/?plan=individual\"]')\u001b[22m\n",
+      "timestamp": "2025-09-16T01:41:08.232Z"
+    }
+  ]
+}

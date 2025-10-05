@@ -1,0 +1,85 @@
+{
+  "tool": "TestSprite",
+  "timestamp": "2025-09-15T22:42:20.919010",
+  "url": "http://127.0.0.1:8000/subscription/pricing/",
+  "summary": {
+    "total": 12,
+    "passed": 12,
+    "failed": 0,
+    "success_rate": 100.0
+  },
+  "tests": [
+    {
+      "test": "P\u00e1gina de precios accesible",
+      "passed": true,
+      "details": "Status: 200",
+      "timestamp": "2025-09-15T22:42:20.917848"
+    },
+    {
+      "test": "T\u00edtulo de p\u00e1gina correcto",
+      "passed": true,
+      "details": "T\u00edtulo: Planes y Precios - Informe Diario Chile",
+      "timestamp": "2025-09-15T22:42:20.918774"
+    },
+    {
+      "test": "Plan Individual presente",
+      "passed": true,
+      "details": "Texto del plan encontrado",
+      "timestamp": "2025-09-15T22:42:20.918780"
+    },
+    {
+      "test": "Plan Organizaci\u00f3n presente",
+      "passed": true,
+      "details": "Texto del plan encontrado",
+      "timestamp": "2025-09-15T22:42:20.918785"
+    },
+    {
+      "test": "Precio $3.990 presente",
+      "passed": true,
+      "details": "Plan Individual",
+      "timestamp": "2025-09-15T22:42:20.918788"
+    },
+    {
+      "test": "Precio $29.990 presente",
+      "passed": true,
+      "details": "Plan Organizaci\u00f3n",
+      "timestamp": "2025-09-15T22:42:20.918792"
+    },
+    {
+      "test": "Botones CTA presentes",
+      "passed": true,
+      "details": "2 botones encontrados",
+      "timestamp": "2025-09-15T22:42:20.918797"
+    },
+    {
+      "test": "Enlaces de registro configurados",
+      "passed": true,
+      "details": "2 enlaces encontrados",
+      "timestamp": "2025-09-15T22:42:20.918821"
+    },
+    {
+      "test": "Descripciones de planes",
+      "passed": true,
+      "details": "5/5 keywords encontradas",
+      "timestamp": "2025-09-15T22:42:20.918880"
+    },
+    {
+      "test": "Frameworks CSS cargados",
+      "passed": true,
+      "details": "Bootstrap y Font Awesome",
+      "timestamp": "2025-09-15T22:42:20.918885"
+    },
+    {
+      "test": "Meta tags esenciales",
+      "passed": true,
+      "details": "Viewport y charset presentes",
+      "timestamp": "2025-09-15T22:42:20.918923"
+    },
+    {
+      "test": "Estructura HTML correcta",
+      "passed": true,
+      "details": "H1: S\u00ed, Cards: 2",
+      "timestamp": "2025-09-15T22:42:20.919002"
+    }
+  ]
+}

@@ -13,10 +13,14 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 import dj_database_url
+from dotenv import load_dotenv
 # import django_heroku  # Comentado para desarrollo local
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Cargar variables de entorno desde .env
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 
 # Quick-start development settings - unsuitable for production
@@ -201,6 +205,11 @@ SITE_URL = os.environ.get('SITE_URL', 'http://127.0.0.1:8000')
 TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')
 TWILIO_WHATSAPP_NUMBER = os.environ.get('TWILIO_WHATSAPP_NUMBER') # Ej: 'whatsapp:+14155238886'
+
+# Flow Payment Gateway Configuration
+FLOW_SANDBOX = os.environ.get('FLOW_SANDBOX', 'True').lower() == 'true'
+FLOW_API_KEY = os.environ.get('FLOW_API_KEY', '')
+FLOW_SECRET_KEY = os.environ.get('FLOW_SECRET_KEY', '')
 
 # Configuración de Logging
 LOGGING = {

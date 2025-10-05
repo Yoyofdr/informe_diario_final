@@ -346,9 +346,22 @@ def landing_explicativa(request):
     return render(request, 'alerts/landing_explicativa_chennai.html')
 
 def registro_prueba(request):
+    print(f"[REGISTRO-TEST] Función registro_prueba iniciada - Method: {request.method}")
+    import sys
+    sys.stdout.flush()
+    
     mensaje = None
+    # Obtener el plan desde GET o POST
+    plan_slug = request.GET.get('plan') or request.POST.get('plan', 'individual')
+    print(f"[REGISTRO-TEST] Plan slug al inicio: {plan_slug}")
+    sys.stdout.flush()
+    
     if request.method == 'POST':
+        print(f"[REGISTRO-TEST] POST recibido")
+        sys.stdout.flush()
         form = RegistroPruebaForm(request.POST)
+        print(f"[REGISTRO-TEST] Form creado, valid: {form.is_valid()}")
+        sys.stdout.flush()
         if form.is_valid():
             nombre = form.cleaned_data['nombre']
             apellido = form.cleaned_data['apellido']
@@ -361,9 +374,10 @@ def registro_prueba(request):
             # Verificar email duplicado
             if User.objects.filter(email=email).exists():
                 messages.error(request, 'Ya existe un usuario con ese email.')
-                return render(request, 'alerts/registro_prueba_chennai.html', {'form': form})
+                return render(request, 'alerts/registro_prueba_chennai.html', {'form': form, 'plan': plan_slug})
             
             # Si todo está OK, proceder con el registro
+            user = None  # Declarar user fuera del bloque
             try:
                 with transaction.atomic():
                     password = form.cleaned_data['password1']
@@ -402,43 +416,128 @@ def registro_prueba(request):
                     
                 # Fuera de la transacción - los datos ya deberían estar guardados
                 print(f"[REGISTRO] Transacción completada exitosamente")
+                print(f"[REGISTRO] Usuario disponible: {user is not None}")
+                print(f"[REGISTRO] Email del usuario: {user.email if user else 'No user'}")
                 
-                # En lugar de redirect, mostrar página de éxito directamente
-                response = render(request, 'alerts/registro_exitoso_partial.html')
+                # Forzar que los prints se muestren inmediatamente
+                import sys
+                sys.stdout.flush()
                 
-                # Enviar emails en background (no bloquear la respuesta)
-                # Nota: En producción se debería usar Celery o similar
-                import threading
+                # NUEVO: Crear suscripción trial si viene de la página de precios
+                # plan_slug ya está definido arriba
+                print(f"[REGISTRO] Plan slug recibido: {plan_slug}")
+                sys.stdout.flush()
                 
-                def enviar_emails_background():
+                try:
+                    # Importar los modelos necesarios
+                    from alerts.models import Plan, Subscription
+                    
+                    # DEPURACIÓN: Ver si llegamos aquí
+                    print(f"[REGISTRO-DEBUG] ============ INICIO CREACIÓN SUSCRIPCIÓN ============")
+                    print(f"[REGISTRO-DEBUG] Usuario: {user.email if user else 'NO USER'}")
+                    print(f"[REGISTRO-DEBUG] Plan recibido: {plan_slug}")
+                    sys.stdout.flush()
+                    
+                    # Obtener el plan seleccionado
+                    plan = None
                     try:
-                        # Enviar SOLO el correo HTML de bienvenida (el bonito)
+                        plan = Plan.objects.get(slug=plan_slug, is_active=True)
+                        print(f"[REGISTRO-DEBUG] Plan encontrado: {plan.name} (slug: {plan.slug})")
+                    except Plan.DoesNotExist:
+                        print(f"[REGISTRO-DEBUG] Plan {plan_slug} no existe, buscando individual por defecto")
+                        # Si no existe el plan, usar el individual por defecto
+                        plan = Plan.objects.filter(plan_type='individual', is_active=True).first()
+                        if plan:
+                            print(f"[REGISTRO-DEBUG] Plan por defecto encontrado: {plan.name}")
+                    
+                    if plan:
+                        print(f"[REGISTRO-DEBUG] Entrando a crear suscripción...")
+                        # Crear suscripción PENDIENTE (sin trial hasta que agregue tarjeta)
+                        subscription = Subscription.objects.create(
+                            user=user,
+                            plan=plan,
+                            status='pending',  # Estado pendiente, NO trial
+                            trial_end=None,  # Sin fecha de trial todavía
+                            current_period_start=None,
+                            current_period_end=None
+                        )
+                        print(f"[REGISTRO-DEBUG] Suscripción PENDIENTE creada - ID: {subscription.id}")
+                        print(f"[REGISTRO] Suscripción pendiente creada para {user.email} - Plan: {plan.name} - REQUIERE TARJETA")
+                        
+                        # Autenticar al usuario automáticamente
+                        from django.contrib.auth import login as auth_login
+                        auth_login(request, user)
+                        print(f"[REGISTRO-DEBUG] Usuario autenticado")
+                        
+                        # Enviar email de bienvenida en background antes de redirigir
+                        import threading
+                        def enviar_email_async():
+                            try:
+                                nombre_completo = f"{nombre} {apellido}".strip()
+                                enviar_informe_bienvenida(email, nombre_completo)
+                                print(f"✅ Correo de bienvenida enviado a {email}")
+                            except Exception as e:
+                                print(f"Error enviando correo: {e}")
+                        
+                        thread = threading.Thread(target=enviar_email_async)
+                        thread.daemon = True
+                        thread.start()
+                        print(f"[REGISTRO-DEBUG] Email thread iniciado")
+                        
+                        # Redirigir a Flow para agregar método de pago
+                        messages.warning(request, f"¡Último paso! Agrega tu tarjeta para activar tu período de prueba gratuito de 7 días. No se te cobrará hasta que termine el trial.")
+                        print(f"[REGISTRO-DEBUG] ============ REDIRIGIENDO A PAYMENT METHOD ============")
+                        sys.stdout.flush()
+                        return redirect('/subscription/add-payment-method/')  # URL absoluta
+                    else:
+                        print(f"[REGISTRO] ERROR: No se encontró ningún plan")
+                        sys.stdout.flush()
+                        raise Exception("No se pudo encontrar un plan de suscripción")
+                
+                except Exception as subscription_error:
+                    print(f"[REGISTRO-ERROR] Error creando suscripción: {str(subscription_error)}")
+                    import traceback
+                    print(f"[REGISTRO-ERROR] Traceback: {traceback.format_exc()}")
+                    sys.stdout.flush()
+                    
+                # Si falla la creación de la suscripción, mostrar página de éxito normal
+                # Enviar email de bienvenida de todas formas
+                import threading
+                def enviar_email_async():
+                    try:
                         nombre_completo = f"{nombre} {apellido}".strip()
                         enviar_informe_bienvenida(email, nombre_completo)
                         print(f"✅ Correo de bienvenida enviado a {email}")
                     except Exception as e:
-                        print(f"Error enviando correo de bienvenida: {e}")
-                    
-                    # NO enviar el email de texto plano duplicado
+                        print(f"Error enviando correo: {e}")
                 
-                # Ejecutar en thread separado
-                thread = threading.Thread(target=enviar_emails_background)
+                thread = threading.Thread(target=enviar_email_async)
                 thread.daemon = True
                 thread.start()
                 
+                response = render(request, 'alerts/registro_exitoso_partial.html')
                 return response
                 
             except Exception as e:
                 # Si algo falla, eliminar el usuario creado
+                print(f"[REGISTRO-ERROR] Exception en bloque principal: {str(e)}")
+                sys.stdout.flush()
                 if 'user' in locals():
                     user.delete()
                 messages.error(request, f'Error durante el registro: {str(e)}')
-                return render(request, 'alerts/registro_prueba_chennai.html', {'form': form})
+                return render(request, 'alerts/registro_prueba_chennai.html', {'form': form, 'plan': plan_slug})
         else:
+            print(f"[REGISTRO-TEST] Form NO es válido. Errores: {form.errors}")
+            sys.stdout.flush()
             messages.error(request, 'Por favor, corrige los errores del formulario.')
     else:
+        print(f"[REGISTRO-TEST] GET request - mostrando formulario")
+        sys.stdout.flush()
         form = RegistroPruebaForm()
-    return render(request, 'alerts/registro_prueba_chennai.html', {'form': form})
+    
+    print(f"[REGISTRO-TEST] Retornando template registro_prueba_chennai.html")
+    sys.stdout.flush()
+    return render(request, 'alerts/registro_prueba_chennai.html', {'form': form, 'plan': plan_slug})
 
 @login_required
 def historial_informes(request):
@@ -568,16 +667,16 @@ def editar_dias_prueba(request, destinatario_id):
         
         elif accion == 'reiniciar':
             destinatario.fecha_inicio_trial = timezone.now()
-            destinatario.fecha_fin_trial = timezone.now() + timedelta(days=14)
+            destinatario.fecha_fin_trial = timezone.now() + timedelta(days=7)
             destinatario.es_pagado = False
             destinatario.save()
-            messages.success(request, f'Período de prueba reiniciado para {destinatario.nombre} (14 días desde hoy).')
+            messages.success(request, f'Período de prueba reiniciado para {destinatario.nombre} (7 días desde hoy).')
         
         return redirect('alerts:admin_panel')
     
     # Calcular fecha sugerida para el input de fecha
     fecha_sugerida = (destinatario.fecha_fin_trial.date() if destinatario.fecha_fin_trial else 
-                      (timezone.now() + timedelta(days=14)).date())
+                      (timezone.now() + timedelta(days=7)).date())
     
     return render(request, 'alerts/editar_dias_prueba.html', {
         'destinatario': destinatario,

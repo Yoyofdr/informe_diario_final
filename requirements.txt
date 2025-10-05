@@ -41,6 +41,10 @@ fintoc
 # API de IA
 openai
 
+# Procesamiento de pagos
+pyflowcl==1.1.3
+stripe==10.12.0  # Mantenemos por si queremos agregar pagos internacionales después
+
 # Added from the code block
 django-crispy-forms==2.1
 crispy-bootstrap5==2024.2

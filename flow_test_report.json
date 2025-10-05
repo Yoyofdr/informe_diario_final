@@ -1,0 +1,96 @@
+{
+  "timestamp": "2025-09-16T03:32:32.823515",
+  "test_email": "test_7f5f4bdc@example.com",
+  "summary": {
+    "total": 14,
+    "passed": 14,
+    "failed": 0,
+    "success_rate": 100.0
+  },
+  "tests": [
+    {
+      "test": "P\u00e1gina de precios carga correctamente",
+      "passed": true,
+      "details": "Status: 200",
+      "timestamp": "2025-09-16T03:32:32.691431"
+    },
+    {
+      "test": "Planes visibles",
+      "passed": true,
+      "details": "Individual: True, Organizaci\u00f3n: True",
+      "timestamp": "2025-09-16T03:32:32.691442"
+    },
+    {
+      "test": "Precios correctos",
+      "passed": true,
+      "details": "Precios: $3.990 y $29.990",
+      "timestamp": "2025-09-16T03:32:32.691445"
+    },
+    {
+      "test": "Botones de CTA presentes",
+      "passed": true,
+      "details": "2 botones 'Comenzar Prueba de 7 D\u00edas'",
+      "timestamp": "2025-09-16T03:32:32.691447"
+    },
+    {
+      "test": "P\u00e1gina de registro accesible",
+      "passed": true,
+      "details": "URL: /registro/?plan=individual",
+      "timestamp": "2025-09-16T03:32:32.696294"
+    },
+    {
+      "test": "Plan preservado en formulario",
+      "passed": true,
+      "details": "Campo plan con valor: individual",
+      "timestamp": "2025-09-16T03:32:32.698923"
+    },
+    {
+      "test": "Registro exitoso",
+      "passed": true,
+      "details": "Status: 302, Redirige a: /subscription/add-payment-method/",
+      "timestamp": "2025-09-16T03:32:32.808759"
+    },
+    {
+      "test": "Redirecci\u00f3n a agregar tarjeta",
+      "passed": true,
+      "details": "URL: /subscription/add-payment-method/",
+      "timestamp": "2025-09-16T03:32:32.808764"
+    },
+    {
+      "test": "Usuario creado en BD",
+      "passed": true,
+      "details": "Email: test_7f5f4bdc@example.com, ID: 26",
+      "timestamp": "2025-09-16T03:32:32.810742"
+    },
+    {
+      "test": "Destinatario creado",
+      "passed": true,
+      "details": "Nombre: Test Usuario",
+      "timestamp": "2025-09-16T03:32:32.811468"
+    },
+    {
+      "test": "Suscripci\u00f3n pendiente creada",
+      "passed": true,
+      "details": "Plan: Plan Individual, Status: pending, Trial hasta: None",
+      "timestamp": "2025-09-16T03:32:32.812552"
+    },
+    {
+      "test": "Estado de suscripci\u00f3n correcto",
+      "passed": true,
+      "details": "Es pending (esperando tarjeta): True, Plan correcto: True",
+      "timestamp": "2025-09-16T03:32:32.812557"
+    },
+    {
+      "test": "P\u00e1gina de pago sin errores del servidor",
+      "passed": true,
+      "details": "Status: 200, Sin errores: S\u00ed",
+      "timestamp": "2025-09-16T03:32:32.816332"
+    },
+    {
+      "test": "Template de pago existe",
+      "passed": true,
+      "details": "add_payment_method.html creado",
+      "timestamp": "2025-09-16T03:32:32.816349"
+    }
+  ]
+}

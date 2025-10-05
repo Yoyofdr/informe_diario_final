@@ -1,0 +1,266 @@
+{
+  "timestamp": "2025-09-16T01:27:06.483531",
+  "environment": "Flow Sandbox",
+  "tests": [
+    {
+      "message": "\n💳 TARJETAS DE PRUEBA PARA FLOW SANDBOX",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.442147"
+    },
+    {
+      "message": "============================================================",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.442156"
+    },
+    {
+      "message": "Visa:       4051885600446623",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.442157"
+    },
+    {
+      "message": "MasterCard: 5186059559590568",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.442159"
+    },
+    {
+      "message": "CVV:        123",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.442160"
+    },
+    {
+      "message": "Fecha:      Cualquier fecha futura",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.442162"
+    },
+    {
+      "message": "RUT:        11.111.111-1",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.442163"
+    },
+    {
+      "message": "============================================================",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.442164"
+    },
+    {
+      "message": "\n🚀 INICIANDO SIMULACIÓN DE FLUJO COMPLETO DE PAGO",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.442166"
+    },
+    {
+      "message": "============================================================",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.442168"
+    },
+    {
+      "message": "Verificando credenciales de Flow...",
+      "status": "TEST",
+      "timestamp": "2025-09-16T01:27:06.442169"
+    },
+    {
+      "message": "API Key: ✓",
+      "status": "SUCCESS",
+      "timestamp": "2025-09-16T01:27:06.442171"
+    },
+    {
+      "message": "Secret Key: ✓",
+      "status": "SUCCESS",
+      "timestamp": "2025-09-16T01:27:06.442173"
+    },
+    {
+      "message": "Modo: Sandbox",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.442174"
+    },
+    {
+      "message": "Configurando datos de prueba...",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.442176"
+    },
+    {
+      "message": "Usuario de prueba existente: test_flow@example.com",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.444991"
+    },
+    {
+      "message": "Planes verificados/creados",
+      "status": "SUCCESS",
+      "timestamp": "2025-09-16T01:27:06.445690"
+    },
+    {
+      "message": "\n📍 Verificando endpoints...",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.445693"
+    },
+    {
+      "message": "Verificando URLs del flujo de pago...",
+      "status": "TEST",
+      "timestamp": "2025-09-16T01:27:06.445695"
+    },
+    {
+      "message": "Página de precios: 200 ✓",
+      "status": "SUCCESS",
+      "timestamp": "2025-09-16T01:27:06.471188"
+    },
+    {
+      "message": "Inicio trial individual (requiere login): 302 ✓",
+      "status": "SUCCESS",
+      "timestamp": "2025-09-16T01:27:06.474195"
+    },
+    {
+      "message": "Inicio trial organización (requiere login): 302 ✓",
+      "status": "SUCCESS",
+      "timestamp": "2025-09-16T01:27:06.476702"
+    },
+    {
+      "message": "Dashboard (requiere login): 302 ✓",
+      "status": "SUCCESS",
+      "timestamp": "2025-09-16T01:27:06.478953"
+    },
+    {
+      "message": "Agregar método de pago (requiere login): 302 ✓",
+      "status": "SUCCESS",
+      "timestamp": "2025-09-16T01:27:06.481074"
+    },
+    {
+      "message": "\n💳 Creando suscripción de prueba...",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.481082"
+    },
+    {
+      "message": "Creando suscripción de prueba para Plan Individual...",
+      "status": "TEST",
+      "timestamp": "2025-09-16T01:27:06.481085"
+    },
+    {
+      "message": "Ya existe suscripción: canceled",
+      "status": "WARNING",
+      "timestamp": "2025-09-16T01:27:06.482211"
+    },
+    {
+      "message": "Suscripción actualizada a trial: ID 1",
+      "status": "SUCCESS",
+      "timestamp": "2025-09-16T01:27:06.483435"
+    },
+    {
+      "message": "\n💰 Iniciando proceso de pago...",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.483439"
+    },
+    {
+      "message": "Creando orden de pago en Flow...",
+      "status": "TEST",
+      "timestamp": "2025-09-16T01:27:06.483441"
+    },
+    {
+      "message": "Datos de pago preparados:",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.483462"
+    },
+    {
+      "message": "  commerceOrder: TEST_1_1757986026.483442",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.483464"
+    },
+    {
+      "message": "  subject: Suscripción Plan Individual",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.483466"
+    },
+    {
+      "message": "  amount: 3990",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.483468"
+    },
+    {
+      "message": "  email: test_flow@example.com",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.483469"
+    },
+    {
+      "message": "  urlConfirmation: http://localhost:8000/subscription/webhook/",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.483471"
+    },
+    {
+      "message": "  urlReturn: http://localhost:8000/subscription/payment-success/",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.483473"
+    },
+    {
+      "message": "Orden creada (simulada): Token SIMULATED_TOKEN_1",
+      "status": "SUCCESS",
+      "timestamp": "2025-09-16T01:27:06.483475"
+    },
+    {
+      "message": "URL de pago: https://sandbox.flow.cl/app/web/pay.php?token=SIMULATED_TOKEN_1",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.483477"
+    },
+    {
+      "message": "\n🔐 Verificando seguridad de webhook...",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.483479"
+    },
+    {
+      "message": "Probando verificación de firma de webhook...",
+      "status": "TEST",
+      "timestamp": "2025-09-16T01:27:06.483481"
+    },
+    {
+      "message": "Verificación de firma exitosa",
+      "status": "SUCCESS",
+      "timestamp": "2025-09-16T01:27:06.483515"
+    },
+    {
+      "message": "\n📊 RESUMEN DE PRUEBAS",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.483518"
+    },
+    {
+      "message": "============================================================",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.483519"
+    },
+    {
+      "message": "Pruebas exitosas: 4/4",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.483522"
+    },
+    {
+      "message": "\n✅ TODAS LAS PRUEBAS PASARON EXITOSAMENTE",
+      "status": "SUCCESS",
+      "timestamp": "2025-09-16T01:27:06.483523"
+    },
+    {
+      "message": "\n📝 Próximos pasos:",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.483525"
+    },
+    {
+      "message": "1. Configurar webhooks en dashboard de Flow Sandbox",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.483526"
+    },
+    {
+      "message": "2. Realizar transacción de prueba con tarjetas de test",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.483527"
+    },
+    {
+      "message": "3. Verificar recepción de webhooks",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.483529"
+    },
+    {
+      "message": "4. Validar actualización de estado de suscripción",
+      "status": "INFO",
+      "timestamp": "2025-09-16T01:27:06.483530"
+    }
+  ],
+  "flow_config": {
+    "sandbox_mode": true,
+    "api_url": "https://sandbox.flow.cl/api",
+    "has_credentials": true
+  }
+}

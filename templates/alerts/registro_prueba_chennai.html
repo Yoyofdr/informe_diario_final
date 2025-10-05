@@ -344,6 +344,7 @@
         
         <form method="POST" action="{% url 'alerts:registro_prueba' %}" id="registroForm">
             {% csrf_token %}
+            <input type="hidden" name="plan" value="{{ plan|default:'individual' }}">
             <div class="row mb-2-custom">
                 <div class="col-6">
                     <label for="nombre" class="form-label">Nombre</label>

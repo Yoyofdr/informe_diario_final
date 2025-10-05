@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 # from . import views_fintoc  # DESACTIVADO TEMPORALMENTE - Activar cuando se habiliten cuentas bancarias
 from django.contrib.auth import views as auth_views
@@ -29,6 +29,9 @@ urlpatterns = [
     path('admin-panel/', views.admin_panel, name='admin_panel'),  # Panel de administración para superusuarios
     path('logout/', views.logout_view, name='logout'),
     path('editar-dias-prueba/<int:destinatario_id>/', views.editar_dias_prueba, name='editar_dias_prueba'),
+    
+    # Sistema de Suscripciones y Pagos con Flow
+    path('subscription/', include('alerts.urls_subscription')),
     
     # Fintoc integration URLs - DESACTIVADAS TEMPORALMENTE
     # Descomentar estas líneas cuando se active la funcionalidad de cuentas bancarias

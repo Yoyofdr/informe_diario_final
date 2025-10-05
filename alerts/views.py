@@ -97,6 +97,19 @@ def dashboard(request):
     if user.is_superuser:
         return redirect('alerts:admin_panel')
     
+    # Obtener información de suscripción si existe
+    subscription = None
+    plan_name = "Sin plan"
+    puede_agregar_usuarios = False
+    try:
+        from alerts.models import Subscription
+        subscription = Subscription.objects.get(user=user)
+        plan_name = subscription.plan.name
+        puede_agregar_usuarios = (subscription.plan.plan_type == 'organizacion' and 
+                                 subscription.status in ['active', 'trialing'])
+    except Subscription.DoesNotExist:
+        pass
+    
     # Primero buscar si el usuario es admin de alguna organización
     try:
         organizacion = Organizacion.objects.select_related('admin').get(admin=user)
@@ -126,7 +139,10 @@ def dashboard(request):
         'organizacion': organizacion,
         'destinatarios': destinatarios,
         'estado': estado,
-        'es_admin': es_admin if organizacion else False
+        'es_admin': es_admin if organizacion else False,
+        'subscription': subscription,
+        'plan_name': plan_name,
+        'puede_agregar_usuarios': puede_agregar_usuarios
     })
 
 
@@ -176,7 +192,19 @@ def landing(request):
 def panel_organizacion(request):
     """
     Panel para que el admin de la organización gestione los destinatarios.
+    Solo disponible para usuarios con Plan Organización activo.
     """
+    # Verificar que el usuario tenga una suscripción activa del Plan Organización
+    try:
+        from alerts.models import Subscription
+        subscription = Subscription.objects.get(user=request.user)
+        if subscription.plan.plan_type != 'organizacion' or subscription.status not in ['active', 'trialing']:
+            messages.error(request, 'Esta funcionalidad solo está disponible con el Plan Organización activo.')
+            return redirect('subscription:pricing')
+    except Subscription.DoesNotExist:
+        messages.error(request, 'Necesitas contratar el Plan Organización para acceder a esta funcionalidad.')
+        return redirect('subscription:pricing')
+    
     try:
         organizacion = Organizacion.objects.select_related('admin').get(admin=request.user)
     except Organizacion.DoesNotExist:
@@ -192,6 +220,13 @@ def panel_organizacion(request):
     form = DestinatarioForm(organizacion=organizacion)
     if request.method == 'POST':
         if 'agregar' in request.POST:
+            # Verificar límites del plan
+            num_usuarios = Destinatario.objects.filter(organizacion=organizacion).count()
+            # Plan Organización permite hasta 50 usuarios
+            if num_usuarios >= 50:
+                messages.error(request, 'Has alcanzado el límite de usuarios para tu plan (50 usuarios).')
+                return redirect('alerts:panel_organizacion')
+            
             form = DestinatarioForm(request.POST, organizacion=organizacion)
             if form.is_valid():
                 destinatario = form.save(commit=False)
